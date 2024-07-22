@@ -21,9 +21,9 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class Model_Activity_Town implements GEntity {
+public class Model_Activity_Vehicle implements GEntity {
 
-    final String XML = "Model_Activity_Town.xml";
+    final String XML = "Model_Activity_Vehicle.xml";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -35,7 +35,7 @@ public class Model_Activity_Town implements GEntity {
      *
      * @param foValue - GhostRider Application Driver
      */
-    public Model_Activity_Town(GRider foValue) {
+    public Model_Activity_Vehicle(GRider foValue) {
         if (foValue == null) {
             System.err.println("Application Driver is not set.");
             System.exit(1);
@@ -121,7 +121,7 @@ public class Model_Activity_Town implements GEntity {
 
     @Override
     public String getTable() {
-        return "activity_town";
+        return "activity_vehicle";
     }
 
     /**
@@ -267,7 +267,7 @@ public class Model_Activity_Town implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {
-        String lsExclude = "sTownName";
+        String lsExclude = "sDescript»sCSNoxxxx";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -291,7 +291,7 @@ public class Model_Activity_Town implements GEntity {
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_Activity_Town loOldEntity = new Model_Activity_Town(poGRider);
+                Model_Activity_Vehicle loOldEntity = new Model_Activity_Vehicle(poGRider);
 
                 //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
@@ -299,7 +299,7 @@ public class Model_Activity_Town implements GEntity {
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
-                    
+
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
                             poJSON.put("result", "success");
@@ -381,14 +381,16 @@ public class Model_Activity_Town implements GEntity {
         return MiscUtil.makeSelect(this);
     }
     
-    private String getSQL() {
-        return    " SELECT "                                              
-                + "    a.sTransNox "                                      
-                + "  , a.sTownIDxx "                                      
-                + "  , a.sAddressx "                                      
-                + "  , b.sTownName "                                      
-                + " FROM activity_town a "                                
-                + " LEFT JOIN towncity b ON b.sTownIDxx = a.sTownIDxx ";  
+    public String getSQL() {
+        return    "  SELECT "                                                  
+                + "  a.sTransNox "                                             
+                + ", a.nEntryNox "                                             
+                + ", a.sSerialID "                                             
+                + ", c.sDescript "                                             
+                + ", b.sCSNoxxxx "                                             
+                + "  FROM activity_vehicle a "                                 
+                + "  LEFT JOIN vehicle_serial b ON b.sSerialID = a.sSerialID " 
+                + "  LEFT JOIN vehicle_master c on c.sVhclIDxx = b.sVhclIDxx " ; 
     }
     
     /**
@@ -408,38 +410,23 @@ public class Model_Activity_Town implements GEntity {
         return (String) getValue("sTransNox");
     }
     
-//    /**
-//     * Description: Sets the Value of this record.
-//     *
-//     * @param fnValue
-//     * @return result as success/failed
-//     */
-//    public JSONObject setEntryNo(Integer fnValue) {
-//        return setValue("nEntryNox", fnValue);
-//    }
-//
-//    /**
-//     * @return The Value of this record.
-//     */
-//    public Integer setEntryNo() {
-//        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
-//    }
+    
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fnValue
      * @return result as success/failed
      */
-    public JSONObject setTownID(String fsValue) {
-        return setValue("sTownIDxx", fsValue);
+    public JSONObject setEntryNo(Integer fnValue) {
+        return setValue("nEntryNox", fnValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getTownID() {
-        return (String) getValue("sTownIDxx");
+    public Integer setEntryNo() {
+        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
     }
     
     /**
@@ -448,15 +435,15 @@ public class Model_Activity_Town implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setAddress(String fsValue) {
-        return setValue("sAddressx", fsValue);
+    public JSONObject setSerialID(String fsValue) {
+        return setValue("sSerialID", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getAddress() {
-        return (String) getValue("sAddressx");
+    public String getSerialID() {
+        return (String) getValue("sSerialID");
     }
     
     /**
@@ -465,15 +452,32 @@ public class Model_Activity_Town implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setTownName(String fsValue) {
-        return setValue("sTownName", fsValue);
+    public JSONObject setDescript(String fsValue) {
+        return setValue("sDescript", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getTownName() {
-        return (String) getValue("sTownName");
+    public String getDescript() {
+        return (String) getValue("sDescript");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCSNo(String fsValue) {
+        return setValue("sCSNoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCSNo() {
+        return (String) getValue("sCSNoxxxx");
     }
     
     
