@@ -282,7 +282,7 @@ public class Model_Activity_Master implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {
-        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sProvIDxx»sProvName»sEventTyp";
+        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»»sEventTyp";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -413,9 +413,9 @@ public class Model_Activity_Master implements GEntity {
                 + " , a.sActSrcex "                                                            
                 + " , a.dDateFrom "                                                            
                 + " , a.dDateThru "                                                            
-                + " , a.sProvIDxx "                                                            
+               // + " , a.sProvIDxx "                                                            
                 + " , a.sLocation "                                                            
-                + " , a.sCompnynx "                                                            
+               // + " , a.sCompnynx "                                                            
                 + " , a.nPropBdgt "                                                            
                 + " , a.nRcvdBdgt "                                                            
                 + " , a.nTrgtClnt "                                                            
@@ -433,15 +433,14 @@ public class Model_Activity_Master implements GEntity {
                 + " , b.sDeptName "                                                            
                 + " , d.sCompnyNm "                                                            
                 + " , e.sBranchNm "                                                            
-                + " , f.sProvName "                                                            
-                + " , g.sEventTyp "                                                            
+                //+ " , f.sProvName "                                                            
+                + " , f.sEventTyp "                                                            
                 + " FROM activity_master a "                                                   
                 + " LEFT JOIN GGC_ISysDBF.Department b ON b.sDeptIDxx = a.sDeptIDxx "          
                 + " LEFT JOIN GGC_ISysDBF.Employee_Master001 c ON c.sEmployID = a.sEmployID "  
                 + " LEFT JOIN GGC_ISysDBF.Client_Master d ON d.sClientID = a.sEmployID "       
-                + " LEFT JOIN branch e ON e.sBranchCd = a.sLocation "                          
-                + " LEFT JOIN province f ON f.sProvIDxx = a.sProvIDxx "                        
-                + " LEFT JOIN event_type g ON g.sActTypID = a.sActTypID " ;                     
+                + " LEFT JOIN branch e ON e.sBranchCd = a.sLocation "                           
+                + " LEFT JOIN event_type f ON f.sActTypID = a.sActTypID " ;                     
     }
     
     /**
@@ -588,23 +587,6 @@ public class Model_Activity_Master implements GEntity {
         }
         
         return date;
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setProvID(String fsValue) {
-        return setValue("sProvIDxx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getProvID() {
-        return (String) getValue("sProvIDxx");
     }
     
     /**
