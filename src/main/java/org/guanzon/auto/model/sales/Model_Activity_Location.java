@@ -383,10 +383,11 @@ public class Model_Activity_Location implements GEntity {
     
     private String getSQL() {
         return    " SELECT "                                              
-                + "    a.sTransNox "                                     
-                + "  , a.nEntryNox "                                       
-                + "  , a.sTownIDxx "                                      
-                + "  , a.sAddressx "                                      
+                + "    a.sTransNox "                                      
+                + "  , a.nEntryNox "                                      
+                + "  , a.sAddressx "                                     
+                + "  , a.sTownIDxx "                                        
+                + "  , a.sCompnynx "                                    
                 + "  , b.sTownName "                                      
                 + "  , b.sZippCode "                                      
                 + "  , b.sProvIDxx "                                      
@@ -479,6 +480,23 @@ public class Model_Activity_Location implements GEntity {
      */
     public String getTownName() {
         return (String) getValue("sTownName");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setCompnyn(String fsValue) {
+        return setValue("sCompnynx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCompnyn() {
+        return (String) getValue("sCompnynx");
     }
     
      /**
