@@ -64,7 +64,7 @@ public class Model_Activity_Master implements GEntity {
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateDouble("nPropBdgt", 0.00);
             poEntity.updateDouble("nRcvdBdgt", 0.00);
-            poEntity.updateDouble("nTrgtClnt", 0);
+            poEntity.updateInt("nTrgtClnt", 0);
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -228,8 +228,8 @@ public class Model_Activity_Master implements GEntity {
         pnEditMode = EditMode.ADDNEW;
 
         //replace with the primary key column info
-        setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
-        setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
 
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -289,8 +289,8 @@ public class Model_Activity_Master implements GEntity {
             String lsSQL;
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
-                setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
-                setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
                 setModified(poGRider.getUserID());
@@ -678,18 +678,18 @@ public class Model_Activity_Master implements GEntity {
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdbValue
+     * @param fnValue
      * @return result as success/failed
      */
-    public JSONObject setTrgtClnt(Double fdbValue) {
-        return setValue("nTrgtClnt", fdbValue);
+    public JSONObject setTrgtClnt(Integer fnValue) {
+        return setValue("nTrgtClnt", fnValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getTrgtClnt() {
-        return (Double) getValue("nTrgtClnt");
+    public Integer getTrgtClnt() {
+        return (Integer) getValue("nTrgtClnt");
     }
     
     /**
@@ -924,14 +924,14 @@ public class Model_Activity_Master implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setCompnyNm(String fsValue) {
+    public JSONObject setEmpInCharge(String fsValue) {
         return setValue("sCompnyNm", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getCompnyNm() {
+    public String getEmpInCharge() {
         return (String) getValue("sCompnyNm");
     }
     

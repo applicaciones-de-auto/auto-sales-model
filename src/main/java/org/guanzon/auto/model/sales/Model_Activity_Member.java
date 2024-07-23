@@ -56,7 +56,6 @@ public class Model_Activity_Member implements GEntity {
             poEntity.moveToInsertRow();
 
             MiscUtil.initRowSet(poEntity);
-            poEntity.updateString("cTranStat", RecordStatus.ACTIVE);
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -219,9 +218,6 @@ public class Model_Activity_Member implements GEntity {
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
 
-        //replace with the primary key column info
-        //setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
@@ -237,7 +233,7 @@ public class Model_Activity_Member implements GEntity {
     public JSONObject openRecord(String fsCondition) {
         poJSON = new JSONObject();
 
-        String lsSQL = MiscUtil.makeSelect(this);
+        String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsCondition));
@@ -273,15 +269,17 @@ public class Model_Activity_Member implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {
+        String lsExclude = "sCompnyNm»sDeptName";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
             if (pnEditMode == EditMode.ADDNEW) {
-                //replace with the primary key column info
-                //setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                
+                setEntryBy(poGRider.getUserID());
+                setEntryDte(poGRider.getServerDate());
 
-                lsSQL = makeSQL();
+                lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
                     if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -303,7 +301,7 @@ public class Model_Activity_Member implements GEntity {
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()));
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -423,18 +421,18 @@ public class Model_Activity_Member implements GEntity {
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param fnValue
      * @return result as success/failed
      */
-    public JSONObject setEntryNo(String fsValue) {
-        return setValue("nEntryNox", fsValue);
+    public JSONObject setEntryNo(Integer fnValue) {
+        return setValue("nEntryNox", fnValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String setEntryNo() {
-        return (String) getValue("nEntryNox");
+    public Integer setEntryNo() {
+        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
     }
     
     /**
