@@ -267,7 +267,7 @@ public class Model_Activity_Location implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {    
-        String lsExclude = "»sTownName»sZippCode»sProvIDxx»sProvName";
+        String lsExclude = "»sTownName»sZippCode»sProvIDxx»sProvName»sBrgyName";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -385,16 +385,19 @@ public class Model_Activity_Location implements GEntity {
         return    " SELECT "                                              
                 + "    a.sTransNox "                                      
                 + "  , a.nEntryNox "                                      
-                + "  , a.sAddressx "                                     
+                + "  , a.sAddressx "                                       
+                + "  , a.sBrgyIDxx "                                    
                 + "  , a.sTownIDxx "                                        
-                + "  , a.sCompnynx "                                    
+                + "  , a.sCompnynx "                                      
+                + "  , d.sBrgyName "                                   
                 + "  , b.sTownName "                                      
                 + "  , b.sZippCode "                                      
                 + "  , b.sProvIDxx "                                      
                 + "  , c.sProvName "                                     
                 + " FROM activity_location a "                                
                 + " LEFT JOIN towncity b ON b.sTownIDxx = a.sTownIDxx "        
-                + " LEFT JOIN province c ON c.sProvIDxx = b.sProvIDxx ";  
+                + " LEFT JOIN province c ON c.sProvIDxx = b.sProvIDxx "       
+                + " LEFT JOIN barangay d ON d.sBrgyIDxx = a.sBrgyIDxx ";  
     }
     
     /**
@@ -437,6 +440,23 @@ public class Model_Activity_Location implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
+    public JSONObject setBrgyID(String fsValue) {
+        return setValue("sBrgyIDxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBrgyID() {
+        return (String) getValue("sBrgyIDxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
     public JSONObject setTownID(String fsValue) {
         return setValue("sTownIDxx", fsValue);
     }
@@ -463,6 +483,23 @@ public class Model_Activity_Location implements GEntity {
      */
     public String getAddress() {
         return (String) getValue("sAddressx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setBrgyName(String fsValue) {
+        return setValue("sBrgyName", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBrgyName() {
+        return (String) getValue("sBrgyName");
     }
     
     /**

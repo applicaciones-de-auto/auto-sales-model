@@ -282,7 +282,7 @@ public class Model_Activity_Master implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {
-        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»»sEventTyp";
+        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sEventTyp»sActTypDs";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -434,7 +434,8 @@ public class Model_Activity_Master implements GEntity {
                 + " , d.sCompnyNm "                                                            
                 + " , e.sBranchNm "                                                            
                 //+ " , f.sProvName "                                                            
-                + " , f.sEventTyp "                                                            
+                + " , f.sEventTyp "                                                              
+                + " , f.sActTypDs "                                                           
                 + " FROM activity_master a "                                                   
                 + " LEFT JOIN GGC_ISysDBF.Department b ON b.sDeptIDxx = a.sDeptIDxx "          
                 + " LEFT JOIN GGC_ISysDBF.Employee_Master001 c ON c.sEmployID = a.sEmployID "  
@@ -526,6 +527,23 @@ public class Model_Activity_Master implements GEntity {
      */
     public String getActTypID() {
         return (String) getValue("sActTypID");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setActTypDs(String fsValue) {
+        return setValue("sActTypDs", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getActTypDs() {
+        return (String) getValue("sActTypDs");
     }
     
     /**
@@ -637,7 +655,7 @@ public class Model_Activity_Master implements GEntity {
      * @return The Value of this record.
      */
     public Double getPropBdgt() {
-        return (Double) getValue("nPropBdgt");
+        return Double.parseDouble(String.valueOf(getValue("nPropBdgt")));
     }
     
     /**
@@ -654,7 +672,7 @@ public class Model_Activity_Master implements GEntity {
      * @return The Value of this record.
      */
     public Double getRcvdBdgt() {
-        return (Double) getValue("nRcvdBdgt");
+        return Double.parseDouble(String.valueOf(getValue("nRcvdBdgt")));
     }
     
     /**
@@ -671,7 +689,7 @@ public class Model_Activity_Master implements GEntity {
      * @return The Value of this record.
      */
     public Integer getTrgtClnt() {
-        return (Integer) getValue("nTrgtClnt");
+        return Integer.parseInt(String.valueOf(getValue("nTrgtClnt")));
     }
     
     /**
