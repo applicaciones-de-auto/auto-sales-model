@@ -222,21 +222,26 @@ public class Model_Activity_Member implements GEntity {
         poJSON.put("result", "success");
         return poJSON;
     }
+    
+    @Override
+    public JSONObject openRecord(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
     /**
      * Opens a record.
      *
-     * @param fsCondition - filter values
+     * @param fsValue - filter values
+     * @param fsValue2 - filter values
      * @return result as success/failed
      */
-    @Override
-    public JSONObject openRecord(String fsCondition) {
+    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsCondition));
+        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue) + " AND nEntryNox = " + SQLUtil.toSQL(fsValue2));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -297,11 +302,11 @@ public class Model_Activity_Member implements GEntity {
                 Model_Activity_Member loOldEntity = new Model_Activity_Member(poGRider);
 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), String.valueOf(this.getEntryNo()));
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo()), lsExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -431,7 +436,7 @@ public class Model_Activity_Member implements GEntity {
     /**
      * @return The Value of this record.
      */
-    public Integer setEntryNo() {
+    public Integer getEntryNo() {
         return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
     }
     

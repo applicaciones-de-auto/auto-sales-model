@@ -220,22 +220,27 @@ public class Model_Activity_Location implements GEntity {
         poJSON.put("result", "success");
         return poJSON;
     }
+    
+    @Override
+    public JSONObject openRecord(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
     /**
      * Opens a record.
      *
-     * @param fsCondition - filter values
+     * @param fsValue - filter values
+     * @param fsValue2 - filter values 2
      * @return result as success/failed
      */
-    @Override
-    public JSONObject openRecord(String fsCondition) {
+    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsCondition));
-
+        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue) + " AND nEntryNox = " + SQLUtil.toSQL(fsValue2));
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -291,31 +296,61 @@ public class Model_Activity_Location implements GEntity {
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_Activity_Location loOldEntity = new Model_Activity_Location(poGRider);
-
-                //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
-
-                if ("success".equals((String) loJSON.get("result"))) {
-                    //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
-                    
-                    if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
-                            poJSON.put("result", "success");
-                            poJSON.put("message", "Record saved successfully.");
-                        } else {
-                            poJSON.put("result", "error");
-                            poJSON.put("message", poGRider.getErrMsg());
-                        }
-                    } else {
+                //Delete Record
+                lsSQL = "DELETE FROM "+getTable()+" WHERE"
+                        + " sTransNox = " + SQLUtil.toSQL(this.getTransNo());
+                if (!lsSQL.isEmpty()) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
                         poJSON.put("result", "success");
-                        poJSON.put("message", "No updates has been made.");
+                        poJSON.put("message", "Record deleted successfully.");
+                    } else {
+                        poJSON.put("result", "error");
+                        poJSON.put("message", poGRider.getErrMsg());
+                    }
+                }
+                
+                lsSQL = MiscUtil.makeSQL(this, lsExclude);
+
+                if (!lsSQL.isEmpty()) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        poJSON.put("result", "success");
+                        poJSON.put("message", "Record saved successfully.");
+                    } else {
+                        poJSON.put("result", "error");
+                        poJSON.put("message", poGRider.getErrMsg());
                     }
                 } else {
                     poJSON.put("result", "error");
-                    poJSON.put("message", "Record discrepancy. Unable to save record.");
+                    poJSON.put("message", "No record to save.");
                 }
+                
+                
+                
+//                Model_Activity_Location loOldEntity = new Model_Activity_Location(poGRider);
+//
+//                //replace with the primary key column info
+//                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), String.valueOf(this.getEntryNo()));
+//
+//                if ("success".equals((String) loJSON.get("result"))) {
+//                    //replace the condition based on the primary key column of the record
+//                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo()), lsExclude);
+//                    
+//                    if (!lsSQL.isEmpty()) {
+//                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+//                            poJSON.put("result", "success");
+//                            poJSON.put("message", "Record saved successfully.");
+//                        } else {
+//                            poJSON.put("result", "error");
+//                            poJSON.put("message", poGRider.getErrMsg());
+//                        }
+//                    } else {
+//                        poJSON.put("result", "success");
+//                        poJSON.put("message", "No updates has been made.");
+//                    }
+//                } else {
+//                    poJSON.put("result", "error");
+//                    poJSON.put("message", "Record discrepancy. Unable to save record.");
+//                }
             }
         } else {
             poJSON.put("result", "error");
@@ -323,6 +358,24 @@ public class Model_Activity_Location implements GEntity {
             return poJSON;
         }
 
+        return poJSON;
+    }
+    
+    public JSONObject deleteRecord(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = "DELETE FROM "+getTable()+" WHERE"
+                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo());
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record deleted successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
         return poJSON;
     }
 
@@ -430,7 +483,7 @@ public class Model_Activity_Location implements GEntity {
     /**
      * @return The Value of this record.
      */
-    public Integer setEntryNo() {
+    public Integer getEntryNo() {
         return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
     }
     
