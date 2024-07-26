@@ -241,7 +241,7 @@ public class Model_Activity_Member implements GEntity {
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue) + " AND nEntryNox = " + SQLUtil.toSQL(fsValue2));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sEmployID = " + SQLUtil.toSQL(fsValue2));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -302,11 +302,11 @@ public class Model_Activity_Member implements GEntity {
                 Model_Activity_Member loOldEntity = new Model_Activity_Member(poGRider);
 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), String.valueOf(this.getEntryNo()));
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), String.valueOf(this.getEmployID()));
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo()), lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sEmployID = " + SQLUtil.toSQL(this.getEmployID()), lsExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {

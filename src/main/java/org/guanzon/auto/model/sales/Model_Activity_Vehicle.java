@@ -238,7 +238,7 @@ public class Model_Activity_Vehicle implements GEntity {
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue) + " AND nEntryNox = " + SQLUtil.toSQL(fsValue2));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sSerialID = " + SQLUtil.toSQL(fsValue2));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -298,11 +298,11 @@ public class Model_Activity_Vehicle implements GEntity {
                 Model_Activity_Vehicle loOldEntity = new Model_Activity_Vehicle(poGRider);
 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), String.valueOf(this.getEntryNo()));
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), String.valueOf(this.getSerialID()));
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo()), lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sSerialID = " + SQLUtil.toSQL(this.getSerialID()), lsExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -327,6 +327,25 @@ public class Model_Activity_Vehicle implements GEntity {
             return poJSON;
         }
 
+        return poJSON;
+    }
+    
+    public JSONObject deleteRecord(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = "DELETE FROM "+getTable()+" WHERE "
+                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo())
+                + " AND sSerialID = " + SQLUtil.toSQL(this.getSerialID());
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record deleted successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
         return poJSON;
     }
 

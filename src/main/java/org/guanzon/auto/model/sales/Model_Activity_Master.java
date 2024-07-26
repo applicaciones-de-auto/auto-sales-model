@@ -228,7 +228,7 @@ public class Model_Activity_Master implements GEntity {
         pnEditMode = EditMode.ADDNEW;
 
         //replace with the primary key column info
-        setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()+"AC"));
         setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
 
         poJSON = new JSONObject();
@@ -289,7 +289,7 @@ public class Model_Activity_Master implements GEntity {
             String lsSQL;
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
-                setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()+"AC"));
                 setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
