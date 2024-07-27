@@ -627,23 +627,6 @@ public class Model_Activity_Master implements GEntity {
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setCompnyn(String fsValue) {
-        return setValue("sCompnynx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getCompnyn() {
-        return (String) getValue("sCompnynx");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
      * @param fdbValue
      * @return result as success/failed
      */

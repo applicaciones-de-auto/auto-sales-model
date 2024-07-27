@@ -314,6 +314,7 @@ public class Model_Activity_Vehicle implements GEntity {
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
@@ -333,7 +334,7 @@ public class Model_Activity_Vehicle implements GEntity {
     public JSONObject deleteRecord(){
         poJSON = new JSONObject();
         
-        String lsSQL = "DELETE FROM "+getTable()+" WHERE "
+        String lsSQL = " DELETE FROM "+getTable()+" WHERE "
                 + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
                 + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo())
                 + " AND sSerialID = " + SQLUtil.toSQL(this.getSerialID());
@@ -343,6 +344,7 @@ public class Model_Activity_Vehicle implements GEntity {
                 poJSON.put("message", "Record deleted successfully.");
             } else {
                 poJSON.put("result", "error");
+                poJSON.put("continue", true);
                 poJSON.put("message", poGRider.getErrMsg());
             }
         }

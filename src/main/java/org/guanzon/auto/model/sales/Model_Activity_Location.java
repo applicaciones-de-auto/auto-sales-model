@@ -316,6 +316,7 @@ public class Model_Activity_Location implements GEntity {
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
@@ -345,6 +346,7 @@ public class Model_Activity_Location implements GEntity {
                 poJSON.put("message", "Record deleted successfully.");
             } else {
                 poJSON.put("result", "error");
+                poJSON.put("continue", true);
                 poJSON.put("message", poGRider.getErrMsg());
             }
         }
