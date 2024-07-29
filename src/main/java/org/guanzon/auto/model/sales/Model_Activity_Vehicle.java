@@ -220,21 +220,25 @@ public class Model_Activity_Vehicle implements GEntity {
         poJSON.put("result", "success");
         return poJSON;
     }
+    
+    @Override
+    public JSONObject openRecord(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
     /**
      * Opens a record.
-     *
-     * @param fsCondition - filter values
+     * @param fsValue - filter values
+     * @param fsValue2 - filter values
      * @return result as success/failed
      */
-    @Override
-    public JSONObject openRecord(String fsCondition) {
+    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsCondition));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sSerialID = " + SQLUtil.toSQL(fsValue2));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -294,11 +298,11 @@ public class Model_Activity_Vehicle implements GEntity {
                 Model_Activity_Vehicle loOldEntity = new Model_Activity_Vehicle(poGRider);
 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), String.valueOf(this.getSerialID()));
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sSerialID = " + SQLUtil.toSQL(this.getSerialID()), lsExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -310,6 +314,7 @@ public class Model_Activity_Vehicle implements GEntity {
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
@@ -323,6 +328,26 @@ public class Model_Activity_Vehicle implements GEntity {
             return poJSON;
         }
 
+        return poJSON;
+    }
+    
+    public JSONObject deleteRecord(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = " DELETE FROM "+getTable()+" WHERE "
+                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo())
+                + " AND sSerialID = " + SQLUtil.toSQL(this.getSerialID());
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record deleted successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
         return poJSON;
     }
 
@@ -425,7 +450,7 @@ public class Model_Activity_Vehicle implements GEntity {
     /**
      * @return The Value of this record.
      */
-    public Integer setEntryNo() {
+    public Integer getEntryNo() {
         return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
     }
     

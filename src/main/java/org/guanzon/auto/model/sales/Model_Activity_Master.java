@@ -228,7 +228,7 @@ public class Model_Activity_Master implements GEntity {
         pnEditMode = EditMode.ADDNEW;
 
         //replace with the primary key column info
-        setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()+"AC"));
         setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
 
         poJSON = new JSONObject();
@@ -282,14 +282,14 @@ public class Model_Activity_Master implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {
-        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sProvIDxx»sProvName»sEventTyp";
+        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sEventTyp»sActTypDs";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
-                setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setActvtyID(MiscUtil.getNextCode(getTable(), "sActvtyID", true, poGRider.getConnection(), poGRider.getBranchCode()+"AC"));
                 setActNo(MiscUtil.getNextCode(getTable(), "sActNoxxx", true, poGRider.getConnection(), poGRider.getBranchCode()+"ACT"));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
@@ -413,9 +413,9 @@ public class Model_Activity_Master implements GEntity {
                 + " , a.sActSrcex "                                                            
                 + " , a.dDateFrom "                                                            
                 + " , a.dDateThru "                                                            
-                + " , a.sProvIDxx "                                                            
+               // + " , a.sProvIDxx "                                                            
                 + " , a.sLocation "                                                            
-                + " , a.sCompnynx "                                                            
+               // + " , a.sCompnynx "                                                            
                 + " , a.nPropBdgt "                                                            
                 + " , a.nRcvdBdgt "                                                            
                 + " , a.nTrgtClnt "                                                            
@@ -433,15 +433,15 @@ public class Model_Activity_Master implements GEntity {
                 + " , b.sDeptName "                                                            
                 + " , d.sCompnyNm "                                                            
                 + " , e.sBranchNm "                                                            
-                + " , f.sProvName "                                                            
-                + " , g.sEventTyp "                                                            
+                //+ " , f.sProvName "                                                            
+                + " , f.sEventTyp "                                                              
+                + " , f.sActTypDs "                                                           
                 + " FROM activity_master a "                                                   
                 + " LEFT JOIN GGC_ISysDBF.Department b ON b.sDeptIDxx = a.sDeptIDxx "          
                 + " LEFT JOIN GGC_ISysDBF.Employee_Master001 c ON c.sEmployID = a.sEmployID "  
                 + " LEFT JOIN GGC_ISysDBF.Client_Master d ON d.sClientID = a.sEmployID "       
-                + " LEFT JOIN branch e ON e.sBranchCd = a.sLocation "                          
-                + " LEFT JOIN province f ON f.sProvIDxx = a.sProvIDxx "                        
-                + " LEFT JOIN event_type g ON g.sActTypID = a.sActTypID " ;                     
+                + " LEFT JOIN branch e ON e.sBranchCd = a.sLocation "                           
+                + " LEFT JOIN event_type f ON f.sActTypID = a.sActTypID " ;                     
     }
     
     /**
@@ -535,6 +535,23 @@ public class Model_Activity_Master implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
+    public JSONObject setActTypDs(String fsValue) {
+        return setValue("sActTypDs", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getActTypDs() {
+        return (String) getValue("sActTypDs");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
     public JSONObject setActSrce(String fsValue) {
         return setValue("sActSrcex", fsValue);
     }
@@ -596,23 +613,6 @@ public class Model_Activity_Master implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setProvID(String fsValue) {
-        return setValue("sProvIDxx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getProvID() {
-        return (String) getValue("sProvIDxx");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
     public JSONObject setLocation(String fsValue) {
         return setValue("sLocation", fsValue);
     }
@@ -622,23 +622,6 @@ public class Model_Activity_Master implements GEntity {
      */
     public String getLocation() {
         return (String) getValue("sLocation");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setCompnyn(String fsValue) {
-        return setValue("sCompnynx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getCompnyn() {
-        return (String) getValue("sCompnynx");
     }
     
     /**
@@ -655,7 +638,7 @@ public class Model_Activity_Master implements GEntity {
      * @return The Value of this record.
      */
     public Double getPropBdgt() {
-        return (Double) getValue("nPropBdgt");
+        return Double.parseDouble(String.valueOf(getValue("nPropBdgt")));
     }
     
     /**
@@ -672,7 +655,7 @@ public class Model_Activity_Master implements GEntity {
      * @return The Value of this record.
      */
     public Double getRcvdBdgt() {
-        return (Double) getValue("nRcvdBdgt");
+        return Double.parseDouble(String.valueOf(getValue("nRcvdBdgt")));
     }
     
     /**
@@ -689,7 +672,7 @@ public class Model_Activity_Master implements GEntity {
      * @return The Value of this record.
      */
     public Integer getTrgtClnt() {
-        return (Integer) getValue("nTrgtClnt");
+        return Integer.parseInt(String.valueOf(getValue("nTrgtClnt")));
     }
     
     /**

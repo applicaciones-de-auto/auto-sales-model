@@ -22,7 +22,7 @@ import org.json.simple.JSONObject;
 
 /**
  *
- * @author MIS-PC
+ * @author Arsiela
  */
 public class Model_Inquiry_Master implements GEntity {
     final String XML = "Model_Inquiry_Master.xml";
@@ -105,7 +105,7 @@ public class Model_Inquiry_Master implements GEntity {
 
     @Override
     public String getTable() {
-        return "Customer_Inquiry";
+        return "customer_inquiry";
     }
 
     @Override
@@ -172,7 +172,7 @@ public class Model_Inquiry_Master implements GEntity {
         if (psBranchCd.isEmpty()) psBranchCd = poGRider.getBranchCode();
         
         //replace with the primary key column info
-        //setClientID(MiscUtil.getNextCode(getTable(), "sClientID", true, poConn, poGRider.getBranchCode()));
+//        setClientID(MiscUtil.getNextCode(getTable(), "sClientID", true, poConn, poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
