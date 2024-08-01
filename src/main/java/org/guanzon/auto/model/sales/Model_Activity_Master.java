@@ -767,7 +767,7 @@ public class Model_Activity_Master implements GEntity {
      * @return result as success/failed
      */
     public JSONObject setActive(boolean fbValue) {
-        return setValue("cTranStat", fbValue ? "1" : "0");
+        return setValue("cTranStat", fbValue ? "1" : "2");
     }
 
     /**
