@@ -313,7 +313,6 @@ public class Model_Activity_Master implements GEntity {
             } else {
                 Model_Activity_Master loOldEntity = new Model_Activity_Master(poGRider);
 
-                //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getActvtyID());
 
                 if ("success".equals((String) loJSON.get("result"))) {
@@ -412,10 +411,8 @@ public class Model_Activity_Master implements GEntity {
                 + " , a.sActTypID "                                                            
                 + " , a.sActSrcex "                                                            
                 + " , a.dDateFrom "                                                            
-                + " , a.dDateThru "                                                            
-               // + " , a.sProvIDxx "                                                            
-                + " , a.sLocation "                                                            
-               // + " , a.sCompnynx "                                                            
+                + " , a.dDateThru "                                                             
+                + " , a.sLocation "                                                              
                 + " , a.nPropBdgt "                                                            
                 + " , a.nRcvdBdgt "                                                            
                 + " , a.nTrgtClnt "                                                            
@@ -432,8 +429,7 @@ public class Model_Activity_Master implements GEntity {
                 + " , a.dModified "                                                            
                 + " , b.sDeptName "                                                            
                 + " , d.sCompnyNm "                                                            
-                + " , e.sBranchNm "                                                            
-                //+ " , f.sProvName "                                                            
+                + " , e.sBranchNm "                                                              
                 + " , f.sEventTyp "                                                              
                 + " , f.sActTypDs "                                                           
                 + " FROM activity_master a "                                                   
