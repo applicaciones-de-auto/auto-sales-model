@@ -435,8 +435,6 @@ public class Model_Activity_Vehicle implements GEntity {
         return (String) getValue("sTransNox");
     }
     
-    
-    
     /**
      * Description: Sets the Value of this record.
      *

@@ -62,7 +62,8 @@ public class Model_Inquiry_Master implements GEntity {
             MiscUtil.initRowSet(poEntity);    
             poEntity.updateObject("dTargetDt", poGRider.getServerDate());    
             poEntity.updateObject("dTransact", poGRider.getServerDate());    
-            poEntity.updateObject("dLastUpdt", poGRider.getServerDate());
+            poEntity.updateObject("dLastUpdt", poGRider.getServerDate());  
+            poEntity.updateObject("sLockedDt", poGRider.getServerDate());
             poEntity.updateDouble("nReserved", 0.00);
             poEntity.updateDouble("nRsrvTotl", 0.00);
             poEntity.updateString("cTranStat", "0"); 
@@ -279,6 +280,8 @@ public class Model_Inquiry_Master implements GEntity {
                 setEntryDte(poGRider.getServerDate());
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDate(poGRider.getServerDate());
+                setLockedBy(poGRider.getUserID());
+                setLockedDt(poGRider.getServerDate());
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
