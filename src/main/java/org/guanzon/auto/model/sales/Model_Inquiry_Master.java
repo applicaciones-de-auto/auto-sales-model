@@ -64,7 +64,6 @@ public class Model_Inquiry_Master implements GEntity {
             poEntity.updateObject("dTransact", poGRider.getServerDate());    
             poEntity.updateObject("dLastUpdt", poGRider.getServerDate());  
             poEntity.updateObject("sLockedDt", poGRider.getServerDate());
-            poEntity.updateDouble("nReserved", 0.00);
             poEntity.updateDouble("nRsrvTotl", 0.00);
             poEntity.updateString("cTranStat", "0"); 
             
@@ -333,6 +332,27 @@ public class Model_Inquiry_Master implements GEntity {
         return poJSON;
     }
     
+    public JSONObject lostSale(String fsValue){
+        poJSON = new JSONObject();
+        
+        String lsSQL = " UPDATE "+getTable()+" SET cTranStat = '2' " 
+                     + ", sModified = " + SQLUtil.toSQL(poGRider.getUserID()) 
+                     + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate()) 
+                     + " WHERE sTransNox = " + SQLUtil.toSQL(fsValue);
+        
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record saved successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
+        return poJSON;
+    }
+    
     @Override
     public void list() {
         Method[] methods = this.getClass().getMethods();
@@ -373,8 +393,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.sEmployID "                                                                        
                 + " , a.cIsVhclNw "                                                                        
                 + " , a.sVhclIDxx "                                                                        
-                + " , a.sClientID "                                                                        
-                + " , a.sAddrssID "                                                                        
+                + " , a.sClientID "                                                                         
                 + " , a.sContctID "                                                                        
                 + " , a.sRemarksx "                                                                        
                 + " , a.sAgentIDx "                                                                        
@@ -385,7 +404,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.sTestModl "                                                                        
                 + " , a.sActvtyID "                                                                        
                 + " , a.dLastUpdt "                                                                        
-                + " , a.nReserved "                                                                        
+                + " , a.sReserved "                                                                        
                 + " , a.nRsrvTotl "                                                                        
                 + " , a.sLockedBy "                                                                        
                 + " , a.sLockedDt "                                                                        
@@ -555,23 +574,6 @@ public class Model_Inquiry_Master implements GEntity {
      */
     public String getClientID() {
         return (String) getValue("sClientID");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setAddrssID(String fsValue) {
-        return setValue("sAddrssID", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getAddrssID() {
-        return (String) getValue("sAddrssID");
     }
     
     /**
@@ -757,18 +759,18 @@ public class Model_Inquiry_Master implements GEntity {
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdbValue
+     * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setReserved(Double fdbValue) {
-        return setValue("nReserved", fdbValue);
+    public JSONObject setReserved(String fsValue) {
+        return setValue("sReserved", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getReserved() {
-        return Double.parseDouble(String.valueOf(getValue("nReserved")));
+    public String getReserved() {
+        return (String) getValue("sReserved");
     }
     
     /**
@@ -885,8 +887,7 @@ public class Model_Inquiry_Master implements GEntity {
         2	Lost Sale
         3	VSP
         4	Sold
-        5	Retired
-        6	Cancelled
+        5	Cancelled
     */
     
     /**

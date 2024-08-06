@@ -287,10 +287,10 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
                 }
             } else {
                 Model_Inquiry_VehiclePriority loOldEntity = new Model_Inquiry_VehiclePriority(poGRider);
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getVhclID());
                 
                 if ("success".equals((String) loJSON.get("result"))){
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sVhclIDxx = " + SQLUtil.toSQL(this.getVhclID()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
