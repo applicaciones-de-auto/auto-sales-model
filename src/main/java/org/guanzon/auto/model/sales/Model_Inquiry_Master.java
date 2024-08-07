@@ -64,7 +64,6 @@ public class Model_Inquiry_Master implements GEntity {
             poEntity.updateObject("dTransact", poGRider.getServerDate());    
             poEntity.updateObject("dLastUpdt", poGRider.getServerDate());  
             poEntity.updateObject("sLockedDt", poGRider.getServerDate());
-            poEntity.updateDouble("nRsrvTotl", 0.00);
             poEntity.updateString("cTranStat", "0"); 
             
             poEntity.updateString("cIsVhclNw", "0");  
@@ -227,6 +226,8 @@ public class Model_Inquiry_Master implements GEntity {
         //replace with the primary key column info
         setTransactDte(poGRider.getServerDate());
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
+        setBranchCd(poGRider.getBranchCode());
+        setBranchNm(poGRider.getBranchName());
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -404,8 +405,8 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.sTestModl "                                                                        
                 + " , a.sActvtyID "                                                                        
                 + " , a.dLastUpdt "                                                                        
-                + " , a.sReserved "                                                                        
-                + " , a.nRsrvTotl "                                                                        
+//                + " , a.sReserved "                                                                        
+//                + " , a.nRsrvTotl "                                                                        
                 + " , a.sLockedBy "                                                                        
                 + " , a.sLockedDt "                                                                        
                 + " , a.sApproved "                                                                        
@@ -762,33 +763,33 @@ public class Model_Inquiry_Master implements GEntity {
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setReserved(String fsValue) {
-        return setValue("sReserved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getReserved() {
-        return (String) getValue("sReserved");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdbValue
-     * @return result as success/failed
-     */
-    public JSONObject setRsrvTotl(Double fdbValue) {
-        return setValue("nRsrvTotl", fdbValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Double getRsrvTotl() {
-        return Double.parseDouble(String.valueOf(getValue("nRsrvTotl")));
-    }
+//    public JSONObject setReserved(String fsValue) {
+//        return setValue("sReserved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getReserved() {
+//        return (String) getValue("sReserved");
+//    }
+//    
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fdbValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setRsrvTotl(Double fdbValue) {
+//        return setValue("nRsrvTotl", fdbValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public Double getRsrvTotl() {
+//        return Double.parseDouble(String.valueOf(getValue("nRsrvTotl")));
+//    }
     
     /**
      * Description: Sets the Value of this record.

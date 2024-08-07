@@ -313,7 +313,27 @@ public class Model_Inquiry_Requirements implements GEntity{
         
         return poJSON;
     }
-
+    
+    public JSONObject deleteRecord(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = "DELETE FROM "+getTable()+" WHERE "
+                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo())
+                + " AND sRqrmtCde = " + SQLUtil.toSQL(this.getRqrmtCde());
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record deleted successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
+        return poJSON;
+    }
+    
     @Override
     public void list() {
         Method[] methods = this.getClass().getMethods();
