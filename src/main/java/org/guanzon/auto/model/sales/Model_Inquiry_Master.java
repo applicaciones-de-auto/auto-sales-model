@@ -226,6 +226,7 @@ public class Model_Inquiry_Master implements GEntity {
         //replace with the primary key column info
         setTransactDte(poGRider.getServerDate());
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
+        setInqryID(MiscUtil.getNextCode(getTable(), "sInqryIDx", true, poGRider.getConnection(), poGRider.getBranchCode()));
         setBranchCd(poGRider.getBranchCode());
         setBranchNm(poGRider.getBranchName());
         
@@ -276,6 +277,7 @@ public class Model_Inquiry_Master implements GEntity {
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
+                setInqryID(MiscUtil.getNextCode(getTable(), "sInqryIDx", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
                 setModifiedBy(poGRider.getUserID());
@@ -388,7 +390,8 @@ public class Model_Inquiry_Master implements GEntity {
     
     private String getSQL(){
         return    " SELECT "                                                                               
-                + "   a.sTransNox "                                                                        
+                + "   a.sTransNox "                                                                            
+                + " , a.sInqryIDx "                                                                       
                 + " , a.sBranchCd "                                                                        
                 + " , a.dTransact "                                                                        
                 + " , a.sEmployID "                                                                        
@@ -404,9 +407,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.sSourceNo "                                                                        
                 + " , a.sTestModl "                                                                        
                 + " , a.sActvtyID "                                                                        
-                + " , a.dLastUpdt "                                                                        
-//                + " , a.sReserved "                                                                        
-//                + " , a.nRsrvTotl "                                                                        
+                + " , a.dLastUpdt "                                                                           
                 + " , a.sLockedBy "                                                                        
                 + " , a.sLockedDt "                                                                        
                 + " , a.sApproved "                                                                        
@@ -468,6 +469,22 @@ public class Model_Inquiry_Master implements GEntity {
      */
     public String getTransNo() {
         return (String) getValue("sTransNox");
+    }
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setInqryID(String fsValue) {
+        return setValue("sInqryIDx", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getInqryID() {
+        return (String) getValue("sInqryIDx");
     }
     
     /**

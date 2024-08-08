@@ -232,7 +232,7 @@ public class Model_Inquiry_Requirements implements GEntity{
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sVhclIDxx = " + SQLUtil.toSQL(fsValue2));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sRqrmtCde = " + SQLUtil.toSQL(fsValue2));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -298,6 +298,7 @@ public class Model_Inquiry_Requirements implements GEntity{
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {

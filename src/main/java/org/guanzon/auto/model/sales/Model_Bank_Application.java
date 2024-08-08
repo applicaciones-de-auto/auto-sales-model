@@ -6,7 +6,6 @@
 package org.guanzon.auto.model.sales;
 
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -24,8 +23,8 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class Model_Inquiry_Promo implements GEntity{
-    final String XML = "Model_Inquiry_Promo.xml";
+public class Model_Bank_Application implements GEntity{
+    final String XML = "Model_Bank_Application.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
 
@@ -39,7 +38,7 @@ public class Model_Inquiry_Promo implements GEntity{
      *
      * @param foValue - GhostRider Application Driver
      */
-    public Model_Inquiry_Promo(GRider foValue){
+    public Model_Bank_Application(GRider foValue){
         if (foValue == null) {
             System.err.println("Application Driver is not set.");
             System.exit(1);
@@ -57,7 +56,13 @@ public class Model_Inquiry_Promo implements GEntity{
             poEntity.last();
             poEntity.moveToInsertRow();
 
-            MiscUtil.initRowSet(poEntity);     
+            MiscUtil.initRowSet(poEntity);   
+            poEntity.updateObject("dTransact", poGRider.getServerDate());
+            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateString("cTranStat", "0"); 
+            poEntity.updateString("cResrvTyp","0");   
+            poEntity.updateDouble("nAmountxx", 0.00);  
+            poEntity.updateInt("nPrintedx",0);    
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -66,7 +71,7 @@ public class Model_Inquiry_Promo implements GEntity{
             e.printStackTrace();
             System.exit(1);
         }
-    } 
+    }
     
     /**
      * Gets the column index name.
@@ -122,9 +127,8 @@ public class Model_Inquiry_Promo implements GEntity{
 
     @Override
     public String getTable() {
-        return "customer_inquiry_promo";
+        return "bank_application";
     }
-
 
     /**
      * Gets the value of a column index number.
@@ -208,34 +212,28 @@ public class Model_Inquiry_Promo implements GEntity{
         }
         return poJSON;
     }
-    
+
     @Override
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
-
+        
+        setTransactDte(poGRider.getServerDate());
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
+        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
     }
 
     @Override
-    public JSONObject openRecord(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    /**
-     * Opens a record.
-     * @param fsValue - filter values
-     * @param fsValue2 - filter values
-     * @return result as success/failed
-     */
-    public JSONObject openRecord(String fsValue, String fsValue2) {
+    public JSONObject openRecord(String fsValue) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sPromoIDx = " + SQLUtil.toSQL(fsValue2));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -260,18 +258,22 @@ public class Model_Inquiry_Promo implements GEntity{
 
         return poJSON;
     }
-
+    
     @Override
     public JSONObject saveRecord() {
         poJSON = new JSONObject();
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sActNoxxx»sActTitle»dDateFrom»dDateThru";
+            String lsExclude = "sBrBankNm»sBankIDxx»sBankName»sTownName»sProvName";
             
             if (pnEditMode == EditMode.ADDNEW){
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
+                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
+                setModifiedBy(poGRider.getUserID());
+                setModifiedDate(poGRider.getServerDate());
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
@@ -288,11 +290,14 @@ public class Model_Inquiry_Promo implements GEntity{
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_Inquiry_Promo loOldEntity = new Model_Inquiry_Promo(poGRider);
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getPromoID());
+                Model_Bank_Application loOldEntity = new Model_Bank_Application(poGRider);
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 
                 if ("success".equals((String) loJSON.get("result"))){
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sPromoIDx = " + SQLUtil.toSQL(this.getPromoID()), lsExclude);
+//                    setModifiedBy(poGRider.getUserID());
+//                    setModifiedDate(poGRider.getServerDate());
+                    
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -321,25 +326,6 @@ public class Model_Inquiry_Promo implements GEntity{
         return poJSON;
     }
     
-    public JSONObject deleteRecord(){
-        poJSON = new JSONObject();
-        
-        String lsSQL = " DELETE FROM "+getTable()+" WHERE "
-                    + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
-                    + " AND sPromoIDx = " + SQLUtil.toSQL(this.getPromoID());
-        if (!lsSQL.isEmpty()) {
-            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
-                poJSON.put("result", "success");
-                poJSON.put("message", "Record deleted successfully.");
-            } else {
-                poJSON.put("result", "error");
-                poJSON.put("continue", true);
-                poJSON.put("message", poGRider.getErrMsg());
-            }
-        }
-        return poJSON;
-    }
-
     @Override
     public void list() {
         Method[] methods = this.getClass().getMethods();
@@ -373,52 +359,214 @@ public class Model_Inquiry_Promo implements GEntity{
     }
     
     private String getSQL(){
-        return    " SELECT "                                                   
-                + "   a.sTransNox "                                            
-                + " , a.sPromoIDx "                                            
-                + " , a.sEntryByx "                                            
-                + " , a.dEntryDte "                                            
-                + " , b.sActNoxxx "                                            
-                + " , b.sActTitle "                                            
-                + " , b.dDateFrom "                                            
-                + " , b.dDateThru "                                            
-                + " FROM customer_inquiry_promo a "                            
-                + " LEFT JOIN activity_master b ON b.sActvtyID = a.sPromoIDx ";  
+        return    " SELECT "                                                 
+                + "    a.sTransNox "                                         
+                + "  , a.sApplicNo "                                         
+                + "  , a.dAppliedx "                                         
+                + "  , a.dApproved "                                         
+                + "  , a.cPayModex "                                         
+                + "  , a.sSourceCD "                                         
+                + "  , a.sSourceNo "                                         
+                + "  , a.sBrBankID "                                         
+                + "  , a.sRemarksx "                                         
+                + "  , a.cTranStat "                                         
+                + "  , a.sEntryByx "                                         
+                + "  , a.dEntryDte "                                         
+                + "  , a.sModified "                                         
+                + "  , a.dModified "                                         
+                + "  , a.sCancelld "                                         
+                + "  , a.dCancelld "                                         
+                + "  , b.sBrBankNm "                                         
+                + "  , c.sBankIDxx "                                         
+                + "  , c.sBankName "                                         
+                + "  , d.sTownName "                                         
+                + "  , e.sProvName "                                         
+                + " FROM bank_application a "                                
+                + " LEFT JOIN banks_branches b ON b.sBrBankID = a.sBrBankID "
+                + " LEFT JOIN banks c ON c.sBankIDxx = b.sBankIDxx          "
+                + " LEFT JOIN towncity d ON d.sTownIDxx = b.sTownIDxx       "
+                + " LEFT JOIN province e ON e.sProvIDxx = d.sProvIDxx       "  ;                          
     }
     
     /**
-     * Sets the Transaction Code of this record.
-     * 
-     * @param fsValue 
-     * @return  True if the record assignment is successful.
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
      */
-    public JSONObject setTransNo(String fsValue){
+    public JSONObject setTransNo(String fsValue) {
         return setValue("sTransNox", fsValue);
     }
-    
+
     /**
-     * @return The Transaction Code of this record. 
+     * @return The ID of this record.
      */
-    public String getTransNo(){
+    public String getTransNo() {
         return (String) getValue("sTransNox");
     }
     
     /**
-     * Sets the Promo id.
-     * 
-     * @param fsValue 
-     * @return  True if the record assignment is successful.
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
      */
-    public JSONObject setPromoID(String fsValue){
-        return setValue("sPromoIDx", fsValue);
+    public JSONObject setApplicNo(String fsValue) {
+        return setValue("sApplicNo", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getApplicNo() {
+        return (String) getValue("sApplicNo");
+    }  
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setAppliedDte(Date fdValue) {
+        return setValue("dAppliedx", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getAppliedDte() {
+        Date date = null;
+        if(!getValue("dAppliedx").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dAppliedx").toString());
+        }
+        
+        return date;
     }
     
     /**
-     * @return The Promo id.
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
      */
-    public String getPromoID(){
-        return (String) getValue("sPromoIDx");
+    public JSONObject setApprovedDte(Date fdValue) {
+        return setValue("dApproved", fdValue);
     }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApprovedDte() {
+        Date date = null;
+        if(!getValue("dAppliedx").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dApproved").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setPayMode(String fsValue) {
+        return setValue("cPayModex", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getPayMode() {
+        return (String) getValue("cPayModex");
+    }
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setSourceCD(String fsValue) {
+        return setValue("sSourceCD", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getSourceCD() {
+        return (String) getValue("sSourceCD");
+    }   
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setSourceNo(String fsValue) {
+        return setValue("sSourceNo", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getSourceNo() {
+        return (String) getValue("sSourceNo");
+    }   
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setRemarks(String fsValue) {
+        return setValue("sRemarksx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getRemarks() {
+        return (String) getValue("sRemarksx");
+    }   
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setTranStat(String fsValue) {
+        return setValue("cTranStat", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTranStat() {
+        return (String) getValue("cTranStat");
+    }   
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setBrBankID(String fsValue) {
+        return setValue("sBrBankID", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBrBankID() {
+        return (String) getValue("sBrBankID");
+    }   
     
     /**
      * Sets the user encoded/updated the record.
@@ -455,81 +603,139 @@ public class Model_Inquiry_Promo implements GEntity{
     }
     
     /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
      */
-    public JSONObject setActNo(String fsValue) {
-        return setValue("sActNoxxx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getActNo() {
-        return (String) getValue("sActNoxxx");
+    public JSONObject setModifiedBy(String fsValue){
+        return setValue("sModified", fsValue);
     }
     
     /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
+     * @return The user encoded/updated the record 
      */
-    public JSONObject setActTitle(String fsValue) {
-        return setValue("sActTitle", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getActTitle() {
-        return (String) getValue("sActTitle");
+    public String getModifiedBy(){
+        return (String) getValue("sModified");
     }
     
     /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdValue
-     * @return result as success/failed
+     * Sets the date and time the record was modified.
+     * 
+     * @param fdValue 
+     * @return  True if the record assignment is successful.
      */
-    public JSONObject setDateFrom(Date fdValue) {
-        return setValue("dDateFrom", fdValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Date getDateFrom() {
-        Date date = null;
-        if(!getValue("dDateFrom").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dDateFrom").toString());
-        }
-        
-        return date;
+    public JSONObject setModifiedDate(Date fdValue){
+        return setValue("dModified", fdValue);
     }
     
     /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdValue
-     * @return result as success/failed
+     * @return The date and time the record was modified.
      */
-    public JSONObject setDateThru(Date fdValue) {
-        return setValue("dDateThru", fdValue);
+    public Date getModifiedDate(){
+        return (Date) getValue("dModified");
     }
-
+    
     /**
-     * @return The Value of this record.
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
      */
-    public Date getDateThru() {
-        Date date = null;
-        if(!getValue("dDateThru").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dDateThru").toString());
-        }
-        
-        return date;
+    public JSONObject setCancelld(String fsValue){
+        return setValue("sCancelld", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getCancelld(){
+        return (String) getValue("sCancelld");
+    }
+    
+    /**
+     * Sets the date and time the record was modified.
+     * 
+     * @param fdValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setCancelldDte(Date fdValue){
+        return setValue("dCancelld", fdValue);
+    }
+    
+    /**
+     * @return The date and time the record was modified.
+     */
+    public Date getCancelldDte(){
+        return (Date) getValue("dCancelld");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setBankID(String fsValue){
+        return setValue("sBankIDxx", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getBankID(){
+        return (String) getValue("sBankIDxx");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setBankName(String fsValue){
+        return setValue("sBankName", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getBankName(){
+        return (String) getValue("sBankName");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setTownName(String fsValue){
+        return setValue("sTownName", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getTownName(){
+        return (String) getValue("sTownName");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setProvName(String fsValue){
+        return setValue("sProvName", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getProvName(){
+        return (String) getValue("sProvName");
     }
     
 }

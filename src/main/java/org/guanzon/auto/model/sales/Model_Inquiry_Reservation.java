@@ -56,7 +56,13 @@ public class Model_Inquiry_Reservation  implements GEntity{
             poEntity.last();
             poEntity.moveToInsertRow();
 
-            MiscUtil.initRowSet(poEntity);     
+            MiscUtil.initRowSet(poEntity);   
+            poEntity.updateObject("dTransact", poGRider.getServerDate());
+            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateString("cTranStat", "0"); 
+            poEntity.updateString("cResrvTyp","0");   
+            poEntity.updateDouble("nAmountxx", 0.00);  
+            poEntity.updateInt("nPrintedx",0);    
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -210,30 +216,24 @@ public class Model_Inquiry_Reservation  implements GEntity{
     @Override
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
-
+        
+        setTransactDte(poGRider.getServerDate());
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
+        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
     }
 
     @Override
-    public JSONObject openRecord(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    /**
-     * Opens a record.
-     * @param fsValue - filter values
-     * @param fsValue2 - filter values
-     * @return result as success/failed
-     */
-    public JSONObject openRecord(String fsValue, String fsValue2) {
+    public JSONObject openRecord(String fsValue) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sReferNox = " + SQLUtil.toSQL(fsValue2));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -258,6 +258,44 @@ public class Model_Inquiry_Reservation  implements GEntity{
 
         return poJSON;
     }
+
+//    /**
+//     * Opens a record.
+//     * @param fsValue - filter values
+//     * @param fsValue2 - filter values
+//     * @return result as success/failed
+//     */
+//    public JSONObject openRecord(String fsValue, String fsValue2) {
+//        poJSON = new JSONObject();
+//
+//        String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
+//
+//        //replace the condition based on the primary key column of the record
+//        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sReferNox = " + SQLUtil.toSQL(fsValue2));
+//
+//        ResultSet loRS = poGRider.executeQuery(lsSQL);
+//
+//        try {
+//            if (loRS.next()) {
+//                for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
+//                    setValue(lnCtr, loRS.getObject(lnCtr));
+//                }
+//
+//                pnEditMode = EditMode.UPDATE;
+//
+//                poJSON.put("result", "success");
+//                poJSON.put("message", "Record loaded successfully.");
+//            } else {
+//                poJSON.put("result", "error");
+//                poJSON.put("message", "No record to load.");
+//            }
+//        } catch (SQLException e) {
+//            poJSON.put("result", "error");
+//            poJSON.put("message", e.getMessage());
+//        }
+//
+//        return poJSON;
+//    }
     
     @Override
     public JSONObject saveRecord() {
@@ -265,9 +303,16 @@ public class Model_Inquiry_Reservation  implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sCompnyNm»sAddressx";
+            String lsExclude = "sCompnyNm»sAddressx»cClientTp";
             
             if (pnEditMode == EditMode.ADDNEW){
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
+                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setEntryBy(poGRider.getUserID());
+                setEntryDte(poGRider.getServerDate());
+                setModifiedBy(poGRider.getUserID());
+                setModifiedDate(poGRider.getServerDate());
+                
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
@@ -283,11 +328,14 @@ public class Model_Inquiry_Reservation  implements GEntity{
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_Inquiry_Requirements loOldEntity = new Model_Inquiry_Requirements(poGRider);
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getReferNo());
+                Model_Inquiry_Reservation loOldEntity = new Model_Inquiry_Reservation(poGRider);
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 
                 if ("success".equals((String) loJSON.get("result"))){
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sReferNox = " + SQLUtil.toSQL(this.getReferNo()), lsExclude);
+                    setModifiedBy(poGRider.getUserID());
+                    setModifiedDate(poGRider.getServerDate());
+                    
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -299,6 +347,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
@@ -315,24 +364,24 @@ public class Model_Inquiry_Reservation  implements GEntity{
         return poJSON;
     }
     
-    public JSONObject deleteRecord(){
-        poJSON = new JSONObject();
-        
-        String lsSQL = "DELETE FROM "+getTable()+" WHERE "
-                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
-                + " AND sReferNox = " + SQLUtil.toSQL(this.getReferNo());
-        if (!lsSQL.isEmpty()) {
-            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
-                poJSON.put("result", "success");
-                poJSON.put("message", "Record deleted successfully.");
-            } else {
-                poJSON.put("result", "error");
-                poJSON.put("continue", true);
-                poJSON.put("message", poGRider.getErrMsg());
-            }
-        }
-        return poJSON;
-    }
+//    public JSONObject deleteRecord(){
+//        poJSON = new JSONObject();
+//        
+//        String lsSQL = "DELETE FROM "+getTable()+" WHERE "
+//                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+//                + " AND sReferNox = " + SQLUtil.toSQL(this.getReferNo());
+//        if (!lsSQL.isEmpty()) {
+//            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+//                poJSON.put("result", "success");
+//                poJSON.put("message", "Record deleted successfully.");
+//            } else {
+//                poJSON.put("result", "error");
+//                poJSON.put("continue", true);
+//                poJSON.put("message", poGRider.getErrMsg());
+//            }
+//        }
+//        return poJSON;
+//    }
     
     @Override
     public void list() {
@@ -377,7 +426,6 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  , a.sSourceCD "                                                              
                 + "  , a.sSourceNo "                                                              
                 + "  , a.nPrintedx "                                                              
-                + "  , a.nRowPosxx "                                                              
                 + "  , a.sResrvCde "                                                              
                 + "  , a.cResrvTyp "                                                              
                 + "  , a.cTranStat "                                                              
@@ -527,7 +575,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         return (String) getValue("sSourceCD");
     }   
     
-    /**
+    /** INQUIRY TRANSACTION NUMBER
      * Description: Sets the Value of this record.
      *
      * @param fsValue
@@ -559,23 +607,6 @@ public class Model_Inquiry_Reservation  implements GEntity{
      */
     public Integer getPrinted() {
         return Integer.parseInt(String.valueOf(getValue("nPrintedx")));
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fnValue
-     * @return result as success/failed
-     */
-    public JSONObject setRowPos(Integer fnValue) {
-        return setValue("nRowPosxx", fnValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Integer getRowPos() {
-        return Integer.parseInt(String.valueOf(getValue("nRowPosxx")));
     }
     
     /**

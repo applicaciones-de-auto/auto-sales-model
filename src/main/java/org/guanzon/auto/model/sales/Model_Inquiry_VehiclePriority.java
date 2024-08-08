@@ -302,6 +302,7 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
