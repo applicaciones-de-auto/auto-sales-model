@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.GRider;
@@ -20,31 +21,38 @@ import org.json.simple.JSONObject;
 
 /**
  *
- * @author MIS-PC
+ * @author Arsiela
  */
 public class Model_Inquiry_VehiclePriority implements GEntity{
     final String XML = "Model_Inquiry_VehiclePriority.xml";
-    Connection poConn;          //connection
-    CachedRowSet poEntity;      //rowset
-    String psMessage;           //warning, success or error message
-    GRider poGRider;
+    private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
-    int pnEditMode;
-    public JSONObject poJSON;
-    public Model_Inquiry_VehiclePriority(GRider poValue){
-        if (poValue.getConnection() == null){
-            System.err.println("Database connection is not set.");
+
+    GRider poGRider;                //application driver
+    CachedRowSet poEntity;          //rowset
+    JSONObject poJSON;              //json container
+    int pnEditMode;                 //edit mode
+    
+    /**
+     * Entity constructor
+     *
+     * @param foValue - GhostRider Application Driver
+     */
+    public Model_Inquiry_VehiclePriority(GRider foValue){
+        if (foValue == null) {
+            System.err.println("Application Driver is not set.");
             System.exit(1);
         }
-        pnEditMode = EditMode.UNKNOWN;
-        poGRider = poValue;
-        poConn = poGRider.getConnection();
+
+        poGRider = foValue;
+
         initialize();
     }
     
     private void initialize(){
         try {
             poEntity = MiscUtil.xml2ResultSet(System.getProperty("sys.default.path.metadata") + XML, getTable());
+
             poEntity.last();
             poEntity.moveToInsertRow();
 
@@ -59,32 +67,50 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
         }
     }    
     
+    /**
+     * Gets the column index name.
+     *
+     * @param fnValue - column index number
+     * @return column index name
+     */
     @Override
-    public String getColumn(int fnCol) {
+    public String getColumn(int fnValue) {
         try {
-            return poEntity.getMetaData().getColumnLabel(fnCol); 
+            return poEntity.getMetaData().getColumnLabel(fnValue);
         } catch (SQLException e) {
         }
         return "";
     }
 
+    /**
+     * Gets the column index number.
+     *
+     * @param fsValue - column index name
+     * @return column index number
+     */
     @Override
-    public int getColumn(String fsCol) {
+    public int getColumn(String fsValue) {
         try {
-            return MiscUtil.getColumnIndex(poEntity, fsCol);
+            return MiscUtil.getColumnIndex(poEntity, fsValue);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
     }
 
+    /**
+     * Gets the total number of column.
+     *
+     * @return total number of column
+     */
     @Override
     public int getColumnCount() {
         try {
-            return poEntity.getMetaData().getColumnCount(); 
+            return poEntity.getMetaData().getColumnCount();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return -1;
     }
 
@@ -95,9 +121,15 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
 
     @Override
     public String getTable() {
-        return "Customer_Inquiry_Vehicle_Priority";
+        return "customer_inquiry_vehicle_priority";
     }
 
+    /**
+     * Gets the value of a column index number.
+     *
+     * @param fnColumn - column index number
+     * @return object value
+     */
     @Override
     public Object getValue(int fnColumn) {
         try {
@@ -107,7 +139,7 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
         }
         return null;
     }
-    
+
     /**
      * Gets the value of a column index name.
      *
@@ -124,100 +156,91 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
         return null;
     }
 
+    /**
+     * Sets column value.
+     *
+     * @param fnColumn - column index number
+     * @param foValue - value
+     * @return result as success/failed
+     */
     @Override
     public JSONObject setValue(int fnColumn, Object foValue) {
-        poJSON = new JSONObject();
         try {
+            poJSON = MiscUtil.validateColumnValue(System.getProperty("sys.default.path.metadata") + XML, MiscUtil.getColumnLabel(poEntity, fnColumn), foValue);
+            if ("error".equals((String) poJSON.get("result"))) {
+                return poJSON;
+            }
+
             poEntity.updateObject(fnColumn, foValue);
             poEntity.updateRow();
+
+            poJSON = new JSONObject();
             poJSON.put("result", "success");
             poJSON.put("value", getValue(fnColumn));
-            return poJSON;
         } catch (SQLException e) {
             e.printStackTrace();
-            psMessage = e.getMessage();
             poJSON.put("result", "error");
             poJSON.put("message", e.getMessage());
-            return poJSON;
         }
+
+        return poJSON;
     }
 
+    /**
+     * Sets column value.
+     *
+     * @param fsColumn - column index name
+     * @param foValue - value
+     * @return result as success/failed
+     */
     @Override
-    public JSONObject setValue(String fsValue, Object foValue) {
+    public JSONObject setValue(String fsColumn, Object foValue) {
+        poJSON = new JSONObject();
+
         try {
-            return setValue(MiscUtil.getColumnIndex(poEntity, fsValue), foValue);
-        } catch (SQLException ex) {
-            
-            poJSON = new JSONObject();
+            return setValue(MiscUtil.getColumnIndex(poEntity, fsColumn), foValue);
+        } catch (SQLException e) {
+            e.printStackTrace();
             poJSON.put("result", "error");
-            poJSON.put("message", ex.getMessage());
-            return poJSON;
-            
+            poJSON.put("message", e.getMessage());
         }
-    }
-    
-    /**
-     * Sets the Transaction Code of this record.
-     * 
-     * @param fsValue 
-     * @return  True if the record assignment is successful.
-     */
-    public JSONObject setTransNox(String fsValue){
-        return setValue("sTransNox", fsValue);
-    }
-    
-    /**
-     * @return The Transaction Code of this record. 
-     */
-    public String getTransNox(){
-        return (String) getValue("sTransNox");
-    }
-    
-    /**
-     * Sets the Vehicle id.
-     * 
-     * @param fsValue 
-     * @return  True if the record assignment is successful.
-     */
-    public JSONObject setVehicleID(String fsValue){
-        return setValue("sVhclIDxx", fsValue);
-    }
-    
-    /**
-     * @return The Vehicle id.
-     */
-    public String getVehicleID(){
-        return (String) getValue("sVhclIDxx");
+        return poJSON;
     }
     
     @Override
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
-        if (psBranchCd.isEmpty()) psBranchCd = poGRider.getBranchCode();
-        
-        //replace with the primary key column info
-        //setClientID(MiscUtil.getNextCode(getTable(), "sClientID", true, poConn, poGRider.getBranchCode()));
-        
+
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
     }
 
     @Override
-    public JSONObject openRecord(String fsValue) {
-        pnEditMode = EditMode.UPDATE;
+    public JSONObject openRecord(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    /**
+     * Opens a record.
+     * @param fsValue - filter values
+     * @param fsValue2 - filter values
+     * @return result as success/failed
+     */
+    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
-        String lsSQL = getSQL();
-        lsSQL = MiscUtil.addCondition(getSQL(), "a.sTransNox = " + SQLUtil.toSQL(fsValue));
-        System.out.println(lsSQL);
+        String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
+
+        //replace the condition based on the primary key column of the record
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sVhclIDxx = " + SQLUtil.toSQL(fsValue2));
+
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
-            if (loRS.next()){
-                for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++){
+            if (loRS.next()) {
+                for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
                     setValue(lnCtr, loRS.getObject(lnCtr));
-                    System.out.println(loRS.getMetaData().getColumnLabel(lnCtr) + " = " + loRS.getString(lnCtr));
                 }
 
                 pnEditMode = EditMode.UPDATE;
@@ -228,7 +251,6 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
                 poJSON.put("result", "error");
                 poJSON.put("message", "No record to load.");
             }
-            MiscUtil.close(loRS);
         } catch (SQLException e) {
             poJSON.put("result", "error");
             poJSON.put("message", e.getMessage());
@@ -236,21 +258,23 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
 
         return poJSON;
     }
-
+    
     @Override
     public JSONObject saveRecord() {
         poJSON = new JSONObject();
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExcluded = "sDescript";
+            String lsExclude = "sDescript";
             
             if (pnEditMode == EditMode.ADDNEW){
-                setValue("dEntryDte",poGRider.getServerDate());
-                lsSQL = MiscUtil.makeSQL(this, lsExcluded);
+                setEntryBy(poGRider.getUserID());
+                setEntryDte(poGRider.getServerDate());
                 
-                if (!lsSQL.isEmpty()){
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0){
+                lsSQL = MiscUtil.makeSQL(this, lsExclude);
+
+                if (!lsSQL.isEmpty()) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -263,23 +287,21 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
                 }
             } else {
                 Model_Inquiry_VehiclePriority loOldEntity = new Model_Inquiry_VehiclePriority(poGRider);
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNox());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getVhclID());
                 
                 if ("success".equals((String) loJSON.get("result"))){
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNox()), lsExcluded);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sVhclIDxx = " + SQLUtil.toSQL(this.getVhclID()), lsExclude);
                     
-                    if (!lsSQL.isEmpty()){
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0){
+                    if (!lsSQL.isEmpty()) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
                             poJSON.put("result", "success");
-                            poJSON.put("sTransNox", getTransNox());
                             poJSON.put("message", "Record saved successfully.");
                         } else {
                             poJSON.put("result", "error");
                             poJSON.put("message", poGRider.getErrMsg());
                         }
                     } else {
-                        poJSON.put("result", "error");
-                        poJSON.put("continue", true);
+                        poJSON.put("result", "success");
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
@@ -295,30 +317,169 @@ public class Model_Inquiry_VehiclePriority implements GEntity{
         
         return poJSON;
     }
+    
+    public JSONObject deleteRecord(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = " DELETE FROM "+getTable()+" WHERE "
+                    + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                    + " AND sVhclIDxx = " + SQLUtil.toSQL(this.getVhclID());
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record deleted successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
+        return poJSON;
+    }
 
     @Override
     public void list() {
         Method[] methods = this.getClass().getMethods();
-        
-        System.out.println("List of public methods for class " + this.getClass().getName() + ":");
+
+        System.out.println("--------------------------------------------------------------------");
+        System.out.println("LIST OF PUBLIC METHODS FOR " + this.getClass().getName() + ":");
+        System.out.println("--------------------------------------------------------------------");
         for (Method method : methods) {
             System.out.println(method.getName());
         }
-    }
-    
-    public String getMessage(){
-        return psMessage;
+
+        try {
+            int lnRow = poEntity.getMetaData().getColumnCount();
+
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("ENTITY COLUMN INFO");
+            System.out.println("--------------------------------------------------------------------");
+            System.out.println("Total number of columns: " + lnRow);
+            System.out.println("--------------------------------------------------------------------");
+
+            for (int lnCtr = 1; lnCtr <= lnRow; lnCtr++) {
+                System.out.println("Column index: " + (lnCtr) + " --> Label: " + poEntity.getMetaData().getColumnLabel(lnCtr));
+                if (poEntity.getMetaData().getColumnType(lnCtr) == Types.CHAR
+                        || poEntity.getMetaData().getColumnType(lnCtr) == Types.VARCHAR) {
+
+                    System.out.println("Column index: " + (lnCtr) + " --> Size: " + poEntity.getMetaData().getColumnDisplaySize(lnCtr));
+                }
+            }
+        } catch (SQLException e) {
+        }
     }
     
     private String getSQL(){
-        return  "SELECT " + 
-                    " a.sTransNox " + //1
-                    ", a.nPriority" + //2
-                    ", a.sVhclIDxx" + //3
-                    ", a.sEntryByx" + //4
-                    ", a.dEntryDte" + //5
-                    ", IFNULL(b.sDescript, '') sDescript" + //6
-                " FROM Customer_Inquiry_Vehicle_Priority a" +
-                    " LEFT JOIN vehicle_master b ON a.sVhclIDxx = b.sVhclIDxx";                          
+        return    " SELECT "                                                  
+                + "   a.sTransNox "                                           
+                + " , a.nPriority "                                           
+                + " , a.sVhclIDxx "                                           
+                + " , a.sEntryByx "                                           
+                + " , a.dEntryDte "                                           
+                + " , b.sDescript "                                           
+                + " FROM customer_inquiry_vehicle_priority a "                
+                + " LEFT JOIN vehicle_master b ON b.sVhclIDxx = a.sVhclIDxx " ;                          
+    }
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setTransNo(String fsValue) {
+        return setValue("sTransNox", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getTransNo() {
+        return (String) getValue("sTransNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fnValue
+     * @return result as success/failed
+     */
+    public JSONObject setPriority(Integer fnValue) {
+        return setValue("nPriority", fnValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Integer getPriority() {
+        return Integer.parseInt(String.valueOf(getValue("nPriority")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setVhclID(String fsValue) {
+        return setValue("sVhclIDxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclID() {
+        return (String) getValue("sVhclIDxx");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setEntryBy(String fsValue){
+        return setValue("sEntryByx", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getEntryBy(){
+        return (String) getValue("sEntryByx");
+    }
+    
+    /**
+     * Sets the date and time the record was modified.
+     * 
+     * @param fdValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setEntryDte(Date fdValue){
+        return setValue("dEntryDte", fdValue);
+    }
+    
+    /**
+     * @return The date and time the record was modified.
+     */
+    public Date getEntryDte(){
+        return (Date) getValue("dEntryDte");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setDescript(String fsValue) {
+        return setValue("sDescript", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getDescript() {
+        return (String) getValue("sDescript");
     }
 }
