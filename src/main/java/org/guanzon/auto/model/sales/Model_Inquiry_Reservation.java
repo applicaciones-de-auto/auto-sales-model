@@ -218,7 +218,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         pnEditMode = EditMode.ADDNEW;
         
         setTransactDte(poGRider.getServerDate());
-        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"R"));
         setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
@@ -306,7 +306,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
             String lsExclude = "sCompnyNm»sAddressx»cClientTp";
             
             if (pnEditMode == EditMode.ADDNEW){
-                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"R"));
                 setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());

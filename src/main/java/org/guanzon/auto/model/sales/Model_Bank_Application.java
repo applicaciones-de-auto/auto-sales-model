@@ -57,12 +57,10 @@ public class Model_Bank_Application implements GEntity{
             poEntity.moveToInsertRow();
 
             MiscUtil.initRowSet(poEntity);   
-            poEntity.updateObject("dTransact", poGRider.getServerDate());
+            poEntity.updateObject("dAppliedx", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateString("cTranStat", "0"); 
-            poEntity.updateString("cResrvTyp","0");   
-            poEntity.updateDouble("nAmountxx", 0.00);  
-            poEntity.updateInt("nPrintedx",0);    
+            poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateString("cTranStat", "0");   
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -217,9 +215,9 @@ public class Model_Bank_Application implements GEntity{
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
         
-        setTransactDte(poGRider.getServerDate());
-        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
-        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        setAppliedDte(poGRider.getServerDate());
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"BA"));
+        setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -268,8 +266,8 @@ public class Model_Bank_Application implements GEntity{
             String lsExclude = "sBrBankNm»sBankIDxx»sBankName»sTownName»sProvName";
             
             if (pnEditMode == EditMode.ADDNEW){
-                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"RSV"));
-                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"BA"));
+                setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
                 setModifiedBy(poGRider.getUserID());
@@ -294,8 +292,8 @@ public class Model_Bank_Application implements GEntity{
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 
                 if ("success".equals((String) loJSON.get("result"))){
-//                    setModifiedBy(poGRider.getUserID());
-//                    setModifiedDate(poGRider.getServerDate());
+                    setModifiedBy(poGRider.getUserID());
+                    setModifiedDate(poGRider.getServerDate());
                     
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     

@@ -10,7 +10,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
@@ -63,7 +67,7 @@ public class Model_Inquiry_Master implements GEntity {
             poEntity.updateObject("dTargetDt", poGRider.getServerDate());    
             poEntity.updateObject("dTransact", poGRider.getServerDate());    
             poEntity.updateObject("dLastUpdt", poGRider.getServerDate());  
-            poEntity.updateObject("sLockedDt", poGRider.getServerDate());
+            poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateString("cTranStat", "0"); 
             
             poEntity.updateString("cIsVhclNw", "0");  
@@ -284,6 +288,7 @@ public class Model_Inquiry_Master implements GEntity {
                 setModifiedDate(poGRider.getServerDate());
                 setLockedBy(poGRider.getUserID());
                 setLockedDt(poGRider.getServerDate());
+                setLastUpdt(poGRider.getServerDate());
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
@@ -306,6 +311,14 @@ public class Model_Inquiry_Master implements GEntity {
                 if ("success".equals((String) loJSON.get("result"))){
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDate(poGRider.getServerDate());
+                    setLastUpdt(poGRider.getServerDate());
+                    //Clear Locked by/date
+                    setLockedBy("");
+                    try {
+                        poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
@@ -409,7 +422,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.sActvtyID "                                                                        
                 + " , a.dLastUpdt "                                                                           
                 + " , a.sLockedBy "                                                                        
-                + " , a.sLockedDt "                                                                        
+                + " , a.dLockedDt "                                                                        
                 + " , a.sApproved "                                                                        
                 + " , a.sSerialID "                                                                        
                 + " , a.sInqryCde "                                                                        
@@ -832,7 +845,7 @@ public class Model_Inquiry_Master implements GEntity {
      * @return result as success/failed
      */
     public JSONObject setLockedDt(Date fdValue) {
-        return setValue("sLockedDt", fdValue);
+        return setValue("dLockedDt", fdValue);
     }
 
     /**
@@ -840,8 +853,8 @@ public class Model_Inquiry_Master implements GEntity {
      */
     public Date getLockedDt() {
         Date date = null;
-        if(!getValue("sLockedDt").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("sLockedDt").toString());
+        if(!getValue("dLockedDt").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dLockedDt").toString());
         }
         
         return date;
