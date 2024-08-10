@@ -217,7 +217,7 @@ public class Model_Bank_Application implements GEntity{
         
         setAppliedDte(poGRider.getServerDate());
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"BA"));
-        setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        //setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -267,7 +267,7 @@ public class Model_Bank_Application implements GEntity{
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"BA"));
-                setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                //setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
                 setModifiedBy(poGRider.getUserID());

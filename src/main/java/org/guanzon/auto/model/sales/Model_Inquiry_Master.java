@@ -277,7 +277,8 @@ public class Model_Inquiry_Master implements GEntity {
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sClientNm»cClientTp»sAddressx»sMobileNo»sEmailAdd»sAccountx»sContctNm»sSalesExe»sSalesAgn»sPlatform»sActTitle»sBranchNm";
+            String lsExclude = "sClientNm»cClientTp»sAddressx»sMobileNo»sEmailAdd»sAccountx»sContctNm»sSalesExe»sSalesAgn»sPlatform»sActTitle»sBranchNm»" +
+                               "sFrameNox»sEngineNo»sCSNoxxxx»sPlateNox»sDescript";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
@@ -290,6 +291,7 @@ public class Model_Inquiry_Master implements GEntity {
                 setLockedDt(poGRider.getServerDate());
                 setLastUpdt(poGRider.getServerDate());
                 
+                System.out.println("AGENT ID : " + getAgentID());
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
@@ -307,7 +309,7 @@ public class Model_Inquiry_Master implements GEntity {
             } else {
                 Model_Inquiry_Master loOldEntity = new Model_Inquiry_Master(poGRider);
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
-                
+                System.out.println("AGENT ID : " + getAgentID());
                 if ("success".equals((String) loJSON.get("result"))){
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDate(poGRider.getServerDate());
@@ -448,7 +450,12 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , m.sCompnyNm AS sSalesAgn "                                                           
                 + " , n.sPlatform "                                                                        
                 + " , o.sActTitle "                                                                        
-                + " , p.sBranchNm "                                                                        
+                + " , p.sBranchNm "                                                                                      
+                + " , q.sFrameNox "                                                                                           
+                + " , q.sEngineNo "                                                                                                        
+                + " , q.sCSNoxxxx "                                                                                   
+                + " , r.sPlateNox "                                                                                            
+                + " , s.sDescript "                                                                      
                 + " FROM customer_inquiry a "                                                              
                 + " LEFT JOIN client_master b ON a.sClientID = b.sClientID   "                             
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "          
@@ -464,7 +471,10 @@ public class Model_Inquiry_Master implements GEntity {
                 + " LEFT JOIN client_master m ON m.sClientID = a.sAgentIDx    "                            
                 + " LEFT JOIN online_platforms n ON n.sTransNox = a.sSourceCD "                            
                 + " LEFT JOIN activity_master o ON o.sActvtyID = a.sActvtyID  "                            
-                + " LEFT JOIN branch p ON p.sBranchCd = a.sBranchCd           "  ;             
+                + " LEFT JOIN branch p ON p.sBranchCd = a.sBranchCd           "                             
+                + " LEFT JOIN vehicle_serial q ON q.sSerialID = a.sSerialID           "    
+                + " LEFT JOIN vehicle_serial_registration r ON r.sSerialID = a.sSerialID "              
+                + " LEFT JOIN vehicle_master s ON s.sVhclIDxx = q.sVhclIDxx "     ;             
     }
     
     /**
@@ -1244,6 +1254,90 @@ public class Model_Inquiry_Master implements GEntity {
         return (String) getValue("sBranchNm");
     }
     
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setFrameNo(String fsValue){
+        return setValue("sFrameNox", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getFrameNo(){
+        return (String) getValue("sFrameNox");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setEngineNo(String fsValue){
+        return setValue("sEngineNo", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getEngineNo(){
+        return (String) getValue("sEngineNo");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setCSNo(String fsValue){
+        return setValue("sCSNoxxxx", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getCSNo(){
+        return (String) getValue("sCSNoxxxx");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setPlateNo(String fsValue){
+        return setValue("sPlateNox", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getPlateNo(){
+        return (String) getValue("sPlateNox");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setDescript(String fsValue){
+        return setValue("sDescript", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getDescript(){
+        return (String) getValue("sDescript");
+    }
     
     
 }

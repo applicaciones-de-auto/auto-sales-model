@@ -54,8 +54,9 @@ public class Model_Inquiry_Requirements implements GEntity{
 
             poEntity.last();
             poEntity.moveToInsertRow();
-
-            MiscUtil.initRowSet(poEntity);     
+            MiscUtil.initRowSet(poEntity);   
+            
+            poEntity.updateObject("dReceived", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -264,7 +265,7 @@ public class Model_Inquiry_Requirements implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "dReceived»sDescript»cPayModex»cCustGrpx»sCompnyNm";
+            String lsExclude = "sDescript»cPayModex»cCustGrpx»sCompnyNm";
             
             if (pnEditMode == EditMode.ADDNEW){
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);

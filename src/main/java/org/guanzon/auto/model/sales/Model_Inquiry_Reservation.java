@@ -364,19 +364,20 @@ public class Model_Inquiry_Reservation  implements GEntity{
         return poJSON;
     }
     
-//    public JSONObject deleteRecord(){
+//    public JSONObject cancelRecord(String fsTransNo){
 //        poJSON = new JSONObject();
 //        
-//        String lsSQL = "DELETE FROM "+getTable()+" WHERE "
-//                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
-//                + " AND sReferNox = " + SQLUtil.toSQL(this.getReferNo());
+//        String lsSQL = "UPDATE "+getTable()+" SET "
+//                + "  cTranStat = '0'"
+//                + " ,sModified = " + SQLUtil.toSQL(poGRider.getUserID())
+//                + " ,dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
+//                + " WHERE sTransNox = " + SQLUtil.toSQL(fsTransNo);
 //        if (!lsSQL.isEmpty()) {
 //            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
 //                poJSON.put("result", "success");
-//                poJSON.put("message", "Record deleted successfully.");
+//                poJSON.put("message", "Record cancelled successfully.");
 //            } else {
 //                poJSON.put("result", "error");
-//                poJSON.put("continue", true);
 //                poJSON.put("message", poGRider.getErrMsg());
 //            }
 //        }
