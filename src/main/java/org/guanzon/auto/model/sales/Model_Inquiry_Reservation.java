@@ -16,6 +16,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -59,7 +60,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
             MiscUtil.initRowSet(poEntity);   
             poEntity.updateObject("dTransact", poGRider.getServerDate());
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateString("cTranStat", "0"); 
+            poEntity.updateString("cTranStat", RecordStatus.ACTIVE); 
             poEntity.updateString("cResrvTyp","0");   
             poEntity.updateDouble("nAmountxx", 0.00);  
             poEntity.updateInt("nPrintedx",0);    
@@ -219,7 +220,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         
         setTransactDte(poGRider.getServerDate());
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"R"));
-        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        //setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");

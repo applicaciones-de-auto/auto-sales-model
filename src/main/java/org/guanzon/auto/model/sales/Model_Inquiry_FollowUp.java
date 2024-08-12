@@ -215,7 +215,7 @@ public class Model_Inquiry_FollowUp implements GEntity{
         pnEditMode = EditMode.ADDNEW;
         
         setTransactDte(poGRider.getServerDate());
-        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"FU"));
+        setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
         
         poJSON = new JSONObject();
         poJSON.put("result", "success");
@@ -229,7 +229,7 @@ public class Model_Inquiry_FollowUp implements GEntity{
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sReferNox = " + SQLUtil.toSQL(fsValue));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -261,10 +261,10 @@ public class Model_Inquiry_FollowUp implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = ""; //»
+            String lsExclude = "sPlatform»sCompnyNm"; //»
             
             if (pnEditMode == EditMode.ADDNEW){
-                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"FU"));
+                setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
                 
@@ -353,24 +353,30 @@ public class Model_Inquiry_FollowUp implements GEntity{
     }
     
     private String getSQL(){
-        return    " SELECT "                          
-                + "    sTransNox "                    
-                + "  , sReferNox "                    
-                + "  , dTransact "                    
-                + "  , sRemarksx "                    
-                + "  , sMessagex "                    
-                + "  , sMethodCd "                    
-                + "  , sSclMedia "                    
-                + "  , dFollowUp "                    
-                + "  , tFollowUp "                    
-                + "  , sGdsCmptr "                    
-                + "  , sMkeCmptr "                    
-                + "  , sDlrCmptr "                    
-                + "  , sRspnseCd "                    
-                + "  , sEmployID "                    
-                + "  , sEntryByx "                    
-                + "  , dEntryDte "                    
-                + " FROM customer_inquiry_followup "    ;                          
+        return    " SELECT "                                                    
+                + "    a.sTransNox "                                            
+                + "  , a.sReferNox "                                            
+                + "  , a.dTransact "                                            
+                + "  , a.sRemarksx "                                            
+                + "  , a.sMessagex "                                            
+                + "  , a.sMethodCd "                                            
+                + "  , a.sSclMedia "                                            
+                + "  , a.dFollowUp "                                            
+                + "  , a.tFollowUp "                                            
+                + "  , a.sGdsCmptr "                                            
+                + "  , a.sMkeCmptr "                                            
+                + "  , a.sDlrCmptr "                                            
+                + "  , a.sRspnseCd "                                            
+                + "  , a.sEmployID "                                            
+                + "  , a.sEntryByx "                                            
+                + "  , a.dEntryDte "                                            
+                + "  , b.sPlatform "
+                + "  , c.sCompnyNm "   
+                + "  , d.sDisValue "                                            
+                + " FROM customer_inquiry_followup  a "                         
+                + " LEFT JOIN online_platforms b ON b.sTransNox = a.sSclMedia "
+                + " LEFT JOIN GGC_ISysDBF.Client_Master c ON c.sClientID = a.sEmployID "
+                + " LEFT JOIN xxxform_typelist d ON d.sDataValx = a.sRspnseCd " ;                          
     }
     
     /**
@@ -635,6 +641,23 @@ public class Model_Inquiry_FollowUp implements GEntity{
      */
     public Date getEntryDte(){
         return (Date) getValue("dEntryDte");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setPlatform(String fsValue){
+        return setValue("sPlatform", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getPlatform(){
+        return (String) getValue("sPlatform");
     }
     
 }
