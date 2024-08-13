@@ -263,7 +263,7 @@ public class Model_Bank_Application implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sBrBankNm»sBankIDxx»sBankName»sTownName»sProvName";
+            String lsExclude = "sBrBankNm»sBankIDxx»sBankName»sTownName»sProvName»sAddressx»sBankType";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"BA"));
@@ -356,7 +356,7 @@ public class Model_Bank_Application implements GEntity{
         }
     }
     
-    private String getSQL(){
+    public String getSQL(){
         return    " SELECT "                                                 
                 + "    a.sTransNox "                                         
                 + "  , a.sApplicNo "                                         
@@ -378,7 +378,9 @@ public class Model_Bank_Application implements GEntity{
                 + "  , c.sBankIDxx "                                         
                 + "  , c.sBankName "                                         
                 + "  , d.sTownName "                                         
-                + "  , e.sProvName "                                         
+                + "  , e.sProvName " 
+                + "  , UPPER(CONCAT(b.sAddressx,' ', d.sTownName, ', ', e.sProvName)) sAddressx "                                      
+                + "  , c.sBankType " 
                 + " FROM bank_application a "                                
                 + " LEFT JOIN banks_branches b ON b.sBrBankID = a.sBrBankID "
                 + " LEFT JOIN banks c ON c.sBankIDxx = b.sBankIDxx          "
@@ -734,6 +736,57 @@ public class Model_Bank_Application implements GEntity{
      */
     public String getProvName(){
         return (String) getValue("sProvName");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setBrBankNm(String fsValue){
+        return setValue("sBrBankNm", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getBrBankNm(){
+        return (String) getValue("sBrBankNm");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setBankType(String fsValue){
+        return setValue("sBankType", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getBankType(){
+        return (String) getValue("sBankType");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setAddressx(String fsValue){
+        return setValue("sAddressx", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getAddressx(){
+        return (String) getValue("sAddressx");
     }
     
 }
