@@ -5,10 +5,15 @@
  */
 package org.guanzon.auto.model.sales;
 
+import static java.lang.String.format;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.CommonUtils;
@@ -59,6 +64,7 @@ public class Model_Inquiry_FollowUp implements GEntity{
             MiscUtil.initRowSet(poEntity);   
             poEntity.updateObject("dTransact", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dFollowUp", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("tFollowUp", Time.valueOf("00:00:00"));
             poEntity.updateString("sMethodCd", "0");   
             
             poEntity.insertRow();
@@ -267,6 +273,7 @@ public class Model_Inquiry_FollowUp implements GEntity{
                 setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
+                setEmployID(poGRider.getUserID());
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
@@ -459,7 +466,7 @@ public class Model_Inquiry_FollowUp implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setMessage(String fsValue) {
-        return setValue("sMessage", fsValue);
+        return setValue("sMessagex", fsValue);
     }
 
     /**
@@ -528,19 +535,56 @@ public class Model_Inquiry_FollowUp implements GEntity{
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fsValue
+     * @param ftValue
      * @return result as success/failed
      */
-    public JSONObject setFollowUp(String fsValue) {
-        return setValue("tFollowUp", fsValue);
+    public JSONObject setFollowUpTme(Time ftValue) {
+        return setValue("tFollowUp", ftValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getFollowUp() {
-        return (String) getValue("tFollowUp");
-    }   
+    public Time getFollowUpTme() {
+        Time lTime = Time.valueOf("00:00:00");
+        if(getValue("tFollowUp") != null){
+            lTime = (Time) getValue("tFollowUp");
+        } 
+        return lTime;
+    }  
+    
+//    
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param ftValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setFollowUpTme(LocalTime ftValue) {
+//        return setValue("tFollowUp", ftValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public LocalTime getFollowUpTme() {
+//        LocalTime ltTime = LocalTime.MIDNIGHT;
+//        if(getValue("tFollowUp") != null){
+//            try {
+//                // Assuming the value is a String representing time in "HH:mm:ss" format
+//                String timeString = getValue("tFollowUp").toString();
+//                
+//                if (!timeString.isEmpty()) {
+//                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+//                    ltTime = LocalTime.parse(timeString, formatter);
+//                }
+//            } catch (DateTimeParseException e) {
+//                System.err.println("Failed to parse the time string: " + e.getMessage());
+//            }
+//        }
+//        
+//        return ltTime;
+//    }  
     
     /**
      * Description: Sets the Value of this record.
