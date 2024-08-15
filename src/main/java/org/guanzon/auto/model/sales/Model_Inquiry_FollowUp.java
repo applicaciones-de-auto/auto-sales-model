@@ -379,11 +379,11 @@ public class Model_Inquiry_FollowUp implements GEntity{
                 + "  , a.dEntryDte "                                            
                 + "  , b.sPlatform "
                 + "  , c.sCompnyNm "   
-                + "  , d.sDisValue "                                            
+                //+ "  , d.sDisValue "                                            
                 + " FROM customer_inquiry_followup  a "                         
                 + " LEFT JOIN online_platforms b ON b.sTransNox = a.sSclMedia "
-                + " LEFT JOIN GGC_ISysDBF.Client_Master c ON c.sClientID = a.sEmployID "
-                + " LEFT JOIN xxxform_typelist d ON d.sDataValx = a.sRspnseCd " ;                          
+                + " LEFT JOIN GGC_ISysDBF.Client_Master c ON c.sClientID = a.sEmployID ";
+                //+ " LEFT JOIN xxxform_typelist d ON d.sDataValx = a.sRspnseCd " ;                          
     }
     
     /**
@@ -619,6 +619,24 @@ public class Model_Inquiry_FollowUp implements GEntity{
     public String getMkeCmptr(){
         return (String) getValue("sMkeCmptr");
     }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setDlrCmptr(String fsValue){
+        return setValue("sDlrCmptr", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getDlrCmptr(){
+        return (String) getValue("sDlrCmptr");
+    }
+    
     /**
      * Sets the user encoded/updated the record.
      * 
