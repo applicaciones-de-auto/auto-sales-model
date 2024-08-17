@@ -294,6 +294,11 @@ public class Model_Bank_Application implements GEntity{
                 if ("success".equals((String) loJSON.get("result"))){
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDate(poGRider.getServerDate());
+                    System.out.println("loOldEntity cancelled by : " + loOldEntity.getCancelld());
+                    System.out.println("loOldEntity cancelled date : " + loOldEntity.getCancelldDte());
+                    
+                    System.out.println("cancelled by : " + this.getCancelld());
+                    System.out.println("cancelled date : " + this.getCancelldDte());
                     
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
@@ -321,6 +326,28 @@ public class Model_Bank_Application implements GEntity{
             return poJSON;
         }
         
+        return poJSON;
+    }
+    
+    public JSONObject cancelTransaction(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = " UPDATE "+getTable()
+                + " SET sCancelld = " + SQLUtil.toSQL(poGRider.getUserID())
+                + " , dCancelld = " + SQLUtil.toSQL(poGRider.getServerDate())
+                + " , sModified = " + SQLUtil.toSQL(poGRider.getUserID())
+                + " , dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
+                + " WHERE sTransNox = " + SQLUtil.toSQL(this.getTransNo());
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record cancelled successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
         return poJSON;
     }
     
@@ -369,11 +396,11 @@ public class Model_Bank_Application implements GEntity{
                 + "  , a.sRemarksx "                                         
                 + "  , a.cTranStat "                                         
                 + "  , a.sEntryByx "                                         
-                + "  , a.dEntryDte "                                         
-                + "  , a.sModified "                                         
-                + "  , a.dModified "                                         
+                + "  , a.dEntryDte "                                        
                 + "  , a.sCancelld "                                         
                 + "  , a.dCancelld "                                         
+                + "  , a.sModified "                                         
+                + "  , a.dModified "                                          
                 + "  , b.sBrBankNm "                                         
                 + "  , c.sBankIDxx "                                         
                 + "  , c.sBankName "                                         

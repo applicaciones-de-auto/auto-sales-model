@@ -356,6 +356,7 @@ public class Model_Inquiry_Master implements GEntity {
         String lsSQL = " UPDATE "+getTable()+" SET cTranStat = '2' " 
                      + ", sModified = " + SQLUtil.toSQL(poGRider.getUserID()) 
                      + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate()) 
+                     + ", dLastUpdt = " + SQLUtil.toSQL(poGRider.getServerDate()) 
                      + " WHERE sTransNox = " + SQLUtil.toSQL(fsValue);
         
         if (!lsSQL.isEmpty()) {
