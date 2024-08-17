@@ -65,7 +65,6 @@ public class Model_Inquiry_FollowUp implements GEntity{
             poEntity.updateObject("dTransact", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dFollowUp", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("tFollowUp", Time.valueOf("00:00:00"));
-            poEntity.updateString("sMethodCd", "0");   
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -273,7 +272,6 @@ public class Model_Inquiry_FollowUp implements GEntity{
                 setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
-                setEmployID(poGRider.getUserID());
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
