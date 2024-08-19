@@ -277,6 +277,8 @@ public class Model_Inquiry_FollowUp implements GEntity{
 
                 if (!lsSQL.isEmpty()) {
                     if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        //Update inquiry last update;
+                        InqLastUpd();
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -322,6 +324,26 @@ public class Model_Inquiry_FollowUp implements GEntity{
             return poJSON;
         }
         
+        return poJSON;
+    }
+    
+    public JSONObject InqLastUpd(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = " UPDATE customer_inquiry SET "
+                     + " dLastUpdt = " + SQLUtil.toSQL(poGRider.getServerDate()) 
+                     + " WHERE sTransNox = " + SQLUtil.toSQL(getTransNo());
+        
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record saved successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
         return poJSON;
     }
     
