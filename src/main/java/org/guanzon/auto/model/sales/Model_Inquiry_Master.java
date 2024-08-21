@@ -291,7 +291,6 @@ public class Model_Inquiry_Master implements GEntity {
                 setLockedDt(poGRider.getServerDate());
                 setLastUpdt(poGRider.getServerDate());
                 
-                System.out.println("AGENT ID : " + getAgentID());
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
@@ -309,7 +308,6 @@ public class Model_Inquiry_Master implements GEntity {
             } else {
                 Model_Inquiry_Master loOldEntity = new Model_Inquiry_Master(poGRider);
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
-                System.out.println("AGENT ID : " + getAgentID());
                 if ("success".equals((String) loJSON.get("result"))){
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDate(poGRider.getServerDate());
