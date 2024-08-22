@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
+import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
@@ -22,8 +23,8 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class Model_Inquiry_Requirements implements GEntity{
-    final String XML = "Model_Inquiry_Requirements.xml";
+public class Model_Bank_Application implements GEntity{
+    final String XML = "Model_Bank_Application.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
 
@@ -32,12 +33,12 @@ public class Model_Inquiry_Requirements implements GEntity{
     JSONObject poJSON;              //json container
     int pnEditMode;                 //edit mode
     
-     /**
+    /**
      * Entity constructor
      *
      * @param foValue - GhostRider Application Driver
      */
-    public Model_Inquiry_Requirements(GRider foValue){
+    public Model_Bank_Application(GRider foValue){
         if (foValue == null) {
             System.err.println("Application Driver is not set.");
             System.exit(1);
@@ -54,9 +55,12 @@ public class Model_Inquiry_Requirements implements GEntity{
 
             poEntity.last();
             poEntity.moveToInsertRow();
+
             MiscUtil.initRowSet(poEntity);   
-            
-            poEntity.updateObject("dReceived", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dAppliedx", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateString("cTranStat", "0");   
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -65,7 +69,7 @@ public class Model_Inquiry_Requirements implements GEntity{
             e.printStackTrace();
             System.exit(1);
         }
-    }    
+    }
     
     /**
      * Gets the column index name.
@@ -121,7 +125,7 @@ public class Model_Inquiry_Requirements implements GEntity{
 
     @Override
     public String getTable() {
-        return "customer_inquiry_requirements";
+        return "bank_application";
     }
 
     /**
@@ -210,30 +214,24 @@ public class Model_Inquiry_Requirements implements GEntity{
     @Override
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
-
+        
+        setAppliedDte(poGRider.getServerDate());
+        setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"BA"));
+        //setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
+        
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
     }
 
     @Override
-    public JSONObject openRecord(String string) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    /**
-     * Opens a record.
-     * @param fsValue - filter values
-     * @param fsValue2 - filter values
-     * @return result as success/failed
-     */
-    public JSONObject openRecord(String fsValue, String fsValue2) {
+    public JSONObject openRecord(String fsValue) {
         poJSON = new JSONObject();
 
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sRqrmtCde = " + SQLUtil.toSQL(fsValue2));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -265,9 +263,16 @@ public class Model_Inquiry_Requirements implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sDescript»cPayModex»cCustGrpx»sCompnyNm";
+            String lsExclude = "sBrBankNm»sBankIDxx»sBankName»sTownName»sProvName»sAddressx»sBankType";
             
             if (pnEditMode == EditMode.ADDNEW){
+                setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"BA"));
+                //setApplicNo(MiscUtil.getNextCode(getTable(), "sApplicNo", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setEntryBy(poGRider.getUserID());
+                setEntryDte(poGRider.getServerDate());
+                setModifiedBy(poGRider.getUserID());
+                setModifiedDate(poGRider.getServerDate());
+                
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
@@ -283,11 +288,19 @@ public class Model_Inquiry_Requirements implements GEntity{
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_Inquiry_Requirements loOldEntity = new Model_Inquiry_Requirements(poGRider);
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(), this.getRqrmtCde());
+                Model_Bank_Application loOldEntity = new Model_Bank_Application(poGRider);
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 
                 if ("success".equals((String) loJSON.get("result"))){
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sRqrmtCde = " + SQLUtil.toSQL(this.getRqrmtCde()), lsExclude);
+                    setModifiedBy(poGRider.getUserID());
+                    setModifiedDate(poGRider.getServerDate());
+                    System.out.println("loOldEntity cancelled by : " + loOldEntity.getCancelld());
+                    System.out.println("loOldEntity cancelled date : " + loOldEntity.getCancelldDte());
+                    
+                    System.out.println("cancelled by : " + this.getCancelld());
+                    System.out.println("cancelled date : " + this.getCancelldDte());
+                    
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
@@ -316,17 +329,19 @@ public class Model_Inquiry_Requirements implements GEntity{
         return poJSON;
     }
     
-    public JSONObject deleteRecord(){
+    public JSONObject cancelTransaction(){
         poJSON = new JSONObject();
         
-        String lsSQL = "DELETE FROM "+getTable()+" WHERE "
-                + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
-                + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo())
-                + " AND sRqrmtCde = " + SQLUtil.toSQL(this.getRqrmtCde());
+        String lsSQL = " UPDATE "+getTable()
+                + " SET sCancelld = " + SQLUtil.toSQL(poGRider.getUserID())
+                + " , dCancelld = " + SQLUtil.toSQL(poGRider.getServerDate())
+                + " , sModified = " + SQLUtil.toSQL(poGRider.getUserID())
+                + " , dModified = " + SQLUtil.toSQL(poGRider.getServerDate())
+                + " WHERE sTransNox = " + SQLUtil.toSQL(this.getTransNo());
         if (!lsSQL.isEmpty()) {
             if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
                 poJSON.put("result", "success");
-                poJSON.put("message", "Record deleted successfully.");
+                poJSON.put("message", "Record cancelled successfully.");
             } else {
                 poJSON.put("result", "error");
                 poJSON.put("continue", true);
@@ -368,23 +383,36 @@ public class Model_Inquiry_Requirements implements GEntity{
         }
     }
     
-    private String getSQL(){
-        return    " SELECT "                                                            
-                + "    a.sTransNox "                                                    
-                + "  , a.nEntryNox "                                                    
-                + "  , a.sRqrmtCde "                                                    
-                + "  , a.cRequired "                                                    
-                + "  , a.cSubmittd "                                                    
-                + "  , a.sReceived "                                                    
-                + "  , a.dReceived "                                                    
-                + "  , b.sDescript "                                                    
-                + "  , d.cPayModex "                                                    
-                + "  , d.cCustGrpx "                                                    
-                + "  , e.sCompnyNm "                                                    
-                + " FROM customer_inquiry_requirements a "                              
-                + " LEFT JOIN requirement_source b ON a.sRqrmtCde = b.sRqrmtCde "       
-                + " LEFT JOIN customer_inquiry d ON d.sTransNox = a.sTransNox   "       
-                + " LEFT JOIN GGC_ISysDBF.Client_Master e ON e.sClientID = a.sReceived " ;                          
+    public String getSQL(){
+        return    " SELECT "                                                 
+                + "    a.sTransNox "                                         
+                + "  , a.sApplicNo "                                         
+                + "  , a.dAppliedx "                                         
+                + "  , a.dApproved "                                         
+                + "  , a.cPayModex "                                         
+                + "  , a.sSourceCD "                                         
+                + "  , a.sSourceNo "                                         
+                + "  , a.sBrBankID "                                         
+                + "  , a.sRemarksx "                                         
+                + "  , a.cTranStat "                                         
+                + "  , a.sEntryByx "                                         
+                + "  , a.dEntryDte "                                        
+                + "  , a.sCancelld "                                         
+                + "  , a.dCancelld "                                         
+                + "  , a.sModified "                                         
+                + "  , a.dModified "                                          
+                + "  , b.sBrBankNm "                                         
+                + "  , c.sBankIDxx "                                         
+                + "  , c.sBankName "                                         
+                + "  , d.sTownName "                                         
+                + "  , e.sProvName " 
+                + "  , UPPER(CONCAT(b.sAddressx,' ', d.sTownName, ', ', e.sProvName)) sAddressx "                                      
+                + "  , c.sBankType " 
+                + " FROM bank_application a "                                
+                + " LEFT JOIN banks_branches b ON b.sBrBankID = a.sBrBankID "
+                + " LEFT JOIN banks c ON c.sBankIDxx = b.sBankIDxx          "
+                + " LEFT JOIN towncity d ON d.sTownIDxx = b.sTownIDxx       "
+                + " LEFT JOIN province e ON e.sProvIDxx = d.sProvIDxx       "  ;                          
     }
     
     /**
@@ -405,20 +433,64 @@ public class Model_Inquiry_Requirements implements GEntity{
     }
     
     /**
-     * Description: Sets the Value of this record.
+     * Description: Sets the ID of this record.
      *
-     * @param fnValue
+     * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setEntryNo(Integer fnValue) {
-        return setValue("nEntryNox", fnValue);
+    public JSONObject setApplicNo(String fsValue) {
+        return setValue("sApplicNo", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getApplicNo() {
+        return (String) getValue("sApplicNo");
+    }  
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setAppliedDte(Date fdValue) {
+        return setValue("dAppliedx", fdValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Integer getEntryNo() {
-        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
+    public Date getAppliedDte() {
+        Date date = null;
+        if(!getValue("dAppliedx").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dAppliedx").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprovedDte(Date fdValue) {
+        return setValue("dApproved", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApprovedDte() {
+        Date date = null;
+        if(!getValue("dAppliedx").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dApproved").toString());
+        }
+        
+        return date;
     }
     
     /**
@@ -427,15 +499,15 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setRqrmtCde(String fsValue) {
-        return setValue("sRqrmtCde", fsValue);
+    public JSONObject setPayMode(String fsValue) {
+        return setValue("cPayModex", fsValue);
     }
 
     /**
      * @return The ID of this record.
      */
-    public String getRqrmtCde() {
-        return (String) getValue("sRqrmtCde");
+    public String getPayMode() {
+        return (String) getValue("cPayModex");
     }
     
     /**
@@ -444,16 +516,16 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setRequired(String fsValue) {
-        return setValue("cRequired", fsValue);
+    public JSONObject setSourceCD(String fsValue) {
+        return setValue("sSourceCD", fsValue);
     }
 
     /**
      * @return The ID of this record.
      */
-    public String getRequired() {
-        return (String) getValue("cRequired");
-    }
+    public String getSourceCD() {
+        return (String) getValue("sSourceCD");
+    }   
     
     /**
      * Description: Sets the ID of this record.
@@ -461,32 +533,83 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setSubmittd(String fsValue) {
-        return setValue("cSubmittd", fsValue);
+    public JSONObject setSourceNo(String fsValue) {
+        return setValue("sSourceNo", fsValue);
     }
 
     /**
      * @return The ID of this record.
      */
-    public String getSubmittd() {
-        return (String) getValue("cSubmittd");
-    }
+    public String getSourceNo() {
+        return (String) getValue("sSourceNo");
+    }   
     
     /**
-     * Description: Sets the ID of this record.
+     * Description: Sets the Value of this record.
      *
      * @param fsValue
      * @return result as success/failed
      */
-    public JSONObject setReceived(String fsValue) {
-        return setValue("sReceived", fsValue);
+    public JSONObject setRemarks(String fsValue) {
+        return setValue("sRemarksx", fsValue);
     }
 
     /**
-     * @return The ID of this record.
+     * @return The Value of this record.
      */
-    public String getReceived() {
-        return (String) getValue("sReceived");
+    public String getRemarks() {
+        return (String) getValue("sRemarksx");
+    }   
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setTranStat(String fsValue) {
+        return setValue("cTranStat", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTranStat() {
+        return (String) getValue("cTranStat");
+    }   
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setBrBankID(String fsValue) {
+        return setValue("sBrBankID", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBrBankID() {
+        return (String) getValue("sBrBankID");
+    }   
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setEntryBy(String fsValue){
+        return setValue("sEntryByx", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getEntryBy(){
+        return (String) getValue("sEntryByx");
     }
     
     /**
@@ -495,15 +618,15 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fdValue 
      * @return  True if the record assignment is successful.
      */
-    public JSONObject setReceivedDte(Date fdValue){
-        return setValue("dReceived", fdValue);
+    public JSONObject setEntryDte(Date fdValue){
+        return setValue("dEntryDte", fdValue);
     }
     
     /**
      * @return The date and time the record was modified.
      */
-    public Date getReceivedDte(){
-        return (Date) getValue("dReceived");
+    public Date getEntryDte(){
+        return (Date) getValue("dEntryDte");
     }
     
     /**
@@ -512,15 +635,32 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fsValue 
      * @return  True if the record assignment is successful.
      */
-    public JSONObject setDescript(String fsValue){
-        return setValue("sDescript", fsValue);
+    public JSONObject setModifiedBy(String fsValue){
+        return setValue("sModified", fsValue);
     }
     
     /**
      * @return The user encoded/updated the record 
      */
-    public String getDescript(){
-        return (String) getValue("sDescript");
+    public String getModifiedBy(){
+        return (String) getValue("sModified");
+    }
+    
+    /**
+     * Sets the date and time the record was modified.
+     * 
+     * @param fdValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setModifiedDate(Date fdValue){
+        return setValue("dModified", fdValue);
+    }
+    
+    /**
+     * @return The date and time the record was modified.
+     */
+    public Date getModifiedDate(){
+        return (Date) getValue("dModified");
     }
     
     /**
@@ -529,15 +669,32 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fsValue 
      * @return  True if the record assignment is successful.
      */
-    public JSONObject setPayMode(String fsValue){
-        return setValue("cPayModex", fsValue);
+    public JSONObject setCancelld(String fsValue){
+        return setValue("sCancelld", fsValue);
     }
     
     /**
      * @return The user encoded/updated the record 
      */
-    public String getPayMode(){
-        return (String) getValue("cPayModex");
+    public String getCancelld(){
+        return (String) getValue("sCancelld");
+    }
+    
+    /**
+     * Sets the date and time the record was modified.
+     * 
+     * @param fdValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setCancelldDte(Date fdValue){
+        return setValue("dCancelld", fdValue);
+    }
+    
+    /**
+     * @return The date and time the record was modified.
+     */
+    public Date getCancelldDte(){
+        return (Date) getValue("dCancelld");
     }
     
     /**
@@ -546,15 +703,15 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fsValue 
      * @return  True if the record assignment is successful.
      */
-    public JSONObject setCustGrp(String fsValue){
-        return setValue("cCustGrpx", fsValue);
+    public JSONObject setBankID(String fsValue){
+        return setValue("sBankIDxx", fsValue);
     }
     
     /**
      * @return The user encoded/updated the record 
      */
-    public String getCustGrp(){
-        return (String) getValue("cCustGrpx");
+    public String getBankID(){
+        return (String) getValue("sBankIDxx");
     }
     
     /**
@@ -563,14 +720,100 @@ public class Model_Inquiry_Requirements implements GEntity{
      * @param fsValue 
      * @return  True if the record assignment is successful.
      */
-    public JSONObject setCompnyNm(String fsValue){
-        return setValue("sCompnyNm", fsValue);
+    public JSONObject setBankName(String fsValue){
+        return setValue("sBankName", fsValue);
     }
     
     /**
      * @return The user encoded/updated the record 
      */
-    public String getCompnyNm(){
-        return (String) getValue("sCompnyNm");
+    public String getBankName(){
+        return (String) getValue("sBankName");
     }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setTownName(String fsValue){
+        return setValue("sTownName", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getTownName(){
+        return (String) getValue("sTownName");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setProvName(String fsValue){
+        return setValue("sProvName", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getProvName(){
+        return (String) getValue("sProvName");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setBrBankNm(String fsValue){
+        return setValue("sBrBankNm", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getBrBankNm(){
+        return (String) getValue("sBrBankNm");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setBankType(String fsValue){
+        return setValue("sBankType", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getBankType(){
+        return (String) getValue("sBankType");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setAddressx(String fsValue){
+        return setValue("sAddressx", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getAddressx(){
+        return (String) getValue("sAddressx");
+    }
+    
 }

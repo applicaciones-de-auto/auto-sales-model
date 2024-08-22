@@ -10,7 +10,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
@@ -63,7 +67,7 @@ public class Model_Inquiry_Master implements GEntity {
             poEntity.updateObject("dTargetDt", poGRider.getServerDate());    
             poEntity.updateObject("dTransact", poGRider.getServerDate());    
             poEntity.updateObject("dLastUpdt", poGRider.getServerDate());  
-            poEntity.updateObject("sLockedDt", poGRider.getServerDate());
+            poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateString("cTranStat", "0"); 
             
             poEntity.updateString("cIsVhclNw", "0");  
@@ -226,6 +230,7 @@ public class Model_Inquiry_Master implements GEntity {
         //replace with the primary key column info
         setTransactDte(poGRider.getServerDate());
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
+        setInqryID(MiscUtil.getNextCode(getTable(), "sInqryIDx", true, poGRider.getConnection(), poGRider.getBranchCode()));
         setBranchCd(poGRider.getBranchCode());
         setBranchNm(poGRider.getBranchName());
         
@@ -272,16 +277,19 @@ public class Model_Inquiry_Master implements GEntity {
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sClientNm»cClientTp»sAddressx»sMobileNo»sEmailAdd»sAccountx»sContctNm»sSalesExe»sSalesAgn»sPlatform»sActTitle»sBranchNm";
+            String lsExclude = "sClientNm»cClientTp»sAddressx»sMobileNo»sEmailAdd»sAccountx»sContctNm»sSalesExe»sSalesAgn»sPlatform»sActTitle»sBranchNm»" +
+                               "sFrameNox»sEngineNo»sCSNoxxxx»sPlateNox»sDescript";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
+                setInqryID(MiscUtil.getNextCode(getTable(), "sInqryIDx", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDate(poGRider.getServerDate());
                 setLockedBy(poGRider.getUserID());
                 setLockedDt(poGRider.getServerDate());
+                setLastUpdt(poGRider.getServerDate());
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
@@ -300,10 +308,17 @@ public class Model_Inquiry_Master implements GEntity {
             } else {
                 Model_Inquiry_Master loOldEntity = new Model_Inquiry_Master(poGRider);
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
-                
                 if ("success".equals((String) loJSON.get("result"))){
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDate(poGRider.getServerDate());
+                    setLastUpdt(poGRider.getServerDate());
+                    //Clear Locked by/date
+                    setLockedBy("");
+                    try {
+                        poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
@@ -339,6 +354,7 @@ public class Model_Inquiry_Master implements GEntity {
         String lsSQL = " UPDATE "+getTable()+" SET cTranStat = '2' " 
                      + ", sModified = " + SQLUtil.toSQL(poGRider.getUserID()) 
                      + ", dModified = " + SQLUtil.toSQL(poGRider.getServerDate()) 
+                     + ", dLastUpdt = " + SQLUtil.toSQL(poGRider.getServerDate()) 
                      + " WHERE sTransNox = " + SQLUtil.toSQL(fsValue);
         
         if (!lsSQL.isEmpty()) {
@@ -388,7 +404,8 @@ public class Model_Inquiry_Master implements GEntity {
     
     private String getSQL(){
         return    " SELECT "                                                                               
-                + "   a.sTransNox "                                                                        
+                + "   a.sTransNox "                                                                            
+                + " , a.sInqryIDx "                                                                       
                 + " , a.sBranchCd "                                                                        
                 + " , a.dTransact "                                                                        
                 + " , a.sEmployID "                                                                        
@@ -404,11 +421,9 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.sSourceNo "                                                                        
                 + " , a.sTestModl "                                                                        
                 + " , a.sActvtyID "                                                                        
-                + " , a.dLastUpdt "                                                                        
-//                + " , a.sReserved "                                                                        
-//                + " , a.nRsrvTotl "                                                                        
+                + " , a.dLastUpdt "                                                                           
                 + " , a.sLockedBy "                                                                        
-                + " , a.sLockedDt "                                                                        
+                + " , a.dLockedDt "                                                                        
                 + " , a.sApproved "                                                                        
                 + " , a.sSerialID "                                                                        
                 + " , a.sInqryCde "                                                                        
@@ -434,7 +449,12 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , m.sCompnyNm AS sSalesAgn "                                                           
                 + " , n.sPlatform "                                                                        
                 + " , o.sActTitle "                                                                        
-                + " , p.sBranchNm "                                                                        
+                + " , p.sBranchNm "                                                                                      
+                + " , q.sFrameNox "                                                                                           
+                + " , q.sEngineNo "                                                                                                        
+                + " , q.sCSNoxxxx "                                                                                   
+                + " , r.sPlateNox "                                                                                            
+                + " , s.sDescript "                                                                      
                 + " FROM customer_inquiry a "                                                              
                 + " LEFT JOIN client_master b ON a.sClientID = b.sClientID   "                             
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "          
@@ -450,7 +470,10 @@ public class Model_Inquiry_Master implements GEntity {
                 + " LEFT JOIN client_master m ON m.sClientID = a.sAgentIDx    "                            
                 + " LEFT JOIN online_platforms n ON n.sTransNox = a.sSourceCD "                            
                 + " LEFT JOIN activity_master o ON o.sActvtyID = a.sActvtyID  "                            
-                + " LEFT JOIN branch p ON p.sBranchCd = a.sBranchCd           "  ;             
+                + " LEFT JOIN branch p ON p.sBranchCd = a.sBranchCd           "                             
+                + " LEFT JOIN vehicle_serial q ON q.sSerialID = a.sSerialID           "    
+                + " LEFT JOIN vehicle_serial_registration r ON r.sSerialID = a.sSerialID "              
+                + " LEFT JOIN vehicle_master s ON s.sVhclIDxx = q.sVhclIDxx "     ;             
     }
     
     /**
@@ -468,6 +491,22 @@ public class Model_Inquiry_Master implements GEntity {
      */
     public String getTransNo() {
         return (String) getValue("sTransNox");
+    }
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setInqryID(String fsValue) {
+        return setValue("sInqryIDx", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getInqryID() {
+        return (String) getValue("sInqryIDx");
     }
     
     /**
@@ -815,7 +854,7 @@ public class Model_Inquiry_Master implements GEntity {
      * @return result as success/failed
      */
     public JSONObject setLockedDt(Date fdValue) {
-        return setValue("sLockedDt", fdValue);
+        return setValue("dLockedDt", fdValue);
     }
 
     /**
@@ -823,8 +862,8 @@ public class Model_Inquiry_Master implements GEntity {
      */
     public Date getLockedDt() {
         Date date = null;
-        if(!getValue("sLockedDt").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("sLockedDt").toString());
+        if(!getValue("dLockedDt").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dLockedDt").toString());
         }
         
         return date;
@@ -1214,6 +1253,90 @@ public class Model_Inquiry_Master implements GEntity {
         return (String) getValue("sBranchNm");
     }
     
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setFrameNo(String fsValue){
+        return setValue("sFrameNox", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getFrameNo(){
+        return (String) getValue("sFrameNox");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setEngineNo(String fsValue){
+        return setValue("sEngineNo", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getEngineNo(){
+        return (String) getValue("sEngineNo");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setCSNo(String fsValue){
+        return setValue("sCSNoxxxx", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getCSNo(){
+        return (String) getValue("sCSNoxxxx");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setPlateNo(String fsValue){
+        return setValue("sPlateNox", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getPlateNo(){
+        return (String) getValue("sPlateNox");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
+    public JSONObject setDescript(String fsValue){
+        return setValue("sDescript", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getDescript(){
+        return (String) getValue("sDescript");
+    }
     
     
 }
