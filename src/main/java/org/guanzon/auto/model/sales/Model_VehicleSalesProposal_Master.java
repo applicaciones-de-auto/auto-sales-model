@@ -63,10 +63,46 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             poEntity.updateObject("dTransact", poGRider.getServerDate()); 
             poEntity.updateObject("dDelvryDt", poGRider.getServerDate());   
             poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); 
             
             poEntity.updateString("cIsVhclNw", "0");  
-            poEntity.updateString("cIsVIPxxx", "0");   
+            poEntity.updateString("cIsVIPxxx", "0");  
+            poEntity.updateInt("nInsurYrx", 0);   
+            
+            poEntity.updateDouble("nUnitPrce", 0.00); 
+            poEntity.updateDouble("nAdvDwPmt", 0.00); 
+            poEntity.updateDouble("nOthrChrg", 0.00); 
+            poEntity.updateDouble("nLaborAmt", 0.00);
+            poEntity.updateDouble("nAccesAmt", 0.00);
+            poEntity.updateDouble("nInsurAmt", 0.00);
+            poEntity.updateDouble("nTPLAmtxx", 0.00);
+            poEntity.updateDouble("nCompAmtx", 0.00);
+            poEntity.updateDouble("nLTOAmtxx", 0.00);
+            poEntity.updateDouble("nChmoAmtx", 0.00);
+            poEntity.updateDouble("nPromoDsc", 0.00);
+            poEntity.updateDouble("nFleetDsc", 0.00);
+            poEntity.updateDouble("nSPFltDsc", 0.00);
+            poEntity.updateDouble("nBndleDsc", 0.00);
+            poEntity.updateDouble("nAddlDscx", 0.00);
+            poEntity.updateDouble("nDealrInc", 0.00);
+            poEntity.updateDouble("nTranTotl", 0.00);
+            poEntity.updateDouble("nResrvFee", 0.00);
+            poEntity.updateDouble("nDownPaym", 0.00);
+            poEntity.updateDouble("nNetTTotl", 0.00);
+            poEntity.updateDouble("nAmtPaidx", 0.00);
+            poEntity.updateDouble("nFrgtChrg", 0.00);
+            poEntity.updateDouble("nDue2Supx", 0.00);
+            poEntity.updateDouble("nDue2Dlrx", 0.00);
+            poEntity.updateDouble("nSPFD2Sup", 0.00);
+            poEntity.updateDouble("nSPFD2Dlr", 0.00);
+            poEntity.updateDouble("nPrmD2Sup", 0.00);
+            poEntity.updateDouble("nPrmD2Dlr", 0.00);
+            poEntity.updateDouble("nDealrRte", 0.00);
+            poEntity.updateDouble("nDealrAmt", 0.00);
+            poEntity.updateDouble("nSlsInRte", 0.00);
+            poEntity.updateDouble("nSlsInAmt", 0.00);
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -138,8 +174,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     public String getTable() {
         return "vsp_master";
     }
-
-
+    
     /**
      * Gets the value of a column index number.
      *
@@ -292,18 +327,24 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
-            String lsExclude = "sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
+            String lsExclude = "sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»nRsvAmtTl»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName";//»
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"VSP"));
-                setInqryID(MiscUtil.getNextCode(getTable(), "sVSPNOxxx", true, poGRider.getConnection(), poGRider.getBranchCode()));
+                setVSPNO(MiscUtil.getNextCode(getTable(), "sVSPNOxxx", true, poGRider.getConnection(), poGRider.getBranchCode()));
                 setEntryBy(poGRider.getUserID());
                 setEntryDte(poGRider.getServerDate());
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDte(poGRider.getServerDate());
-                setLockedBy(poGRider.getUserID());
-                setLockedDte(poGRider.getServerDate());
+                setLockedBy("");
+                try {
+                    poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                    poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                    poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                } catch (SQLException ex) {
+                    Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
@@ -321,7 +362,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 }
             } else {
                 Model_VehicleSalesProposal_Master loOldEntity = new Model_VehicleSalesProposal_Master(poGRider);
-
+                
                 //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
 
@@ -482,7 +523,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.sEntryByx "                                                               
                 + " , a.dEntryDte "                                                               
                 + " , a.sModified "                                                               
-                + " , a.dModified "                                                               
+                + " , a.dModified "                                                        
+                + "  , CASE "                           
+                + " 	WHEN a.cTranStat = '1' THEN 'ACTIVE' "                                         
+                + " 	ELSE 'CANCELLED'  "                                                          
+                + "    END AS sTranStat "   
                   /*BUYING COSTUMER*/                                                             
                 + " , b.sCompnyNm AS sBuyCltNm"                                                               
                 + " , b.cClientTp "                                                               
@@ -505,7 +550,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , l.sCompnyNm AS sAgentNmx "                                                  
                 + " , h.sEmployID              "                                                  
                 + " , m.sCompnyNm AS sSENamexx "                                                  
-                + " , n.nAmountxx AS nRsvAmtTl "                                                  
+                + " , SUM(n.nAmountxx) AS nRsvAmtTl "                                                  
                   /*CO-CLIENT*/                                                                   
                 + " , o.sCompnyNm AS sCoCltNmx "                                                  
                   /*VEHICLE INFORMATION*/                                                         
@@ -561,7 +606,6 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN banks_branches y ON y.sBrBankID = x.sBrBankID   "                   
                 + " LEFT JOIN banks z ON z.sBankIDxx = y.sBankIDxx            " ;
     }
-    
     
     /**
      * Description: Sets the ID of this record.

@@ -24,6 +24,8 @@ import org.json.simple.JSONObject;
  */
 public class Model_VehicleSalesProposal_Finance implements GEntity{
     final String XML = "Model_VehicleSalesProposal_Finance.xml";
+    private final String psDefaultDate = "1900-01-01";
+    private String psBranchCd;
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -53,15 +55,22 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
             poEntity.last();
             poEntity.moveToInsertRow();
 
-            MiscUtil.initRowSet(poEntity);
-            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN);
-
+            MiscUtil.initRowSet(poEntity);          
+            
+            poEntity.updateDouble("nFinAmtxx", 0.00);
+            poEntity.updateDouble("nAcctTerm", 0.00);
+            poEntity.updateDouble("nAcctRate", 0.00);
+            poEntity.updateDouble("nRebatesx", 0.00);
+            poEntity.updateDouble("nMonAmort", 0.00);
+            poEntity.updateDouble("nPNValuex", 0.00);
+            poEntity.updateDouble("nBnkPaidx", 0.00);
+            poEntity.updateDouble("nGrsMonth", 0.00); 
+            poEntity.updateDouble("nNtDwnPmt", 0.00);
+            poEntity.updateDouble("nDiscount", 0.00); 
+            
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
-
             poEntity.absolute(1);
-
-            pnEditMode = EditMode.UNKNOWN;
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);
@@ -83,7 +92,7 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
         return "";
     }
 
-     /**
+    /**
      * Gets the column index number.
      *
      * @param fsValue - column index name
@@ -129,7 +138,7 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
     public String getTable() {
         return "vsp_finance";
     }
-
+    
     /**
      * Gets the value of a column index number.
      *
@@ -222,9 +231,6 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
 
-        //replace with the primary key column info
-        setTransactionNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
@@ -233,17 +239,17 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
     /**
      * Opens a record.
      *
-     * @param fsCondition - filter values
+     * @param fsValue - filter values
      * @return result as success/failed
      */
     @Override
-    public JSONObject openRecord(String fsCondition) {
+    public JSONObject openRecord(String fsValue) {
         poJSON = new JSONObject();
 
-        String lsSQL = MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
+        String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, fsCondition);
+        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + fsValue);
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -301,12 +307,12 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
                 Model_VehicleSalesProposal_Finance loOldEntity = new Model_VehicleSalesProposal_Finance(poGRider);
                 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransactionNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 //setModifiedDate(poGRider.getServerDate());
                 
                 if ("success".equals((String) loJSON.get("result"))){
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransactionNo()));
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()));
                     
                     if (!lsSQL.isEmpty()){
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0){
@@ -380,50 +386,260 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
         return MiscUtil.makeSQL(this, ""); //exclude columns called thru left join
     }
     
+    public String getSQL(){
+        return    " SELECT "          
+                + "    sTransNox "    
+                + "  , cFinPromo "    
+                + "  , sBankIDxx "    
+                + "  , sBankname "    
+                + "  , nFinAmtxx "    
+                + "  , nAcctTerm "    
+                + "  , nAcctRate "    
+                + "  , nRebatesx "    
+                + "  , nMonAmort "    
+                + "  , nPNValuex "    
+                + "  , nBnkPaidx "    
+                + "  , nGrsMonth "    
+                + "  , nNtDwnPmt "    
+                + "  , nDiscount "    
+                + " FROM vsp_finance " ;
+    }
+    
     /**
-     * Description: Sets the ClientID of this record.
+     * Description: Sets the ID of this record.
      *
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject setTransactionNo(String fsValue) {
+    public JSONObject setTransNo(String fsValue) {
         return setValue("sTransNox", fsValue);
     }
 
     /**
-     * @return The sTransNox of this record.
+     * @return The ID of this record.
      */
-    public String getTransactionNo() {
+    public String getTransNo() {
         return (String) getValue("sTransNox");
     }
     
     /**
-     * Description: Sets the cTranStat of this record.
+     * Description: Sets the Value of this record.
      *
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject setTranStatus(String fsValue) {
-        return setValue("cTranStat", fsValue);
+    public JSONObject setFinPromo(String fsValue) {
+        return setValue("cFinPromo", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getFinPromo() {
+        return (String) getValue("cFinPromo");
     }
     
-    public String getSQL(){
-        return " SELECT " +
-            "  IFNULL(a.sTransNox, '') as sTransNox" + //1
-            "  , a.cFinPromo" + //2
-            "  , IFNULL(a.sBankIDxx, '') AS sBankIDxx" + //3
-            "  , IFNULL(a.sBankname, '') AS sBankname" + //4
-            "  , a.nFinAmtxx" + //5
-            "  , a.nAcctTerm" + //6
-            "  , a.nAcctRate" + //7
-            "  , a.nRebatesx" + //8
-            "  , a.nMonAmort" + //9
-            "  , a.nPNValuex" + //10
-            "  , a.nBnkPaidx" + //11
-            "  , a.nGrsMonth" + //12
-            "  , a.nNtDwnPmt" + //13
-            "  , a.nDiscount" + //14
-              /*dTimeStmp*/
-            " FROM "+getTable()+" a"  ;
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBankID(String fsValue) {
+        return setValue("sBankIDxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBankID() {
+        return (String) getValue("sBankIDxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBankname(String fsValue) {
+        return setValue("sBankname", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBankname() {
+        return (String) getValue("sBankname");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setFinAmt(Double fdbValue) {
+        return setValue("nFinAmtxx", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getFinAmt() {
+        return Double.parseDouble(String.valueOf(getValue("nFinAmtxx")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setAcctTerm(Double fdbValue) {
+        return setValue("nAcctTerm", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getAcctTerm() {
+        return Double.parseDouble(String.valueOf(getValue("nAcctTerm")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setAcctRate(Double fdbValue) {
+        return setValue("nAcctRate", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getAcctRate() {
+        return Double.parseDouble(String.valueOf(getValue("nAcctRate")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setRebates(Double fdbValue) {
+        return setValue("nRebatesx", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getRebates() {
+        return Double.parseDouble(String.valueOf(getValue("nRebatesx")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setMonAmort(Double fdbValue) {
+        return setValue("nMonAmort", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getMonAmort() {
+        return Double.parseDouble(String.valueOf(getValue("nMonAmort")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setPNValue(Double fdbValue) {
+        return setValue("nPNValuex", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getPNValue() {
+        return Double.parseDouble(String.valueOf(getValue("nPNValuex")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setBnkPaid(Double fdbValue) {
+        return setValue("nBnkPaidx", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getBnkPaid() {
+        return Double.parseDouble(String.valueOf(getValue("nBnkPaidx")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setGrsMonth(Double fdbValue) {
+        return setValue("nGrsMonth", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getGrsMonth() {
+        return Double.parseDouble(String.valueOf(getValue("nGrsMonth")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setNtDwnPmt(Double fdbValue) {
+        return setValue("nNtDwnPmt", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getNtDwnPmt() {
+        return Double.parseDouble(String.valueOf(getValue("nNtDwnPmt")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setDiscount(Double fdbValue) {
+        return setValue("nDiscount", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getDiscount() {
+        return Double.parseDouble(String.valueOf(getValue("nDiscount")));
     }
 }
