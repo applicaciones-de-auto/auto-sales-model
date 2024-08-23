@@ -290,7 +290,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + fsValue);
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + fsValue
+                                                //+ " GROUP BY a.sTransNox "
+                                                );
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -550,7 +552,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , l.sCompnyNm AS sAgentNmx "                                                  
                 + " , h.sEmployID              "                                                  
                 + " , m.sCompnyNm AS sSENamexx "                                                  
-                + " , SUM(n.nAmountxx) AS nRsvAmtTl "                                                  
+                //+ " , SUM(n.nAmountxx) AS nRsvAmtTl "                                                  
                   /*CO-CLIENT*/                                                                   
                 + " , o.sCompnyNm AS sCoCltNmx "                                                  
                   /*VEHICLE INFORMATION*/                                                         
@@ -586,7 +588,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN online_platforms k ON k.sTransNox = h.sSourceNo "                   
                 + " LEFT JOIN client_master l ON l.sClientID = h.sAgentIDx    "                   
                 + " LEFT JOIN ggc_isysdbf.client_master m ON m.sClientID = h.sEmployID    "       
-                + " LEFT JOIN customer_inquiry_reservation n ON n.sSourceNo = a.sInqryIDx "       
+                //+ " LEFT JOIN customer_inquiry_reservation n ON n.sSourceNo = a.sInqryIDx "       
                  /*CO CLIENT*/                                                                    
                 + " LEFT JOIN client_master o ON o.sClientID = a.sCoCltIDx "                      
                  /*VEHICLE INFORMATION*/                                                          
@@ -1354,14 +1356,14 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setDue2Dlrx(Double fdbValue) {
+    public JSONObject setDue2Dlr(Double fdbValue) {
         return setValue("nDue2Dlrx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getDue2Dlrx() {
+    public Double getDue2Dlr() {
         return Double.parseDouble(String.valueOf(getValue("nDue2Dlrx")));
     }
     
@@ -1558,14 +1560,14 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject setIsVIPxxx(String fsValue) {
+    public JSONObject setIsVIP(String fsValue) {
         return setValue("cIsVIPxxx", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public String getIsVIPxxx() {
+    public String getIsVIP() {
         return (String) getValue("cIsVIPxxx");
     }
     
