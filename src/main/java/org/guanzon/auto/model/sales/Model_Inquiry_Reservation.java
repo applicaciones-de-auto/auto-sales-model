@@ -27,7 +27,7 @@ import org.json.simple.JSONObject;
 public class Model_Inquiry_Reservation  implements GEntity{
     final String XML = "Model_Inquiry_Reservation.xml";
     private final String psDefaultDate = "1900-01-01";
-    private String psBranchCd;
+    private String psTargetBranchCd;
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -304,7 +304,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sCompnyNm»sAddressx»cClientTp";
+            String lsExclude = "sCompnyNm»sAddressx»cClientTp»sSINoxxxx»dSIDatexx";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"R"));
@@ -317,7 +317,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -339,7 +339,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -363,6 +363,14 @@ public class Model_Inquiry_Reservation  implements GEntity{
         }
         
         return poJSON;
+    }
+    
+    public void setTargetBranchCd(String fsBranchCd){
+        if (!poGRider.getBranchCode().equals(fsBranchCd)){
+            psTargetBranchCd = fsBranchCd;
+        } else {
+            psTargetBranchCd = "";
+        }
     }
     
 //    public JSONObject cancelRecord(String fsTransNo){
@@ -429,7 +437,8 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  , a.sSourceNo "                                                              
                 + "  , a.nPrintedx "                                                              
                 + "  , a.sResrvCde "                                                              
-                + "  , a.cResrvTyp "                                                              
+                + "  , a.cResrvTyp "                                                             
+                + "  , a.sTransIDx "    //where the reservation has been linked                                                           
                 + "  , a.cTranStat "                                                              
                 + "  , a.sApproved "                                                              
                 + "  , a.dApproved "                                                              
@@ -443,14 +452,18 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                      
                 + "  IFNULL(CONCAT(e.sBrgyName,' '), ''),  "                                      
                 + "  IFNULL(CONCAT(f.sTownName, ', '),''), "                                      
-                + "  IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx "                        
+                + "  IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  , "
+                + "  , i.sReferNox  AS sSINoxxxx " 
+                + "  , i.dTransact AS dSIDatexx "                        
                 + " FROM customer_inquiry_reservation a    "                                      
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 " 
                 + " LEFT JOIN addresses d ON d.sAddrssID = c.sAddrssID "                          
                 + " LEFT JOIN barangay e ON e.sBrgyIDxx = d.sBrgyIDxx  "                          
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                          
-                + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "    ;                          
+                + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "
+                + " LEFT JOIN si_master_source h ON h.sReferNox = a.sTransNox " 
+                + " LEFT JOIN si_master i ON i.sTransNox = h.sTransNox  "    ;                          
     }
     
     /**
@@ -643,6 +656,23 @@ public class Model_Inquiry_Reservation  implements GEntity{
      */
     public String getResrvTyp() {
         return (String) getValue("cResrvTyp");
+    }
+    
+    /**
+     * Description: Sets the ID of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setTransID(String fsValue) {
+        return setValue("sTransIDx", fsValue);
+    }
+
+    /**
+     * @return The ID of this record.
+     */
+    public String getTransID() {
+        return (String) getValue("sTransIDx");
     }   
     
     /**
@@ -700,7 +730,6 @@ public class Model_Inquiry_Reservation  implements GEntity{
         
         return date;
     }
-    
     
     /**
      * Sets the user encoded/updated the record.

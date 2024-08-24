@@ -294,7 +294,7 @@ public class Model_Inquiry_Master implements GEntity {
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -323,7 +323,7 @@ public class Model_Inquiry_Master implements GEntity {
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -346,6 +346,14 @@ public class Model_Inquiry_Master implements GEntity {
         }
         
         return poJSON;
+    }
+    
+    private String getTargetBranchCd(){
+        if (!poGRider.getBranchCode().equals(getBranchCd())){
+            return getBranchCd();
+        } else {
+            return "";
+        }
     }
     
     public JSONObject lostSale(String fsValue){

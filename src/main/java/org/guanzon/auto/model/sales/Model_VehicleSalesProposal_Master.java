@@ -328,9 +328,10 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
-            String lsSQL;
+            String lsSQL; //nRsvAmtTl
             String lsExclude = "sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
-                             + "»nRsvAmtTl»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName";//»
+                             + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
+                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo";//»
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"VSP"));
@@ -351,7 +352,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -383,7 +384,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
 
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -406,6 +407,48 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         }
 
         return poJSON;
+    }
+    
+    public JSONObject updateTables(){
+        JSONObject loJSON = new JSONObject();
+        //Update customer_inquiry status to with VSP
+        String lsSQL = "";
+        if(getUDRNo().trim().isEmpty()){
+            lsSQL = "UPDATE customer_inquiry SET" +
+                    " cTranStat = '3'" +
+                " WHERE sTransNox = " + SQLUtil.toSQL(getInqryID());
+            if (poGRider.executeQuery(lsSQL, "customer_inquiry", poGRider.getBranchCode(), getTargetBranchCd()) <= 0){
+                loJSON.put("result", "error");
+                loJSON.put("message", "UPDATE CUSTOMER INQUIRY: " + poGRider.getErrMsg() + "; " + poGRider.getMessage());
+                return loJSON;
+            } 
+            
+            //Update Vehicle Serial
+            if(getSerialID() != null){
+                if (!getSerialID().trim().isEmpty()){
+                    lsSQL = "UPDATE vehicle_serial SET" +
+                            " cSoldStat = '2'" +
+                            ", sClientID = " + SQLUtil.toSQL(getClientID()) +
+                            ", sCoCltIDx = " + SQLUtil.toSQL(getCoCltID()) +
+                            " WHERE sSerialID = " + SQLUtil.toSQL(getSerialID());
+                    if (poGRider.executeQuery(lsSQL, "vehicle_serial", poGRider.getBranchCode(), getTargetBranchCd()) <= 0){
+                        loJSON.put("result", "error");
+                        loJSON.put("message", "UPDATE VEHICLE SERIAL: " + poGRider.getErrMsg() + "; " + poGRider.getMessage());
+                        return loJSON;
+                    } 
+                }
+            }
+        }
+        
+        return loJSON;
+    }
+    
+    private String getTargetBranchCd(){
+        if (!poGRider.getBranchCode().equals(getBranchCD())){
+            return getBranchCD();
+        } else {
+            return "";
+        }
     }
     
     /**
@@ -455,7 +498,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     }
     
     public String getSQL(){
-        return    " SELECT "                                                                      
+        return    " SELECT DISTINCT "                                                                      
                 + "   a.sTransNox "                                                               
                 + " , a.dTransact "                                                               
                 + " , a.sVSPNOxxx "                                                               
@@ -484,6 +527,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.nInsurYrx "                                                               
                 + " , a.sInsTplCd "                                                               
                 + " , a.sInsCodex "                                                               
+                + " , a.nToLabDsc "                                                              
+                + " , a.nToPrtDsc "                                                              
                 + " , a.nPromoDsc "                                                               
                 + " , a.nFleetDsc "                                                               
                 + " , a.nSPFltDsc "                                                               
@@ -572,7 +617,13 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                   /*BANK*/                                                                        
                 + " , x.sApplicNo "                                                               
                 + " , y.sBrBankNm "                                                               
-                + " , z.sBankName "                                                               
+                + " , z.sBankName " 
+                 /*VSP LINKED THRU THE FOLLOWING FORMS*/     
+                + " , za.sReferNox AS sUDRNoxxx "
+                + " , CONCAT(zb.sDSNoxxxx) AS sJONoxxxx "
+                + " , CONCAT(zd.sReferNox) AS sSINoxxxx "    
+                + " , ze.sTransNox AS sGatePsNo "
+                   /*TODO GATEPASS*/                                                               
                 + " FROM vsp_master a "                                                           
                  /*BUYING CUSTOMER*/                                                              
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
@@ -606,7 +657,13 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                  /*BANK*/                                                                         
                 + " LEFT JOIN bank_application x ON x.sTransNox = a.sBnkAppCD "                   
                 + " LEFT JOIN banks_branches y ON y.sBrBankID = x.sBrBankID   "                   
-                + " LEFT JOIN banks z ON z.sBankIDxx = y.sBankIDxx            " ;
+                + " LEFT JOIN banks z ON z.sBankIDxx = y.sBankIDxx            "  
+                 /*VSP LINKED THRU THE FOLLOWING FORMS*/                                                             
+                + " LEFT JOIN udr_master za ON za.sSourceNo = a.sTransNox AND za.cTranStat = '1' "   
+                + " LEFT JOIN diagnostic_master zb ON zb.sSourceNo = a.sTransNox AND zb.cTranStat = '1' "
+                + " LEFT JOIN si_master_source zc ON zc.sSourceNo = a.sTransNox "
+                + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sReferNox AND zd.cTranStat = '1'"
+                + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox ";
     }
     
     /**
@@ -1093,6 +1150,40 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getInsCode() {
         return (String) getValue("sInsCodex");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setToLabDsc(Double fdbValue) {
+        return setValue("nToLabDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getToLabDsc() {
+        return Double.parseDouble(String.valueOf(getValue("nToLabDsc")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setToPrtDsc(Double fdbValue) {
+        return setValue("nToPrtDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Double getToPrtDsc() {
+        return Double.parseDouble(String.valueOf(getValue("nToPrtDsc")));
     }
     
     /**
@@ -2386,6 +2477,74 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getBankName() {
         return (String) getValue("sBankName");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setUDRNo(String fsValue) {
+        return setValue("sUDRNoxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getUDRNo() {
+        return (String) getValue("sUDRNoxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setJONo(String fsValue) {
+        return setValue("sJONoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getJONo() {
+        return (String) getValue("sJONoxxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setSINo(String fsValue) {
+        return setValue("sSINoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getSINo() {
+        return (String) getValue("sSINoxxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setGatePsNo(String fsValue) {
+        return setValue("sGatePsNo", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getGatePsNo() {
+        return (String) getValue("sGatePsNo");
     }
     
 }
