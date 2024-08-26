@@ -6,6 +6,7 @@
 package org.guanzon.auto.model.sales;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -350,7 +351,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 }
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
-
+                
+               // lsSQL = "Select * FROM " + getTable() + " a left join (" + makeSQL() + ") b on a.column1 = b.column "
                 if (!lsSQL.isEmpty()) {
                     if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
                         poJSON.put("result", "success");
@@ -1396,15 +1398,15 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setAmtPaid(Double fdbValue) {
+    public JSONObject setAmtPaid(BigDecimal fdbValue) {
         return setValue("nAmtPaidx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getAmtPaid() {
-        return Double.parseDouble(String.valueOf(getValue("nAmtPaidx")));
+    public BigDecimal getAmtPaid() {
+        return new BigDecimal(String.valueOf(getValue("nAmtPaidx")));
     }
     
     /**
