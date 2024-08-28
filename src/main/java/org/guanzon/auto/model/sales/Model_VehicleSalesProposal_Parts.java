@@ -438,10 +438,11 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                 + " , a.nNtPrtAmt "                                                                                               
                 + " , a.sPartStat "                                                                                                  
                 + " , a.dAddDatex "                                                                                                  
-                + " , a.sAddByxxx "                                                                                                  
+                + " , a.sAddByxxx "                                                                                                   
+                + " , b.sBarCodex "                                                                                                
                 + " , d.sDSNoxxxx "                                                                                                  
                 + " , d.dTransact "                                                                                                  
-                + " , e.sCompnyNm "                                                                                                  
+                + " , e.sCompnyNm "                                                                                                   
                 + " FROM vsp_parts a "                                                                                               
                 + " LEFT JOIN inventory b ON b.sStockIDx = a.sStockIDx "                                                             
                 + " LEFT JOIN diagnostic_parts c ON c.sStockIDx = a.sStockIDx "                                                      
@@ -490,7 +491,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject getStockID(String fsValue) {
+    public JSONObject setStockID(String fsValue) {
         return setValue("sStockIDx", fsValue);
     }
 
@@ -768,6 +769,23 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      */
     public String getCompnyNm() {
         return (String) getValue("sCompnyNm");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBarCode(String fsValue) {
+        return setValue("sBarCodex", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBarCode() {
+        return (String) getValue("sBarCodex");
     }
     
 }

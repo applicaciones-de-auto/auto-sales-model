@@ -5,15 +5,27 @@
  */
 package org.guanzon.auto.model.sales;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+//import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.sql.RowSetMetaData;
 import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetMetaDataImpl;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
@@ -23,6 +35,9 @@ import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  *
@@ -67,8 +82,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateString("cTranStat", RecordStatus.ACTIVE); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
-            
+            poEntity.updateObject("dInqryDte", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
+            //RecordStatus.ACTIVE
             poEntity.updateString("cIsVhclNw", "0");  
             poEntity.updateString("cIsVIPxxx", "0");  
             poEntity.updateInt("nInsurYrx", 0);   
@@ -273,6 +289,190 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 
         return poJSON;
     }
+    
+//    public JSONObject setValueDate(int fnColumn, Object foValue) {
+//        try {
+//            poJSON = validateColumnValue(System.getProperty("sys.default.path.metadata") + XML, MiscUtil.getColumnLabel(poEntity, fnColumn), foValue);
+//            if ("error".equals((String) poJSON.get("result"))) {
+//                return poJSON;
+//            }
+//
+//            poEntity.updateObject(fnColumn, foValue);
+//            poEntity.updateRow();
+//
+//            poJSON = new JSONObject();
+//            poJSON.put("result", "success");
+//            poJSON.put("value", getValue(fnColumn));
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            poJSON.put("result", "error");
+//            poJSON.put("message", e.getMessage());
+//        }
+//
+//        return poJSON;
+//    }
+//    
+//    public JSONObject setValueDate(String fsColumn, Object foValue) {
+//        poJSON = new JSONObject();
+//
+//        try {
+//            return setValueDate(MiscUtil.getColumnIndex(poEntity, fsColumn), foValue);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            poJSON.put("result", "error");
+//            poJSON.put("message", e.getMessage());
+//        }
+//        return poJSON;
+//    }
+//    
+//     public static JSONObject validateColumnValue(String fsXMLFile, String fsColumnNm, Object foValue) {
+//    JSONObject loJSON = new JSONObject();
+//    try {
+//      File file = new File(fsXMLFile);
+//      DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+//      DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+//      Document doc = dBuilder.parse(file);
+//      doc.getDocumentElement().normalize();
+//      NodeList nodeList = doc.getElementsByTagName("column");
+//      int lnRow = nodeList.getLength();
+//      RowSetMetaData meta = new RowSetMetaDataImpl();
+//      meta.setColumnCount(lnRow);
+//      for (int i = 0; i < lnRow; i++) {
+//        Element element = (Element)nodeList.item(i);
+//        String columnName = element.getElementsByTagName("COLUMN_LABEL").item(0).getTextContent();
+//        if (columnName.equals(fsColumnNm)) {
+//          String dataType = element.getElementsByTagName("DATA_TYPE").item(0).getTextContent();
+//          String nullable = element.getElementsByTagName("NULLABLE").item(0).getTextContent();
+//          String length = element.getElementsByTagName("LENGTH").item(0).getTextContent();
+//          String precision = element.getElementsByTagName("PRECISION").item(0).getTextContent();
+//          String scale = element.getElementsByTagName("SCALE").item(0).getTextContent();
+//          int columnType = Integer.parseInt(dataType);
+//          int columnDisplaySize = Integer.parseInt(length);
+//          int columnScale = Integer.parseInt(scale);
+//          int columnPrecision = Integer.parseInt(precision);
+//          boolean isNullable = nullable.equals("1");
+//          return validMetadata(columnType, columnDisplaySize, columnScale, columnPrecision, isNullable, foValue);
+//        } 
+//      } 
+//      loJSON.put("result", "error");
+//      loJSON.put("message", "Unable to find column to validate.");
+//    } catch (IOException|SQLException|javax.xml.parsers.ParserConfigurationException|org.w3c.dom.DOMException|org.xml.sax.SAXException e) {
+//      loJSON.put("result", "error");
+//      loJSON.put("message", e.getMessage());
+//    } 
+//    return loJSON;
+//  }
+//    
+//    private static JSONObject validMetadata(int columnType, int columnDisplaySize, int columnScale, int columnPrecision, boolean isNullable, Object foValue) {
+//    long longValue;
+//    double doubleValue, decimalValue;
+//    String stringValue;
+//    JSONObject loJSON = new JSONObject();
+//    if (foValue == null && !isNullable) {
+//      loJSON.put("result", "error");
+//      loJSON.put("message", "Value cannot be null.");
+//      return loJSON;
+//    } 
+//    switch (columnType) {
+//      case -6:
+//      case -5:
+//      case 4:
+//      case 5:
+//        if (!(foValue instanceof Number)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a number.");
+//          return loJSON;
+//        } 
+//        longValue = ((Number)foValue).longValue();
+//        if (longValue < -Math.pow(10.0D, columnPrecision) || longValue > Math.pow(10.0D, columnPrecision) - 1.0D) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value is out of range.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+//        return loJSON;
+//      case 6:
+//      case 7:
+//      case 8:
+//        if (!(foValue instanceof Number)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a number.");
+//          return loJSON;
+//        } 
+//        doubleValue = ((Number)foValue).doubleValue();
+//        if (doubleValue < -Math.pow(10.0D, (columnPrecision - columnScale)) || doubleValue > Math.pow(10.0D, (columnPrecision - columnScale))) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value is out of range.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+//        return loJSON;
+//      case 3:
+//        if (!(foValue instanceof Number)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a number.");
+//          return loJSON;
+//        } 
+//        decimalValue = ((Number)foValue).doubleValue();
+//        if (decimalValue < -Math.pow(10.0D, (columnPrecision - columnScale)) || decimalValue > Math.pow(10.0D, (columnPrecision - columnScale))) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value is out of range.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+//        return loJSON;
+//      case -1:
+//      case 1:
+//      case 12:
+//        if (!(foValue instanceof String)) {
+//          loJSON.put("success", "error");
+//          loJSON.put("message", "Value must be a string.");
+//          return loJSON;
+//        } 
+//        stringValue = (String)foValue;
+//        if (stringValue.length() > columnDisplaySize) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value exceeds maximum length for the field.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+//        return loJSON;
+//      case 91:
+//        if (!(foValue instanceof java.sql.Date) && !(foValue instanceof Date)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a date object.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+//        return loJSON;
+//      case 92:
+//        if (!(foValue instanceof java.sql.Time)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a time object.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+//        return loJSON;
+//      case 93:
+//        if (!(foValue instanceof java.sql.Timestamp)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a java.sql.Timestamp object.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+//        return loJSON;
+//    } 
+//    loJSON.put("result", "error");
+//    loJSON.put("message", "Unsupported data type for validation.");
+//    return loJSON;
+//  }
 
     /**
      * Sets column value.
@@ -378,13 +578,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 setModifiedBy(poGRider.getUserID());
                 setModifiedDte(poGRider.getServerDate());
                 setLockedBy("");
-                try {
-                    poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-                    poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-                    poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-                } catch (SQLException ex) {
-                    Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                setLockedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                setCancelldDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                setApprovedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//                try {
+//                    poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//                    poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//                    poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_TIMESTAMP));
+//                } catch (SQLException ex) {
+//                    Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
+//                }
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
                 
@@ -412,11 +615,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                     setModifiedDte(poGRider.getServerDate());
                     //Clear Locked by/date
                     setLockedBy("");
-                    try {
-                        poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-                    } catch (SQLException ex) {
-                        Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    setLockedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//                    try {
+//                        poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//                    } catch (SQLException ex) {
+//                        Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
                     
                     //replace the condition based on the primary key column of the record
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
@@ -704,6 +908,27 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox ";
     }
     
+    private static String xsDateShort(Date fdValue) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(fdValue);
+        return date;
+    }
+
+    private static String xsDateShort(String fsValue) throws org.json.simple.parser.ParseException, java.text.ParseException {
+        SimpleDateFormat fromUser = new SimpleDateFormat("MMMM dd, yyyy");
+        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String lsResult = "";
+        lsResult = myFormat.format(fromUser.parse(fsValue));
+        return lsResult;
+    }
+    
+    /*Convert Date to String*/
+    private LocalDate strToDate(String val) {
+        DateTimeFormatter date_formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(val, date_formatter);
+        return localDate;
+    }
+    
     /**
      * Description: Sets the ID of this record.
      *
@@ -767,18 +992,21 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setDelvryDt(Date fdValue) {
-        return setValue("dDelvryDt", fdValue);
+        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
+        return setValue("dDelvryDt", timestamp); //dDelvryDt datatype is time stamp so convert it into timestamp
     }
-
+    
     /**
      * @return The Value of this record.
      */
     public Date getDelvryDt() {
         Date date = null;
-        if(!getValue("dDelvryDt").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dDelvryDt").toString());
+        if(getValue("dDelvryDt") == null || getValue("dDelvryDt").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dDelvryDt")), SQLUtil.FORMAT_SHORT_DATE);
         }
-        
+            
         return date;
     }
     
@@ -857,6 +1085,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setUnitPrce(BigDecimal fdbValue) {
+
         return setValue("nUnitPrce", fdbValue);
     }
 
@@ -1749,7 +1978,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setDcStatDt(Date fdValue) {
-        return setValue("dDcStatDt", fdValue);
+        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
+        return setValue("dDcStatDt", timestamp); //dDcStatDt datatype is time stamp so convert it into timestamp
+//        return setValue("dDcStatDt", fdValue);
     }
 
     /**
@@ -1757,9 +1988,14 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public Date getDcStatDt() {
         Date date = null;
-        if(!getValue("dTransact").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dDcStatDt").toString());
+        if(getValue("dDcStatDt") == null || getValue("dDcStatDt").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dDcStatDt")), SQLUtil.FORMAT_SHORT_DATE);
         }
+//        if(!getValue("dTransact").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dDcStatDt").toString());
+//        }
         
         return date;
     }
@@ -1805,7 +2041,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setLockedDte(Date fdValue) {
-        return setValue("dLockedDt", fdValue);
+        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
+        return setValue("dLockedDt", timestamp); //dLockedDt datatype is time stamp so convert it into timestamp
+//        return setValue("dLockedDt", fdValue);
     }
 
     /**
@@ -1813,10 +2051,15 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public Date getLockedDte() {
         Date date = null;
-        if(!getValue("dLockedDt").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dLockedDt").toString());
+//        if(!getValue("dLockedDt").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dLockedDt").toString());
+//        }
+        if(getValue("dLockedDt") == null || getValue("dLockedDt").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dLockedDt")), SQLUtil.FORMAT_SHORT_DATE);
         }
-        
+            
         return date;
     }
     
@@ -1900,7 +2143,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setApprovedDte(Date fdValue) {
-        return setValue("dApproved", fdValue);
+        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
+        return setValue("dApproved", timestamp); //dApproved datatype is time stamp so convert it into timestamp
+//        return setValue("dApproved", fdValue);
     }
 
     /**
@@ -1908,10 +2153,15 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public Date getApprovedDte() {
         Date date = null;
-        if(!getValue("dApproved").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dApproved").toString());
+//        if(!getValue("dApproved").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dApproved").toString());
+//        }
+        if(getValue("dApproved") == null || getValue("dApproved").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApproved")), SQLUtil.FORMAT_SHORT_DATE);
         }
-        
+            
         return date;
     }
     
@@ -2051,6 +2301,14 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setInqryDte(Date fdValue) {
+        JSONObject loJSON = new JSONObject();
+//        if (!(fdValue instanceof java.sql.Date) && !(fdValue instanceof Date)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a date object.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
         return setValue("dInqryDte", fdValue);
     }
 
@@ -2059,10 +2317,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public Date getInqryDte() {
         Date date = null;
-        if(!getValue("dInqryDte").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dInqryDte").toString());
+//        if(!getValue("dInqryDte").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dInqryDte").toString());
+//        }
+//        
+        if(getValue("dInqryDte") == null || getValue("dInqryDte").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dInqryDte")), SQLUtil.FORMAT_SHORT_DATE);
         }
-        
+            
         return date;
     }
     
