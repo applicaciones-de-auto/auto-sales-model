@@ -6,6 +6,7 @@
 package org.guanzon.auto.model.sales;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -59,10 +60,11 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
 
             MiscUtil.initRowSet(poEntity);
             poEntity.updateObject("dAddDatex", poGRider.getServerDate());
-            poEntity.updateDouble("nUnitPrce", 0.00);  
-            poEntity.updateDouble("nSelPrice", 0.00); 
-            poEntity.updateDouble("nQuantity", 0); 
-            poEntity.updateDouble("nReleased", 0); 
+            poEntity.updateBigDecimal("nUnitPrce", new BigDecimal("0.00"));  
+            poEntity.updateBigDecimal("nSelPrice", new BigDecimal("0.00")); 
+            poEntity.updateBigDecimal("nNtPrtAmt", new BigDecimal("0.00")); 
+            poEntity.updateInt("nQuantity", 0); 
+            poEntity.updateInt("nReleased", 0); 
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -253,7 +255,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + fsValue + " AND (a.sStockIDx = " + fsValue2 + " OR REPLACE(a.sDescript,' ', '') = " + fsValue2.replace(" ", "")+ " )" );
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND (a.sStockIDx = " + SQLUtil.toSQL(fsValue2) + " OR REPLACE(a.sDescript,' ', '') = " + SQLUtil.toSQL(fsValue2.replace(" ", ""))+ " )" );
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -431,7 +433,9 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                 + " , a.nQuantity "                                                                                                  
                 + " , a.nReleased "                                                                                                  
                 + " , a.sChrgeTyp "                                                                                                  
-                + " , a.sDescript "                                                                                                  
+                + " , a.sDescript "                                                                                                   
+                + " , a.nPartsDsc "                                                                                                    
+                + " , a.nNtPrtAmt "                                                                                               
                 + " , a.sPartStat "                                                                                                  
                 + " , a.dAddDatex "                                                                                                  
                 + " , a.sAddByxxx "                                                                                                  
@@ -503,15 +507,16 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setUnitPrce(Double fdbValue) {
+    public JSONObject setUnitPrce(BigDecimal fdbValue) {
         return setValue("nUnitPrce", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getUnitPrce() {
-        return Double.parseDouble(String.valueOf(getValue("nUnitPrce")));
+    public BigDecimal getUnitPrce() {
+        return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+//        return Double.parseDouble(String.valueOf(getValue("nUnitPrce")));
     }
     
     /**
@@ -520,15 +525,16 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setSelPrice(Double fdbValue) {
+    public JSONObject setSelPrice(BigDecimal fdbValue) {
         return setValue("nSelPrice", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getSelPrice() {
-        return Double.parseDouble(String.valueOf(getValue("nSelPrice")));
+    public BigDecimal getSelPrice() {
+        return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+//        return Double.parseDouble(String.valueOf(getValue("nSelPrice")));
     }
     
     /**
@@ -597,6 +603,42 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      */
     public String getDescript() {
         return (String) getValue("sDescript");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setPartsDscount(BigDecimal fdbValue) {
+        return setValue("nPartsDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getPartsDscount() {
+        return new BigDecimal(String.valueOf(getValue("nPartsDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nPartsDsc")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setNtPrtAmt(BigDecimal fdbValue) {
+        return setValue("nNtPrtAmt", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getNtPrtAmt() {
+        return new BigDecimal(String.valueOf(getValue("nNtPrtAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nPartsDsc")));
     }
     
     /**

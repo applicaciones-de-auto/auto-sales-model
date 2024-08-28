@@ -6,6 +6,7 @@
 package org.guanzon.auto.model.sales;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -57,16 +58,16 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
 
             MiscUtil.initRowSet(poEntity);          
             
-            poEntity.updateDouble("nFinAmtxx", 0.00);
-            poEntity.updateDouble("nAcctTerm", 0.00);
+            poEntity.updateBigDecimal("nFinAmtxx", new BigDecimal("0.00"));
+            poEntity.updateInt("nAcctTerm", 0);
             poEntity.updateDouble("nAcctRate", 0.00);
-            poEntity.updateDouble("nRebatesx", 0.00);
-            poEntity.updateDouble("nMonAmort", 0.00);
-            poEntity.updateDouble("nPNValuex", 0.00);
-            poEntity.updateDouble("nBnkPaidx", 0.00);
-            poEntity.updateDouble("nGrsMonth", 0.00); 
-            poEntity.updateDouble("nNtDwnPmt", 0.00);
-            poEntity.updateDouble("nDiscount", 0.00); 
+            poEntity.updateBigDecimal("nRebatesx",  new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nMonAmort",  new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nPNValuex",  new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nBnkPaidx",  new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nGrsMonth",  new BigDecimal("0.00")); 
+            poEntity.updateBigDecimal("nNtDwnPmt",  new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDiscount",  new BigDecimal("0.00")); 
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -249,7 +250,7 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + fsValue);
+        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue));
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -487,32 +488,32 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setFinAmt(Double fdbValue) {
+    public JSONObject setFinAmt(BigDecimal fdbValue) {
         return setValue("nFinAmtxx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getFinAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nFinAmtxx")));
+    public BigDecimal getFinAmt() {
+        return new BigDecimal(String.valueOf(getValue("nFinAmtxx")));
     }
     
     /**
      * Description: Sets the Value of this record.
      *
-     * @param fdbValue
+     * @param fnValue
      * @return result as success/failed
      */
-    public JSONObject setAcctTerm(Double fdbValue) {
-        return setValue("nAcctTerm", fdbValue);
+    public JSONObject setAcctTerm(Integer fnValue) {
+        return setValue("nAcctTerm", fnValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getAcctTerm() {
-        return Double.parseDouble(String.valueOf(getValue("nAcctTerm")));
+    public Integer getAcctTerm() {
+        return Integer.parseInt(String.valueOf(getValue("nAcctTerm")));
     }
     
     /**
@@ -538,15 +539,16 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setRebates(Double fdbValue) {
+    public JSONObject setRebates(BigDecimal fdbValue) {
         return setValue("nRebatesx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getRebates() {
-        return Double.parseDouble(String.valueOf(getValue("nRebatesx")));
+    public BigDecimal getRebates() {
+        return new BigDecimal(String.valueOf(getValue("nRebatesx")));
+        //return Double.parseDouble(String.valueOf(getValue("nRebatesx")));
     }
     
     /**
@@ -555,15 +557,15 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setMonAmort(Double fdbValue) {
+    public JSONObject setMonAmort(BigDecimal fdbValue) {
         return setValue("nMonAmort", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getMonAmort() {
-        return Double.parseDouble(String.valueOf(getValue("nMonAmort")));
+    public BigDecimal getMonAmort() {
+        return new BigDecimal(String.valueOf(getValue("nMonAmort"))); //Double.parseDouble(String.valueOf(getValue("nMonAmort")));
     }
     
     /**
@@ -572,15 +574,16 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setPNValue(Double fdbValue) {
+    public JSONObject setPNValue(BigDecimal fdbValue) {
         return setValue("nPNValuex", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getPNValue() {
-        return Double.parseDouble(String.valueOf(getValue("nPNValuex")));
+    public BigDecimal getPNValue() {
+        return new BigDecimal(String.valueOf(getValue("nPNValuex"))); 
+        //return Double.parseDouble(String.valueOf(getValue("nPNValuex")));
     }
     
     /**
@@ -589,15 +592,16 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setBnkPaid(Double fdbValue) {
+    public JSONObject setBnkPaid(BigDecimal fdbValue) {
         return setValue("nBnkPaidx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getBnkPaid() {
-        return Double.parseDouble(String.valueOf(getValue("nBnkPaidx")));
+    public BigDecimal getBnkPaid() {
+        return new BigDecimal(String.valueOf(getValue("nBnkPaidx")));
+        //return Double.parseDouble(String.valueOf(getValue("nBnkPaidx")));
     }
     
     /**
@@ -606,15 +610,16 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setGrsMonth(Double fdbValue) {
+    public JSONObject setGrsMonth(BigDecimal fdbValue) {
         return setValue("nGrsMonth", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getGrsMonth() {
-        return Double.parseDouble(String.valueOf(getValue("nGrsMonth")));
+    public BigDecimal getGrsMonth() {
+        return new BigDecimal(String.valueOf(getValue("nGrsMonth"))); 
+        //return Double.parseDouble(String.valueOf(getValue("nGrsMonth")));
     }
     
     /**
@@ -623,15 +628,16 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setNtDwnPmt(Double fdbValue) {
+    public JSONObject setNtDwnPmt(BigDecimal fdbValue) {
         return setValue("nNtDwnPmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getNtDwnPmt() {
-        return Double.parseDouble(String.valueOf(getValue("nNtDwnPmt")));
+    public BigDecimal getNtDwnPmt() {
+        return new BigDecimal(String.valueOf(getValue("nNtDwnPmt")));
+        //return Double.parseDouble(String.valueOf(getValue("nNtDwnPmt")));
     }
     
     /**
@@ -640,14 +646,15 @@ public class Model_VehicleSalesProposal_Finance implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setDiscount(Double fdbValue) {
+    public JSONObject setDiscount(BigDecimal fdbValue) {
         return setValue("nDiscount", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getDiscount() {
-        return Double.parseDouble(String.valueOf(getValue("nDiscount")));
+    public BigDecimal getDiscount() {
+        return new BigDecimal(String.valueOf(getValue("nDiscount")));
+        //return Double.parseDouble(String.valueOf(getValue("nDiscount")));
     }
 }

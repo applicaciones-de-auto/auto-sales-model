@@ -6,6 +6,7 @@
 package org.guanzon.auto.model.sales;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -59,7 +60,9 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
 
             MiscUtil.initRowSet(poEntity);
             poEntity.updateObject("dAddDatex", poGRider.getServerDate());
-            poEntity.updateDouble("nLaborAmt", 0.00);  
+            poEntity.updateBigDecimal("nLaborAmt", new BigDecimal("0.00"));  
+            poEntity.updateBigDecimal("nLaborDsc", new BigDecimal("0.00"));  
+            poEntity.updateBigDecimal("nNtLabAmt", new BigDecimal("0.00"));  
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -250,7 +253,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + fsValue + " AND a.sLaborCde = " + fsValue2 );
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sLaborCde = " + SQLUtil.toSQL(fsValue2) );
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -422,6 +425,8 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
                 + " , a.sChrgeTyp "                                                                                                    
                 + " , a.sRemarksx "                                                                                                    
                 + " , a.sLaborDsc "                                                                                                    
+                + " , a.nLaborDsc "                                                                                                    
+                + " , a.nNtLabAmt "                                                                                                   
                 + " , a.cAddtlxxx "                                                                                                    
                 + " , a.dAddDatex "                                                                                                    
                 + " , a.sAddByxxx "                                                                                                    
@@ -491,15 +496,16 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setLaborAmt(Double fdbValue) {
+    public JSONObject setLaborAmt(BigDecimal fdbValue) {
         return setValue("nLaborAmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getLaborAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
+    public BigDecimal getLaborAmt() {
+        return new BigDecimal(String.valueOf(getValue("nLaborAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
     }
     
     /**
@@ -551,6 +557,42 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
      */
     public String getLaborDsc() {
         return (String) getValue("sLaborDsc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setLaborDscount(BigDecimal fdbValue) {
+        return setValue("nLaborDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getLaborDscount() {
+        return new BigDecimal(String.valueOf(getValue("nLaborDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nLaborDsc")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setNtLabAmt(BigDecimal fdbValue) {
+        return setValue("nNtLabAmt", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getNtLabAmt() {
+        return new BigDecimal(String.valueOf(getValue("nNtLabAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
     }
     
     /**

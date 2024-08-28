@@ -19,6 +19,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
@@ -66,44 +67,79 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); 
+            poEntity.updateString("cTranStat", RecordStatus.ACTIVE); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
             
             poEntity.updateString("cIsVhclNw", "0");  
             poEntity.updateString("cIsVIPxxx", "0");  
             poEntity.updateInt("nInsurYrx", 0);   
             
-            poEntity.updateDouble("nUnitPrce", 0.00); 
-            poEntity.updateDouble("nAdvDwPmt", 0.00); 
-            poEntity.updateDouble("nOthrChrg", 0.00); 
-            poEntity.updateDouble("nLaborAmt", 0.00);
-            poEntity.updateDouble("nAccesAmt", 0.00);
-            poEntity.updateDouble("nInsurAmt", 0.00);
-            poEntity.updateDouble("nTPLAmtxx", 0.00);
-            poEntity.updateDouble("nCompAmtx", 0.00);
-            poEntity.updateDouble("nLTOAmtxx", 0.00);
-            poEntity.updateDouble("nChmoAmtx", 0.00);
-            poEntity.updateDouble("nPromoDsc", 0.00);
-            poEntity.updateDouble("nFleetDsc", 0.00);
-            poEntity.updateDouble("nSPFltDsc", 0.00);
-            poEntity.updateDouble("nBndleDsc", 0.00);
-            poEntity.updateDouble("nAddlDscx", 0.00);
-            poEntity.updateDouble("nDealrInc", 0.00);
-            poEntity.updateDouble("nTranTotl", 0.00);
-            poEntity.updateDouble("nResrvFee", 0.00);
-            poEntity.updateDouble("nDownPaym", 0.00);
-            poEntity.updateDouble("nNetTTotl", 0.00);
-            poEntity.updateDouble("nAmtPaidx", 0.00);
-            poEntity.updateDouble("nFrgtChrg", 0.00);
-            poEntity.updateDouble("nDue2Supx", 0.00);
-            poEntity.updateDouble("nDue2Dlrx", 0.00);
-            poEntity.updateDouble("nSPFD2Sup", 0.00);
-            poEntity.updateDouble("nSPFD2Dlr", 0.00);
-            poEntity.updateDouble("nPrmD2Sup", 0.00);
-            poEntity.updateDouble("nPrmD2Dlr", 0.00);
-            poEntity.updateDouble("nDealrRte", 0.00);
-            poEntity.updateDouble("nDealrAmt", 0.00);
-            poEntity.updateDouble("nSlsInRte", 0.00);
-            poEntity.updateDouble("nSlsInAmt", 0.00);
+            
+            poEntity.updateBigDecimal("nUnitPrce", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAdvDwPmt", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nOthrChrg", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nLaborAmt", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAccesAmt", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nInsurAmt", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nTPLAmtxx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nCompAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nLTOAmtxx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nChmoAmtx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nPromoDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nFleetDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nSPFltDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nBndleDsc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAddlDscx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDealrInc", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nTranTotl", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nResrvFee", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDownPaym", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nNetTTotl", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nAmtPaidx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nFrgtChrg", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDue2Supx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDue2Dlrx", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nSPFD2Sup", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nSPFD2Dlr", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nPrmD2Sup", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nPrmD2Dlr", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDealrRte", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nDealrAmt", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nSlsInRte", new BigDecimal("0.00"));
+            poEntity.updateBigDecimal("nSlsInAmt", new BigDecimal("0.00"));
+
+            
+//            poEntity.updateBigDecimal("nUnitPrce", new BigDecimal("0.00")); 
+//            poEntity.updateDouble("nAdvDwPmt", 0.00); 
+//            poEntity.updateDouble("nOthrChrg", 0.00); 
+//            poEntity.updateDouble("nLaborAmt", 0.00);
+//            poEntity.updateDouble("nAccesAmt", 0.00);
+//            poEntity.updateDouble("nInsurAmt", 0.00);
+//            poEntity.updateDouble("nTPLAmtxx", 0.00);
+//            poEntity.updateDouble("nCompAmtx", 0.00);
+//            poEntity.updateDouble("nLTOAmtxx", 0.00);
+//            poEntity.updateDouble("nChmoAmtx", 0.00);
+//            poEntity.updateDouble("nPromoDsc", 0.00);
+//            poEntity.updateDouble("nFleetDsc", 0.00);
+//            poEntity.updateDouble("nSPFltDsc", 0.00);
+//            poEntity.updateDouble("nBndleDsc", 0.00);
+//            poEntity.updateDouble("nAddlDscx", 0.00);
+//            poEntity.updateDouble("nDealrInc", 0.00);
+//            poEntity.updateDouble("nTranTotl", 0.00);
+//            poEntity.updateDouble("nResrvFee", 0.00);
+//            poEntity.updateDouble("nDownPaym", 0.00);
+//            poEntity.updateDouble("nNetTTotl", 0.00);
+//            poEntity.updateDouble("nAmtPaidx", 0.00);
+//            poEntity.updateDouble("nFrgtChrg", 0.00);
+//            poEntity.updateDouble("nDue2Supx", 0.00);
+//            poEntity.updateDouble("nDue2Dlrx", 0.00);
+//            poEntity.updateDouble("nSPFD2Sup", 0.00);
+//            poEntity.updateDouble("nSPFD2Dlr", 0.00);
+//            poEntity.updateDouble("nPrmD2Sup", 0.00);
+//            poEntity.updateDouble("nPrmD2Dlr", 0.00);
+//            poEntity.updateDouble("nDealrRte", 0.00);
+//            poEntity.updateDouble("nDealrAmt", 0.00);
+//            poEntity.updateDouble("nSlsInRte", 0.00);
+//            poEntity.updateDouble("nSlsInAmt", 0.00);
             
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -291,7 +327,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + fsValue
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
                                                 //+ " GROUP BY a.sTransNox "
                                                 );
 
@@ -820,15 +856,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setUnitPrce(Double fdbValue) {
+    public JSONObject setUnitPrce(BigDecimal fdbValue) {
         return setValue("nUnitPrce", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getUnitPrce() {
-        return Double.parseDouble(String.valueOf(getValue("nUnitPrce")));
+    public BigDecimal getUnitPrce() {
+        return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+        //return Double.parseDouble(String.valueOf(getValue("nUnitPrce")));
     }
     
     /**
@@ -854,15 +891,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setAdvDwPmt(Double fdbValue) {
+    public JSONObject setAdvDwPmt(BigDecimal fdbValue) {
         return setValue("nAdvDwPmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getAdvDwPmt() {
-        return Double.parseDouble(String.valueOf(getValue("nAdvDwPmt")));
+    public BigDecimal getAdvDwPmt() {
+        return new BigDecimal(String.valueOf(getValue("nAdvDwPmt")));
+        //return Double.parseDouble(String.valueOf(getValue("nAdvDwPmt")));
     }
     
     /**
@@ -888,15 +926,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setOthrChrg(Double fdbValue) {
+    public JSONObject setOthrChrg(BigDecimal fdbValue) {
         return setValue("nOthrChrg", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getOthrChrg() {
-        return Double.parseDouble(String.valueOf(getValue("nOthrChrg")));
+    public BigDecimal getOthrChrg() {
+        return new BigDecimal(String.valueOf(getValue("nOthrChrg")));
+//        return Double.parseDouble(String.valueOf(getValue("nOthrChrg")));
     }
     
     /**
@@ -905,15 +944,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setLaborAmt(Double fdbValue) {
+    public JSONObject setLaborAmt(BigDecimal fdbValue) {
         return setValue("nLaborAmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getLaborAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
+    public BigDecimal getLaborAmt() {
+        return new BigDecimal(String.valueOf(getValue("nLaborAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
     }
     
     /**
@@ -922,15 +962,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setAccesAmt(Double fdbValue) {
+    public JSONObject setAccesAmt(BigDecimal fdbValue) {
         return setValue("nAccesAmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getAccesAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nAccesAmt")));
+    public BigDecimal getAccesAmt() {
+        return new BigDecimal(String.valueOf(getValue("nAccesAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nAccesAmt")));
     }
     
     /**
@@ -939,15 +980,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setInsurAmt(Double fdbValue) {
+    public JSONObject setInsurAmt(BigDecimal fdbValue) {
         return setValue("nInsurAmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getInsurAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nInsurAmt")));
+    public BigDecimal getInsurAmt() {
+        return new BigDecimal(String.valueOf(getValue("nInsurAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nInsurAmt")));
     }
     
     /**
@@ -956,15 +998,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setTPLAmt(Double fdbValue) {
+    public JSONObject setTPLAmt(BigDecimal fdbValue) {
         return setValue("nTPLAmtxx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getTPLAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nTPLAmtxx")));
+    public BigDecimal getTPLAmt() {
+        return new BigDecimal(String.valueOf(getValue("nTPLAmtxx")));
+//        return Double.parseDouble(String.valueOf(getValue("nTPLAmtxx")));
     }
     
     /**
@@ -973,15 +1016,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setCompAmt(Double fdbValue) {
+    public JSONObject setCompAmt(BigDecimal fdbValue) {
         return setValue("nCompAmtx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getCompAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nCompAmtx")));
+    public BigDecimal getCompAmt() {
+        return new BigDecimal(String.valueOf(getValue("nCompAmtx")));
+//        return Double.parseDouble(String.valueOf(getValue("nCompAmtx")));
     }
     
     /**
@@ -990,15 +1034,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setLTOAmt(Double fdbValue) {
+    public JSONObject setLTOAmt(BigDecimal fdbValue) {
         return setValue("nLTOAmtxx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getLTOAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nLTOAmtxx")));
+    public BigDecimal getLTOAmt() {
+        return new BigDecimal(String.valueOf(getValue("nLTOAmtxx")));
+//        return Double.parseDouble(String.valueOf(getValue("nLTOAmtxx")));
     }
     
     /**
@@ -1007,15 +1052,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setChmoAmt(Double fdbValue) {
+    public JSONObject setChmoAmt(BigDecimal fdbValue) {
         return setValue("nChmoAmtx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getChmoAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nChmoAmtx")));
+    public BigDecimal getChmoAmt() {
+        return new BigDecimal(String.valueOf(getValue("nChmoAmtx")));
+//        return Double.parseDouble(String.valueOf(getValue("nChmoAmtx")));
     }
     
     /**
@@ -1160,15 +1206,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setToLabDsc(Double fdbValue) {
+    public JSONObject setToLabDsc(BigDecimal fdbValue) {
         return setValue("nToLabDsc", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getToLabDsc() {
-        return Double.parseDouble(String.valueOf(getValue("nToLabDsc")));
+    public BigDecimal getToLabDsc() {
+        return new BigDecimal(String.valueOf(getValue("nToLabDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nToLabDsc")));
     }
     
     /**
@@ -1177,15 +1224,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setToPrtDsc(Double fdbValue) {
+    public JSONObject setToPrtDsc(BigDecimal fdbValue) {
         return setValue("nToPrtDsc", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getToPrtDsc() {
-        return Double.parseDouble(String.valueOf(getValue("nToPrtDsc")));
+    public BigDecimal getToPrtDsc() {
+        return new BigDecimal(String.valueOf(getValue("nToPrtDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nToPrtDsc")));
     }
     
     /**
@@ -1194,15 +1242,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setPromoDsc(Double fdbValue) {
+    public JSONObject setPromoDsc(BigDecimal fdbValue) {
         return setValue("nPromoDsc", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getPromoDsc() {
-        return Double.parseDouble(String.valueOf(getValue("nPromoDsc")));
+    public BigDecimal getPromoDsc() {
+        return new BigDecimal(String.valueOf(getValue("nPromoDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nPromoDsc")));
     }
     
     /**
@@ -1211,15 +1260,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setFleetDsc(Double fdbValue) {
+    public JSONObject setFleetDsc(BigDecimal fdbValue) {
         return setValue("nFleetDsc", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getFleetDsc() {
-        return Double.parseDouble(String.valueOf(getValue("nFleetDsc")));
+    public BigDecimal getFleetDsc() {
+        return new BigDecimal(String.valueOf(getValue("nFleetDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nFleetDsc")));
     }
     
     /**
@@ -1228,15 +1278,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setSPFltDsc(Double fdbValue) {
+    public JSONObject setSPFltDsc(BigDecimal fdbValue) {
         return setValue("nSPFltDsc", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getSPFltDsc() {
-        return Double.parseDouble(String.valueOf(getValue("nSPFltDsc")));
+    public BigDecimal getSPFltDsc() {
+        return new BigDecimal(String.valueOf(getValue("nSPFltDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nSPFltDsc")));
     }
     
     /**
@@ -1245,15 +1296,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setBndleDsc(Double fdbValue) {
+    public JSONObject setBndleDsc(BigDecimal fdbValue) {
         return setValue("nBndleDsc", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getBndleDsc() {
-        return Double.parseDouble(String.valueOf(getValue("nBndleDsc")));
+    public BigDecimal getBndleDsc() {
+        return new BigDecimal(String.valueOf(getValue("nBndleDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nBndleDsc")));
     }
     
     /**
@@ -1262,15 +1314,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setAddlDsc(Double fdbValue) {
+    public JSONObject setAddlDsc(BigDecimal fdbValue) {
         return setValue("nAddlDscx", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getAddlDsc() {
-        return Double.parseDouble(String.valueOf(getValue("nAddlDscx")));
+    public BigDecimal getAddlDsc() {
+        return new BigDecimal(String.valueOf(getValue("nAddlDscx")));
+//        return Double.parseDouble(String.valueOf(getValue("nAddlDscx")));
     }
     
     /**
@@ -1279,15 +1332,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setDealrInc(Double fdbValue) {
+    public JSONObject setDealrInc(BigDecimal fdbValue) {
         return setValue("nDealrInc", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getDealrInc() {
-        return Double.parseDouble(String.valueOf(getValue("nDealrInc")));
+    public BigDecimal getDealrInc() {
+        return new BigDecimal(String.valueOf(getValue("nDealrInc")));
+//        return Double.parseDouble(String.valueOf(getValue("nDealrInc")));
     }
     
     /**
@@ -1330,15 +1384,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setTranTotl(Double fdbValue) {
+    public JSONObject setTranTotl(BigDecimal fdbValue) {
         return setValue("nTranTotl", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getTranTotl() {
-        return Double.parseDouble(String.valueOf(getValue("nTranTotl")));
+    public BigDecimal getTranTotl() {
+        return new BigDecimal(String.valueOf(getValue("nTranTotl")));
+//        return Double.parseDouble(String.valueOf(getValue("nTranTotl")));
     }
     
     /**
@@ -1347,15 +1402,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setResrvFee(Double fdbValue) {
+    public JSONObject setResrvFee(BigDecimal fdbValue) {
         return setValue("nResrvFee", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getResrvFee() {
-        return Double.parseDouble(String.valueOf(getValue("nResrvFee")));
+    public BigDecimal getResrvFee() {
+        return new BigDecimal(String.valueOf(getValue("nResrvFee")));
+//        return Double.parseDouble(String.valueOf(getValue("nResrvFee")));
     }
     
     /**
@@ -1364,15 +1420,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setDownPaym(Double fdbValue) {
+    public JSONObject setDownPaym(BigDecimal fdbValue) {
         return setValue("nDownPaym", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getDownPaym() {
-        return Double.parseDouble(String.valueOf(getValue("nDownPaym")));
+    public BigDecimal getDownPaym() {
+        return new BigDecimal(String.valueOf(getValue("nDownPaym")));
+//        return Double.parseDouble(String.valueOf(getValue("nDownPaym")));
     }
     
     /**
@@ -1381,15 +1438,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setNetTTotl(Double fdbValue) {
+    public JSONObject setNetTTotl(BigDecimal fdbValue) {
         return setValue("nNetTTotl", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getNetTTotl() {
-        return Double.parseDouble(String.valueOf(getValue("nNetTTotl")));
+    public BigDecimal getNetTTotl() {
+        return new BigDecimal(String.valueOf(getValue("nNetTTotl")));
+//        return Double.parseDouble(String.valueOf(getValue("nNetTTotl")));
     }
     
     /**
@@ -1415,15 +1473,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setFrgtChrg(Double fdbValue) {
+    public JSONObject setFrgtChrg(BigDecimal fdbValue) {
         return setValue("nFrgtChrg", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getFrgtChrg() {
-        return Double.parseDouble(String.valueOf(getValue("nFrgtChrg")));
+    public BigDecimal getFrgtChrg() {
+        return new BigDecimal(String.valueOf(getValue("nFrgtChrg")));
+//        return Double.parseDouble(String.valueOf(getValue("nFrgtChrg")));
     }
     
     /**
@@ -1585,15 +1644,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setDealrAmt(Double fdbValue) {
+    public JSONObject setDealrAmt(BigDecimal fdbValue) {
         return setValue("nDealrAmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getDealrAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nDealrAmt")));
+    public BigDecimal getDealrAmt() {
+        return new BigDecimal(String.valueOf(getValue("nDealrAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nDealrAmt")));
     }
     
     /**
@@ -1619,15 +1679,16 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdbValue
      * @return result as success/failed
      */
-    public JSONObject setSlsInAmt(Double fdbValue) {
+    public JSONObject setSlsInAmt(BigDecimal fdbValue) {
         return setValue("nSlsInAmt", fdbValue);
     }
 
     /**
      * @return The Value of this record.
      */
-    public Double getSlsInAmt() {
-        return Double.parseDouble(String.valueOf(getValue("nSlsInAmt")));
+    public BigDecimal getSlsInAmt() {
+        return new BigDecimal(String.valueOf(getValue("nSlsInAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nSlsInAmt")));
     }
     
     /**
@@ -2209,22 +2270,23 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         return (String) getValue("sSENamexx");
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdbValue
-     * @return result as success/failed
-     */
-    public JSONObject setRsvAmtTl(Double fdbValue) {
-        return setValue("nRsvAmtTl", fdbValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Double getRsvAmtTl() {
-        return Double.parseDouble(String.valueOf(getValue("nRsvAmtTl")));
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fdbValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setRsvAmtTl(BigDecimal fdbValue) {
+//        return setValue("nRsvAmtTl", fdbValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public BigDecimal getRsvAmtTl() {
+//        return new BigDecimal(String.valueOf(getValue("nRsvAmtTl")));
+////        return Double.parseDouble(String.valueOf(getValue("nRsvAmtTl")));
+//    }
     
     /**
      * Description: Sets the Value of this record.
