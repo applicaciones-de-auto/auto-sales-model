@@ -235,7 +235,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
 
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue));
-
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -452,7 +452,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  IFNULL(CONCAT(d.sAddressx,' ') , ''), "                                      
                 + "  IFNULL(CONCAT(e.sBrgyName,' '), ''),  "                                      
                 + "  IFNULL(CONCAT(f.sTownName, ', '),''), "                                      
-                + "  IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  , "
+                + "  IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  "
                 + "  , i.sReferNox  AS sSINoxxxx " 
                 + "  , i.dTransact AS dSIDatexx "                        
                 + " FROM customer_inquiry_reservation a    "                                      

@@ -566,7 +566,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL; //nRsvAmtTl
-            String lsExclude = "sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
+            String lsExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
                              + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo";//»
             if (pnEditMode == EditMode.ADDNEW) {
@@ -825,8 +825,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + "   IFNULL(CONCAT(e.sBrgyName,' '), ''),                  "                     
                 + "   IFNULL(CONCAT(f.sTownName, ', '),''),                 "                     
                 + "   IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  "                     
-                  /*INQUIRY*/                                                                     
-                + " , h.dTransact AS dInqryDte "                                                  
+                  /*INQUIRY*/                                                            
+                + " , h.sInqryIDx AS sInquryID "                                                                
+                + " , DATE(h.dTransact) AS dInqryDte "                                                  
                 + " , h.sClientID AS sInqCltID "                                                  
                 + " , i.sCompnyNm AS sInqCltNm "                                                  
                 + " , i.cClientTp AS cInqCltTp "                                                  
@@ -1017,13 +1018,30 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return True if the record assignment is successful.
      */
     public JSONObject setInqryID(String fsValue) {
-        return setValue("sInqryIDx", fsValue);
+        return setValue("sInquryID", fsValue);
     }
 
     /**
      * @return The Value of this record.
      */
     public String getInqryID() {
+        return (String) getValue("sInquryID");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setInqTran(String fsValue) {
+        return setValue("sInqryIDx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getInqTran() {
         return (String) getValue("sInqryIDx");
     }
     
@@ -1085,7 +1103,6 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setUnitPrce(BigDecimal fdbValue) {
-
         return setValue("nUnitPrce", fdbValue);
     }
 
@@ -1093,7 +1110,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getUnitPrce() {
-        return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+        if(getValue("nUnitPrce") == null || getValue("nUnitPrce").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+        }
         //return Double.parseDouble(String.valueOf(getValue("nUnitPrce")));
     }
     
@@ -1128,7 +1149,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getAdvDwPmt() {
-        return new BigDecimal(String.valueOf(getValue("nAdvDwPmt")));
+        if(getValue("nAdvDwPmt") == null || getValue("nAdvDwPmt").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nAdvDwPmt")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nAdvDwPmt")));
         //return Double.parseDouble(String.valueOf(getValue("nAdvDwPmt")));
     }
     
@@ -1163,7 +1189,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getOthrChrg() {
-        return new BigDecimal(String.valueOf(getValue("nOthrChrg")));
+        if(getValue("nOthrChrg") == null || getValue("nOthrChrg").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nOthrChrg")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nOthrChrg")));
 //        return Double.parseDouble(String.valueOf(getValue("nOthrChrg")));
     }
     
@@ -1181,7 +1212,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getLaborAmt() {
-        return new BigDecimal(String.valueOf(getValue("nLaborAmt")));
+        if(getValue("nLaborAmt") == null || getValue("nLaborAmt").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nLaborAmt")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nLaborAmt")));
 //        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
     }
     
@@ -1199,7 +1235,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getAccesAmt() {
-        return new BigDecimal(String.valueOf(getValue("nAccesAmt")));
+        if(getValue("nAccesAmt") == null || getValue("nAccesAmt").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nAccesAmt")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nAccesAmt")));
 //        return Double.parseDouble(String.valueOf(getValue("nAccesAmt")));
     }
     
@@ -1217,7 +1258,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getInsurAmt() {
-        return new BigDecimal(String.valueOf(getValue("nInsurAmt")));
+        if(getValue("nInsurAmt") == null || getValue("nInsurAmt").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nInsurAmt")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nInsurAmt")));
 //        return Double.parseDouble(String.valueOf(getValue("nInsurAmt")));
     }
     
@@ -1235,7 +1281,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getTPLAmt() {
-        return new BigDecimal(String.valueOf(getValue("nTPLAmtxx")));
+        if(getValue("nTPLAmtxx") == null || getValue("nTPLAmtxx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nTPLAmtxx")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nTPLAmtxx")));
 //        return Double.parseDouble(String.valueOf(getValue("nTPLAmtxx")));
     }
     
@@ -1253,7 +1304,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getCompAmt() {
-        return new BigDecimal(String.valueOf(getValue("nCompAmtx")));
+        if(getValue("nCompAmtx") == null || getValue("nCompAmtx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nCompAmtx")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nCompAmtx")));
 //        return Double.parseDouble(String.valueOf(getValue("nCompAmtx")));
     }
     
@@ -1271,7 +1327,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getLTOAmt() {
-        return new BigDecimal(String.valueOf(getValue("nLTOAmtxx")));
+        if(getValue("nLTOAmtxx") == null || getValue("nLTOAmtxx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nLTOAmtxx")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nLTOAmtxx")));
 //        return Double.parseDouble(String.valueOf(getValue("nLTOAmtxx")));
     }
     
@@ -1289,7 +1350,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getChmoAmt() {
-        return new BigDecimal(String.valueOf(getValue("nChmoAmtx")));
+        if(getValue("nChmoAmtx") == null || getValue("nChmoAmtx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nChmoAmtx")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nChmoAmtx")));
 //        return Double.parseDouble(String.valueOf(getValue("nChmoAmtx")));
     }
     
@@ -1443,7 +1509,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getToLabDsc() {
-        return new BigDecimal(String.valueOf(getValue("nToLabDsc")));
+        if(getValue("nToLabDsc") == null || getValue("nToLabDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nToLabDsc")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nToLabDsc")));
 //        return Double.parseDouble(String.valueOf(getValue("nToLabDsc")));
     }
     
@@ -1461,7 +1532,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getToPrtDsc() {
-        return new BigDecimal(String.valueOf(getValue("nToPrtDsc")));
+        if(getValue("nToPrtDsc") == null || getValue("nToPrtDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nToPrtDsc")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nToPrtDsc")));
 //        return Double.parseDouble(String.valueOf(getValue("nToPrtDsc")));
     }
     
@@ -1479,7 +1555,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getPromoDsc() {
-        return new BigDecimal(String.valueOf(getValue("nPromoDsc")));
+        if(getValue("nPromoDsc") == null || getValue("nPromoDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nPromoDsc")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nPromoDsc")));
 //        return Double.parseDouble(String.valueOf(getValue("nPromoDsc")));
     }
     
@@ -1497,7 +1578,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getFleetDsc() {
-        return new BigDecimal(String.valueOf(getValue("nFleetDsc")));
+        if(getValue("nFleetDsc") == null || getValue("nFleetDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nFleetDsc")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nFleetDsc")));
 //        return Double.parseDouble(String.valueOf(getValue("nFleetDsc")));
     }
     
@@ -1515,7 +1601,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getSPFltDsc() {
-        return new BigDecimal(String.valueOf(getValue("nSPFltDsc")));
+        if(getValue("nSPFltDsc") == null || getValue("nSPFltDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nSPFltDsc")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nSPFltDsc")));
 //        return Double.parseDouble(String.valueOf(getValue("nSPFltDsc")));
     }
     
@@ -1533,7 +1624,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getBndleDsc() {
-        return new BigDecimal(String.valueOf(getValue("nBndleDsc")));
+        if(getValue("nBndleDsc") == null || getValue("nBndleDsc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nBndleDsc")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nBndleDsc")));
 //        return Double.parseDouble(String.valueOf(getValue("nBndleDsc")));
     }
     
@@ -1551,7 +1647,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getAddlDsc() {
-        return new BigDecimal(String.valueOf(getValue("nAddlDscx")));
+        if(getValue("nAddlDscx") == null || getValue("nAddlDscx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nAddlDscx")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nAddlDscx")));
 //        return Double.parseDouble(String.valueOf(getValue("nAddlDscx")));
     }
     
@@ -1569,7 +1670,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getDealrInc() {
-        return new BigDecimal(String.valueOf(getValue("nDealrInc")));
+        if(getValue("nDealrInc") == null || getValue("nDealrInc").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nDealrInc")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nDealrInc")));
 //        return Double.parseDouble(String.valueOf(getValue("nDealrInc")));
     }
     
@@ -1621,7 +1727,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getTranTotl() {
-        return new BigDecimal(String.valueOf(getValue("nTranTotl")));
+        if(getValue("nTranTotl") == null || getValue("nTranTotl").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nTranTotl")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nTranTotl")));
 //        return Double.parseDouble(String.valueOf(getValue("nTranTotl")));
     }
     
@@ -1639,7 +1750,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getResrvFee() {
-        return new BigDecimal(String.valueOf(getValue("nResrvFee")));
+        if(getValue("nResrvFee") == null || getValue("nResrvFee").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nResrvFee")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nResrvFee")));
 //        return Double.parseDouble(String.valueOf(getValue("nResrvFee")));
     }
     
@@ -1657,7 +1773,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getDownPaym() {
-        return new BigDecimal(String.valueOf(getValue("nDownPaym")));
+        if(getValue("nDownPaym") == null || getValue("nDownPaym").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nDownPaym")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nDownPaym")));
 //        return Double.parseDouble(String.valueOf(getValue("nDownPaym")));
     }
     
@@ -1675,7 +1796,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getNetTTotl() {
-        return new BigDecimal(String.valueOf(getValue("nNetTTotl")));
+        if(getValue("nNetTTotl") == null || getValue("nNetTTotl").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nNetTTotl")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nNetTTotl")));
 //        return Double.parseDouble(String.valueOf(getValue("nNetTTotl")));
     }
     
@@ -1693,7 +1819,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getAmtPaid() {
-        return new BigDecimal(String.valueOf(getValue("nAmtPaidx")));
+        if(getValue("nAmtPaidx") == null || getValue("nAmtPaidx").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nAmtPaidx")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nAmtPaidx")));
     }
     
     /**
@@ -1710,7 +1841,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getFrgtChrg() {
-        return new BigDecimal(String.valueOf(getValue("nFrgtChrg")));
+        if(getValue("nFrgtChrg") == null || getValue("nFrgtChrg").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nFrgtChrg")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nFrgtChrg")));
 //        return Double.parseDouble(String.valueOf(getValue("nFrgtChrg")));
     }
     
@@ -1881,7 +2017,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getDealrAmt() {
-        return new BigDecimal(String.valueOf(getValue("nDealrAmt")));
+        if(getValue("nDealrAmt") == null || getValue("nDealrAmt").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nDealrAmt")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nDealrAmt")));
 //        return Double.parseDouble(String.valueOf(getValue("nDealrAmt")));
     }
     
@@ -1916,7 +2057,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getSlsInAmt() {
-        return new BigDecimal(String.valueOf(getValue("nSlsInAmt")));
+        if(getValue("nSlsInAmt") == null || getValue("nSlsInAmt").equals("")){
+            return new BigDecimal("0.00");
+        } else {
+            return new BigDecimal(String.valueOf(getValue("nSlsInAmt")));
+        }
+//        return new BigDecimal(String.valueOf(getValue("nSlsInAmt")));
 //        return Double.parseDouble(String.valueOf(getValue("nSlsInAmt")));
     }
     
