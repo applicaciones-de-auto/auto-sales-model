@@ -381,7 +381,7 @@ public class Model_Inquiry_Requirements implements GEntity{
                 + "    a.sTransNox "                                                    
                 + "  , a.nEntryNox "                                                    
                 + "  , a.sRqrmtCde "                                                    
-                + "  , a.cRequired "                                                    
+//                + "  , a.cRequired "                                                    
                 + "  , a.cSubmittd "                                                    
                 + "  , a.sReceived "                                                    
                 + "  , a.dReceived "                                                    
@@ -389,10 +389,12 @@ public class Model_Inquiry_Requirements implements GEntity{
                 + "  , d.cPayModex "                                                    
                 + "  , d.cCustGrpx "                                                    
                 + "  , e.sCompnyNm "                                                    
+                + "  , f.cRequired "                                                        
                 + " FROM customer_inquiry_requirements a "                              
                 + " LEFT JOIN requirement_source b ON a.sRqrmtCde = b.sRqrmtCde "       
                 + " LEFT JOIN customer_inquiry d ON d.sTransNox = a.sTransNox   "       
-                + " LEFT JOIN GGC_ISysDBF.Client_Master e ON e.sClientID = a.sReceived " ;                          
+                + " LEFT JOIN GGC_ISysDBF.Client_Master e ON e.sClientID = a.sReceived "               
+                + " LEFT JOIN requirement_source_pergroup f ON f.sRqrmtCde = a.sRqrmtCde "  ;                          
     }
     
     /**

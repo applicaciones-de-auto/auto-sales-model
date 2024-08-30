@@ -5,8 +5,6 @@
  */
 package org.guanzon.auto.model.sales;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -16,28 +14,17 @@ import java.sql.Types;
 //import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.sql.RowSetMetaData;
 import javax.sql.rowset.CachedRowSet;
-import javax.sql.rowset.RowSetMetaDataImpl;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
-import org.guanzon.appdriver.constant.RecordStatus;
 import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  *
@@ -105,7 +92,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             poEntity.updateBigDecimal("nSPFltDsc", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nBndleDsc", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nAddlDscx", new BigDecimal("0.00"));
-            poEntity.updateBigDecimal("nDealrInc", new BigDecimal("0.00"));
+//            poEntity.updateBigDecimal("nDealrInc", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nTranTotl", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nResrvFee", new BigDecimal("0.00"));
             poEntity.updateBigDecimal("nDownPaym", new BigDecimal("0.00"));
@@ -776,7 +763,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.nSPFltDsc "                                                               
                 + " , a.nBndleDsc "                                                               
                 + " , a.nAddlDscx "                                                               
-                + " , a.nDealrInc "                                                               
+//                + " , a.nDealrInc "                                                               
                 + " , a.cPayModex "                                                               
                 + " , a.sBnkAppCD "                                                               
                 + " , a.nTranTotl "                                                               
@@ -1656,28 +1643,28 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 //        return Double.parseDouble(String.valueOf(getValue("nAddlDscx")));
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdbValue
-     * @return result as success/failed
-     */
-    public JSONObject setDealrInc(BigDecimal fdbValue) {
-        return setValue("nDealrInc", fdbValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public BigDecimal getDealrInc() {
-        if(getValue("nDealrInc") == null || getValue("nDealrInc").equals("")){
-            return new BigDecimal("0.00");
-        } else {
-            return new BigDecimal(String.valueOf(getValue("nDealrInc")));
-        }
-//        return new BigDecimal(String.valueOf(getValue("nDealrInc")));
-//        return Double.parseDouble(String.valueOf(getValue("nDealrInc")));
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fdbValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setDealrInc(BigDecimal fdbValue) {
+//        return setValue("nDealrInc", fdbValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public BigDecimal getDealrInc() {
+//        if(getValue("nDealrInc") == null || getValue("nDealrInc").equals("")){
+//            return new BigDecimal("0.00");
+//        } else {
+//            return new BigDecimal(String.valueOf(getValue("nDealrInc")));
+//        }
+////        return new BigDecimal(String.valueOf(getValue("nDealrInc")));
+////        return Double.parseDouble(String.valueOf(getValue("nDealrInc")));
+//    }
     
     /**
      * Description: Sets the Value of this record.
