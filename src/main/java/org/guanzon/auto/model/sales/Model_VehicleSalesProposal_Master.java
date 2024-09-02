@@ -726,6 +726,15 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         return MiscUtil.makeSQL(this, ""); //exclude columns called thru left join
     }
     
+    /**
+     * Gets the SQL Select statement for this entity.
+     *
+     * @return SQL Select Statement
+     */
+    public String makeSelectSQL() {
+        return MiscUtil.makeSelect(this);
+    }
+    
     public String getSQL(){
         return    " SELECT DISTINCT "                                                                      
                 + "   a.sTransNox "                                                               
