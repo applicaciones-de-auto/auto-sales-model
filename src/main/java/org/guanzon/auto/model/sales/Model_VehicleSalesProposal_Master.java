@@ -66,6 +66,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             MiscUtil.initRowSet(poEntity);        
             poEntity.updateObject("dTransact", poGRider.getServerDate()); 
             poEntity.updateObject("dDelvryDt", poGRider.getServerDate());   
+            poEntity.updateObject("dDcStatDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
@@ -568,6 +569,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 setLockedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
                 setCancelldDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
                 setApprovedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+                setDcStatDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE)); //TODO
 //                try {
 //                    poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //                    poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
@@ -645,9 +647,10 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         if(getUDRNo().trim().isEmpty()){
             lsSQL = "UPDATE customer_inquiry SET" +
                     " cTranStat = '3'" +
-                " WHERE sTransNox = " + SQLUtil.toSQL(getInqryID());
+                " WHERE sTransNox = " + SQLUtil.toSQL(getInqTran());
             if (poGRider.executeQuery(lsSQL, "customer_inquiry", poGRider.getBranchCode(), getTargetBranchCd()) <= 0){
                 loJSON.put("result", "error");
+                loJSON.put("continue", true);
                 loJSON.put("message", "UPDATE CUSTOMER INQUIRY: " + poGRider.getErrMsg() + "; " + poGRider.getMessage());
                 return loJSON;
             } 
@@ -662,6 +665,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                             " WHERE sSerialID = " + SQLUtil.toSQL(getSerialID());
                     if (poGRider.executeQuery(lsSQL, "vehicle_serial", poGRider.getBranchCode(), getTargetBranchCd()) <= 0){
                         loJSON.put("result", "error");
+                        loJSON.put("continue", true);
                         loJSON.put("message", "UPDATE VEHICLE SERIAL: " + poGRider.getErrMsg() + "; " + poGRider.getMessage());
                         return loJSON;
                     } 
@@ -2119,7 +2123,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @param fdValue
      * @return result as success/failed
      */
-    public JSONObject setDcStatDt(Date fdValue) {
+    public JSONObject setDcStatDte(Date fdValue) {
         Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
         return setValue("dDcStatDt", timestamp); //dDcStatDt datatype is time stamp so convert it into timestamp
 //        return setValue("dDcStatDt", fdValue);
@@ -2128,7 +2132,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     /**
      * @return The Value of this record.
      */
-    public Date getDcStatDt() {
+    public Date getDcStatDte() {
         Date date = null;
         if(getValue("dDcStatDt") == null || getValue("dDcStatDt").equals("")){
             date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);

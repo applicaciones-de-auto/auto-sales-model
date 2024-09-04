@@ -63,6 +63,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
             poEntity.updateBigDecimal("nUnitPrce", new BigDecimal("0.00"));  
             poEntity.updateBigDecimal("nSelPrice", new BigDecimal("0.00")); 
             poEntity.updateBigDecimal("nNtPrtAmt", new BigDecimal("0.00")); 
+            poEntity.updateBigDecimal("nPartsDsc", new BigDecimal("0.00")); 
             poEntity.updateInt("nQuantity", 0); 
             poEntity.updateInt("nReleased", 0); 
 
@@ -292,7 +293,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
-            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm";
+            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm»sBarCodex";
             if (pnEditMode == EditMode.ADDNEW) {
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
@@ -362,8 +363,8 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
         
         String lsSQL = " DELETE FROM "+getTable()+" WHERE "
                     + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
-                    + " AND sStockIDx = " + SQLUtil.toSQL(this.getStockID())
-                    + " AND sDescript = " + SQLUtil.toSQL(this.getDescript());
+                    + " AND (sStockIDx = " + SQLUtil.toSQL(this.getStockID())
+                    + " OR REPLACE(sDescript,' ', '') = " + SQLUtil.toSQL(this.getDescript().replace(" ", "")) + ") ";
         if (!lsSQL.isEmpty()) {
             if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
                 poJSON.put("result", "success");
@@ -534,7 +535,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      * @return The Value of this record.
      */
     public BigDecimal getSelPrice() {
-        return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+        return new BigDecimal(String.valueOf(getValue("nSelPrice")));
 //        return Double.parseDouble(String.valueOf(getValue("nSelPrice")));
     }
     
@@ -639,7 +640,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      */
     public BigDecimal getNtPrtAmt() {
         return new BigDecimal(String.valueOf(getValue("nNtPrtAmt")));
-//        return Double.parseDouble(String.valueOf(getValue("nPartsDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nNtPrtAmt")));
     }
     
     /**
