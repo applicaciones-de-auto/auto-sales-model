@@ -34,6 +34,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     final String XML = "Model_VehicleSalesProposal_Master.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
+    private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
+                             + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
+                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -600,6 +603,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
 
                 if ("success".equals((String) loJSON.get("result"))) {
+                    //set VSP into open when user modify it. TODO
+//                    poJSON = setTranStat(TransactionStatus.STATE_OPEN);
+//                    if ("error".equals((String) poJSON.get("result"))) {
+//                        return poJSON;
+//                    }
+                    
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
                     //Clear Locked by/date
@@ -644,7 +653,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         JSONObject loJSON = new JSONObject();
         //Update customer_inquiry status to with VSP
         String lsSQL = "";
-        if(getUDRNo().trim().isEmpty()){
+        if(getUDRNo() == null || getUDRNo().equals("")){
             lsSQL = "UPDATE customer_inquiry SET" +
                     " cTranStat = '3'" +
                 " WHERE sTransNox = " + SQLUtil.toSQL(getInqTran());
@@ -727,7 +736,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return SQL Statement
      */
     public String makeSQL() {
-        return MiscUtil.makeSQL(this, ""); //exclude columns called thru left join
+        return MiscUtil.makeSQL(this, psExclude); //exclude columns called thru left join
     }
     
     /**
@@ -814,8 +823,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.sModified "                                                               
                 + " , a.dModified "                                                        
                 + "  , CASE "                           
-                + " 	WHEN a.cTranStat = '1' THEN 'ACTIVE' "                                         
-                + " 	ELSE 'CANCELLED'  "                                                          
+                + " 	WHEN a.cTranStat = '1' THEN 'CANCELLED' "    
+                + " 	WHEN a.cTranStat = '2' THEN 'APPROVE' "                                       
+                + " 	ELSE 'OPEN'  "                                                          
                 + "    END AS sTranStat "   
                   /*BUYING COSTUMER*/                                                             
                 + " , b.sCompnyNm AS sBuyCltNm"                                                               
