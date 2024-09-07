@@ -344,7 +344,7 @@ public class Model_Inquiry_FollowUp implements GEntity{
                      + " WHERE sTransNox = " + SQLUtil.toSQL(getTransNo());
         
         if (!lsSQL.isEmpty()) {
-            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
+            if (poGRider.executeQuery(lsSQL, "customer_inquiry", poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                 poJSON.put("result", "success");
                 poJSON.put("message", "Record saved successfully.");
             } else {

@@ -559,7 +559,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             String lsSQL; //nRsvAmtTl
             String lsExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
-                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo";//»
+                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd";//»   
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"VSP"));
@@ -820,9 +820,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.dEntryDte "                                                               
                 + " , a.sModified "                                                               
                 + " , a.dModified "                                                        
-                + "  , CASE "                           
-                + " 	WHEN a.cTranStat = '1' THEN 'CANCELLED' "    
-                + " 	WHEN a.cTranStat = '2' THEN 'APPROVE' "                                       
+                + "  , CASE "          
+                + " 	WHEN a.cTranStat = '2' THEN 'APPROVE' "                     
+                + " 	WHEN a.cTranStat = '3' THEN 'CANCELLED' "                                       
                 + " 	ELSE 'OPEN'  "                                                          
                 + "    END AS sTranStat "   
                   /*BUYING COSTUMER*/                                                             
@@ -874,7 +874,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , CONCAT(zb.sDSNoxxxx) AS sJONoxxxx "
                 + " , CONCAT(zd.sReferNox) AS sSINoxxxx "    
                 + " , ze.sTransNox AS sGatePsNo "
-                   /*TODO GATEPASS*/                                                               
+                + " , b.dBirthDte " 
+                + " , b.sTaxIDNox " 
+                + " , c.cOfficexx " 
+                + " , ba.sMobileNo " 
+                + " , bb.sEmailAdd "                                                          
                 + " FROM vsp_master a "                                                           
                  /*BUYING CUSTOMER*/                                                              
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
@@ -882,7 +886,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN addresses d ON d.sAddrssID = c.sAddrssID "                          
                 + " LEFT JOIN barangay e ON e.sBrgyIDxx = d.sBrgyIDxx  "                          
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                          
-                + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "                          
+                + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "
+                + " LEFT JOIN client_mobile ba ON ba.sClientID = b.sClientID AND ba.cPrimaryx = 1 "
+                + " LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 "                          
                  /*INQUIRY*/                                                                      
                 + " LEFT JOIN customer_inquiry h ON h.sTransNox = a.sInqryIDx "                   
                 + " LEFT JOIN client_master i ON i.sClientID = h.sClientID    "                   
@@ -3027,6 +3033,98 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getGatePsNo() {
         return (String) getValue("sGatePsNo");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setBirthDte(Date fdValue) {
+        return setValue("dBirthDte", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getBirthDte() {
+        Date date = null;
+        if(getValue("dBirthDte") == null || getValue("dBirthDte").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dBirthDte")), SQLUtil.FORMAT_SHORT_DATE);
+        }
+            
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setTaxIDNo(String fsValue) {
+        return setValue("sTaxIDNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTaxIDNo() {
+        return (String) getValue("sTaxIDNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setOffice(String fsValue) {
+        return setValue("cOfficexx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getOffice() {
+        return (String) getValue("cOfficexx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setMobileNo(String fsValue) {
+        return setValue("sMobileNo", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getMobileNo() {
+        return (String) getValue("sMobileNo");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setEmailAdd(String fsValue) {
+        return setValue("sEmailAdd", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getEmailAdd() {
+        return (String) getValue("sEmailAdd");
     }
     
 }
