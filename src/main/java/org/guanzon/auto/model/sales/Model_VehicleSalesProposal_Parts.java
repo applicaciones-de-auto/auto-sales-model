@@ -29,6 +29,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
     final String XML = "Model_VehicleSalesProposal_Parts.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psTargetBranchCd = "";
+    private String psOrigPartDesc = "";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -265,7 +266,13 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                 for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
                     setValue(lnCtr, loRS.getObject(lnCtr));
                 }
-
+                
+                //replace with the primary key column info
+                psOrigPartDesc = this.getStockID();
+                if(psOrigPartDesc.isEmpty()){
+                    psOrigPartDesc = this.getDescript();
+                }
+                
                 pnEditMode = EditMode.UPDATE;
 
                 poJSON.put("result", "success");
@@ -293,7 +300,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
-            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm»sBarCodex";
+            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm»sBarCodex»sPartDesc";
             if (pnEditMode == EditMode.ADDNEW) {
                 
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
@@ -313,16 +320,11 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
             } else {
                 Model_VehicleSalesProposal_Parts loOldEntity = new Model_VehicleSalesProposal_Parts(poGRider);
 
-                //replace with the primary key column info
-                String lsValue2 = this.getStockID();
-                if(lsValue2.isEmpty()){
-                    lsValue2 = this.getDescript();
-                }
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(),this.getStockID());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(),psOrigPartDesc);
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND (sStockIDx = " + SQLUtil.toSQL(this.getStockID()) + " OR sDescript = " + SQLUtil.toSQL(this.getDescript()) + " )" , lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND (sStockIDx = " + SQLUtil.toSQL(psOrigPartDesc) + " OR REPLACE(sDescript,' ', '') = " + SQLUtil.toSQL(psOrigPartDesc.replace(" ", ""))+ " )", lsExclude); //+ " )" (sStockIDx = " + SQLUtil.toSQL(this.getStockID()) + " OR 
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
@@ -440,7 +442,8 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                 + " , a.sPartStat "                                                                                                  
                 + " , a.dAddDatex "                                                                                                  
                 + " , a.sAddByxxx "                                                                                                   
-                + " , b.sBarCodex "                                                                                                
+                + " , b.sBarCodex "                                                                                                   
+                + " , b.sDescript AS sPartDesc "                                                                                               
                 + " , d.sDSNoxxxx "                                                                                                  
                 + " , d.dTransact "                                                                                                  
                 + " , e.sCompnyNm "                                                                                                   
@@ -787,6 +790,23 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      */
     public String getBarCode() {
         return (String) getValue("sBarCodex");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setPartDesc(String fsValue) {
+        return setValue("sPartDesc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPartDesc() {
+        return (String) getValue("sPartDesc");
     }
     
 }

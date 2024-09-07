@@ -598,10 +598,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 }
             } else {
                 Model_VehicleSalesProposal_Master loOldEntity = new Model_VehicleSalesProposal_Master(poGRider);
-                
                 //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
-
                 if ("success".equals((String) loJSON.get("result"))) {
                     //set VSP into open when user modify it. TODO
 //                    poJSON = setTranStat(TransactionStatus.STATE_OPEN);
@@ -830,11 +828,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                   /*BUYING COSTUMER*/                                                             
                 + " , b.sCompnyNm AS sBuyCltNm"                                                               
                 + " , b.cClientTp "                                                               
-                + " , IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''),  "                     
+                + " , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''),  "                     
                 + "   IFNULL(CONCAT(d.sAddressx,' ') , ''),                 "                     
                 + "   IFNULL(CONCAT(e.sBrgyName,' '), ''),                  "                     
                 + "   IFNULL(CONCAT(f.sTownName, ', '),''),                 "                     
-                + "   IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  "                     
+                + "   IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx  "                     
                   /*INQUIRY*/                                                            
                 + " , h.sInqryIDx AS sInquryID "                                                                
                 + " , DATE(h.dTransact) AS dInqryDte "                                                  

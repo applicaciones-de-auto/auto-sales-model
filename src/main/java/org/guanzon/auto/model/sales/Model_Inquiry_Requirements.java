@@ -265,7 +265,7 @@ public class Model_Inquiry_Requirements implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sDescript»cPayModex»cCustGrpx»sCompnyNm";
+            String lsExclude = "sDescript»cPayModex»cCustGrpx»sCompnyNm»cRequired";
             
             if (pnEditMode == EditMode.ADDNEW){
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
