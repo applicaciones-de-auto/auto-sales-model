@@ -36,8 +36,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     private String psBranchCd;
     private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
-                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo";
-
+                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex";//» 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
@@ -68,7 +67,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 
             MiscUtil.initRowSet(poEntity);        
             poEntity.updateObject("dTransact", poGRider.getServerDate()); 
-            poEntity.updateObject("dDelvryDt", poGRider.getServerDate());   
+            poEntity.updateObject("dDelvryDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));   
             poEntity.updateObject("dDcStatDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
@@ -557,9 +556,6 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL; //nRsvAmtTl
-            String lsExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
-                             + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
-                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd";//»   
             if (pnEditMode == EditMode.ADDNEW) {
                 //replace with the primary key column info
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"VSP"));
@@ -581,7 +577,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 //                    Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
 //                }
                 
-                lsSQL = MiscUtil.makeSQL(this, lsExclude);
+                lsSQL = MiscUtil.makeSQL(this, psExclude);
                 
                // lsSQL = "Select * FROM " + getTable() + " a left join (" + makeSQL() + ") b on a.column1 = b.column "
                 if (!lsSQL.isEmpty()) {
@@ -618,8 +614,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 //                        Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
 //                    }
                     
+                    System.out.println("getDelvryDt() : " + getDelvryDt());
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
@@ -878,7 +875,22 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , b.sTaxIDNox " 
                 + " , c.cOfficexx " 
                 + " , ba.sMobileNo " 
-                + " , bb.sEmailAdd "                                                          
+                + " , bb.sEmailAdd "       
+                /*TPL PROPOSAL*/                  
+                + " , zf.sTransNox AS sTPLTrans " 
+                + " , zf.sReferNox AS sTPLRefrn " 
+//                + " , zf.dTransact AS sTPLDatex " 
+                + " , zf.sInsTypID AS sTPLTypex " 
+                /*COMPRE PROPOSAL*/               
+                + " , zg.sTransNox AS sCOMTrans " 
+                + " , zg.sReferNox AS sCOMRefrn " 
+//                + " , zg.dTransact AS sCOMDatex " 
+                + " , zg.sInsTypID AS sCOMTypex " 
+                /*BOTH PROPOSAL*/                 
+                + " , zh.sTransNox AS sBOTTrans " 
+                + " , zh.sReferNox AS sBOTRefrn " 
+//                + " , zh.dTransact AS sBOTDatex " 
+                + " , zh.sInsTypID AS sBOTTypex " 
                 + " FROM vsp_master a "                                                           
                  /*BUYING CUSTOMER*/                                                              
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
@@ -920,7 +932,10 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN diagnostic_master zb ON zb.sSourceNo = a.sTransNox AND zb.cTranStat = '1' "
                 + " LEFT JOIN si_master_source zc ON zc.sSourceNo = a.sTransNox "
                 + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sReferNox AND zd.cTranStat = '1'"
-                + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox ";
+                + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox "
+                + " LEFT JOIN insurance_policy_proposal zf ON zf.sVSPNoxxx = a.sTransNox AND zf.sInsTypID = 'y' AND zf.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN insurance_policy_proposal zg ON zg.sVSPNoxxx = a.sTransNox AND zg.sInsTypID = 'c' AND zg.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN insurance_policy_proposal zh ON zh.sVSPNoxxx = a.sTransNox AND zh.sInsTypID = 'b' AND zh.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED);
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -1000,6 +1015,30 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         return (String) getValue("sVSPNOxxx");
     }
     
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fdValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setDelvryDt(Date fdValue) {
+//        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
+//        return setValue("dDelvryDt", timestamp); //dDelvryDt datatype is time stamp so convert it into timestamp
+//    }
+//    
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public Date getDelvryDt() {
+//        Date date = null;
+//        if(getValue("dDelvryDt") == null || getValue("dDelvryDt").equals("")){
+//            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+//        } else {
+//            date = SQLUtil.toDate(xsDateShort((Date) getValue("dDelvryDt")), SQLUtil.FORMAT_SHORT_DATE);
+//        }
+//        return date;
+//    }
+    
     /**
      * Description: Sets the Value of this record.
      *
@@ -1007,15 +1046,26 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return result as success/failed
      */
     public JSONObject setDelvryDt(Date fdValue) {
-        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
-        return setValue("dDelvryDt", timestamp); //dDelvryDt datatype is time stamp so convert it into timestamp
+        JSONObject loJSON = new JSONObject();
+//        if (!(fdValue instanceof java.sql.Date) && !(fdValue instanceof Date)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a date object.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+        return setValue("dDelvryDt", fdValue);
     }
-    
+
     /**
      * @return The Value of this record.
      */
     public Date getDelvryDt() {
         Date date = null;
+//        if(!getValue("dInqryDte").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dInqryDte").toString());
+//        }
+//        
         if(getValue("dDelvryDt") == null || getValue("dDelvryDt").equals("")){
             date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
         } else {
@@ -3125,6 +3175,158 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getEmailAdd() {
         return (String) getValue("sEmailAdd");
-    }
+    } 
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setTPLTrans(String fsValue) {
+        return setValue("sTPLTrans", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTPLTrans() {
+        return (String) getValue("sTPLTrans");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setTPLRefrn(String fsValue) {
+        return setValue("sTPLRefrn", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTPLRefrn() {
+        return (String) getValue("sTPLRefrn");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setTPLType(String fsValue) {
+        return setValue("sTPLTypex", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTPLType() {
+        return (String) getValue("sTPLTypex");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setCOMTrans(String fsValue) {
+        return setValue("sCOMTrans", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCOMTrans() {
+        return (String) getValue("sCOMTrans");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setCOMRefrn(String fsValue) {
+        return setValue("sCOMRefrn", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCOMRefrn() {
+        return (String) getValue("sCOMRefrn");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setCOMType(String fsValue) {
+        return setValue("sCOMTypex", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCOMType() {
+        return (String) getValue("sCOMTypex");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBOTTrans(String fsValue) {
+        return setValue("sBOTTrans", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBOTTrans() {
+        return (String) getValue("sBOTTrans");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBOTRefrn(String fsValue) {
+        return setValue("sBOTRefrn", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBOTRefrn() {
+        return (String) getValue("sBOTRefrn");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBOTType(String fsValue) {
+        return setValue("sBOTTypex", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBOTType() {
+        return (String) getValue("sBOTTypex");
+    } 
 }
