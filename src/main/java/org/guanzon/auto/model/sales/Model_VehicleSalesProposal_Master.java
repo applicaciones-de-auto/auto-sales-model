@@ -649,9 +649,10 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         //Update customer_inquiry status to with VSP
         String lsSQL = "";
         if(getUDRNo() == null || getUDRNo().equals("")){
-            lsSQL = "UPDATE customer_inquiry SET" +
-                    " cTranStat = '3'" +
-                " WHERE sTransNox = " + SQLUtil.toSQL(getInqTran());
+            lsSQL = "UPDATE customer_inquiry SET" 
+                    + " cTranStat = '3'" 
+                    + " dLastUpdt = " + SQLUtil.toSQL(poGRider.getServerDate()) 
+                    + " WHERE sTransNox = " + SQLUtil.toSQL(getInqTran());
             if (poGRider.executeQuery(lsSQL, "customer_inquiry", poGRider.getBranchCode(), getTargetBranchCd()) <= 0){
                 loJSON.put("result", "error");
                 loJSON.put("continue", true);
@@ -928,10 +929,10 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN banks_branches y ON y.sBrBankID = x.sBrBankID   "                   
                 + " LEFT JOIN banks z ON z.sBankIDxx = y.sBankIDxx            "  
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/                                                             
-                + " LEFT JOIN udr_master za ON za.sSourceNo = a.sTransNox AND za.cTranStat = '1' "   
-                + " LEFT JOIN diagnostic_master zb ON zb.sSourceNo = a.sTransNox AND zb.cTranStat = '1' "
+                + " LEFT JOIN udr_master za ON za.sSourceNo = a.sTransNox AND za.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
+                + " LEFT JOIN diagnostic_master zb ON zb.sSourceNo = a.sTransNox AND zb.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN si_master_source zc ON zc.sSourceNo = a.sTransNox "
-                + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sReferNox AND zd.cTranStat = '1'"
+                + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sReferNox AND zd.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox "
                 + " LEFT JOIN insurance_policy_proposal zf ON zf.sVSPNoxxx = a.sTransNox AND zf.sInsTypID = 'y' AND zf.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN insurance_policy_proposal zg ON zg.sVSPNoxxx = a.sTransNox AND zg.sInsTypID = 'c' AND zg.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
