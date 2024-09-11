@@ -254,7 +254,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
 
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sLaborCde = " + SQLUtil.toSQL(fsValue2) );
-
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -430,12 +430,12 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
                 + " , a.cAddtlxxx "                                                                                                    
                 + " , a.dAddDatex "                                                                                                    
                 + " , a.sAddByxxx "                                                                                                    
-                + " , c.sDSNoxxxx "                                                                                                    
-                + " , c.dTransact "                                                                                                    
+                + " , b.sDSNoxxxx "                                                                                                    
+                + " , b.dTransact "                                                                                                    
                 + " , d.sCompnyNm "                                                                                                    
-                + " FROM vsp_labor a "                                                                                                 
-                + " LEFT JOIN diagnostic_labor b ON b.sLaborCde = a.sLaborCde "                                                        
-                + " LEFT JOIN diagnostic_master c ON c.sTransNox = b.sTransNox and c.sSourceCD = a.sTransNox AND c.cTranStat = '1' "   
+                + " FROM vsp_labor a "
+                + " LEFT JOIN diagnostic_master b ON  b.sSourceNo = a.sTransNox AND b.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN diagnostic_labor c ON c.sLaborCde = a.sLaborCde AND c.sTransNox = b.sTransNox"                 
                 + " LEFT JOIN GGC_ISysDBF.client_master d ON d.sClientID = a.sAddByxxx " ;
     }
     

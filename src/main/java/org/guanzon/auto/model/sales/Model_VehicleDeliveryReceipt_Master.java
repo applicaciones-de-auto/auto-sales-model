@@ -34,7 +34,7 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
     private String psExclude = "sTranStat»sBuyCltNm»cClientTp»sAddressx»sVSPTrans»dVSPDatex»sVSPNOxxx»cIsVhclNw»dDelvryDt»sInqryIDx»sCoCltNmx»"
-                                + "sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sBranchCD";//» 
+                                + "sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sColorDsc»sVhclFDsc»sBranchNm»sBranchCD»cPayModex»sSITransx»sSINoxxxx";//» 
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -503,7 +503,7 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                 + "  , a.dModified "                                                       
                 + "  , CASE "          
                 + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "     
-                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'CLOSED' "        
+                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVED' "        
                 + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "          
                 + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                             
                 + " 	ELSE 'ACTIVE'  "                                                          
@@ -523,7 +523,8 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                 + "  , h.cIsVhclNw "                                                                             
                 + "  , DATE(h.dDelvryDt) AS dDelvryDt "                                                                              
                 + "  , h.sInqryIDx "                                                                               
-                + "  , h.sBranchCD "                                                                              
+                + "  , h.sBranchCD "                                                                               
+                + "  , h.cPayModex "                                                                              
                 /*CO-CLIENT*/                                                                                     
                 + "  , i.sCompnyNm AS sCoCltNmx "                                                                 
                 /*VEHICLE INFORMATION*/                                                                           
@@ -532,9 +533,14 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                 + "  , j.sFrameNox "                                                                              
                 + "  , j.sEngineNo "                                                                              
                 + "  , j.sKeyNoxxx "                                                                              
-                + "  , l.sDescript AS sVhclDesc "                                                                 
+                + "  , l.sDescript AS sVhclFDsc "   
+                + "  ,  TRIM(CONCAT_WS(' ',la.sMakeDesc, lb.sModelDsc, lc.sTypeDesc, l.sTransMsn, l.nYearModl )) AS sVhclDesc "
+                + "  ,ld.sColorDsc "                                                              
                 /*BRANCH*/                                                                                        
-                + "  , m.sBranchNm     "                                                                          
+                + "  , m.sBranchNm    "
+                /*VSI*/
+                + " , o.sTransNox AS sSITransx" 
+                + " , o.sReferNox AS sSINoxxxx "                                                                          
                 + "  FROM udr_master a "                                                                          
                  /*BUYING CUSTOMER*/                                                                              
                 + "  LEFT JOIN client_master b ON b.sClientID = a.sClientID "                                     
@@ -552,9 +558,16 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                 /*VEHICLE INFORMATION*/                                                                           
                 + "  LEFT JOIN vehicle_serial j ON j.sSerialID = a.sSerialID "                                    
                 + "  LEFT JOIN vehicle_serial_registration k ON k.sSerialID = a.sSerialID "                       
-                + "  LEFT JOIN vehicle_master l ON l.sVhclIDxx = j.sVhclIDxx "                                    
+                + "  LEFT JOIN vehicle_master l ON l.sVhclIDxx = j.sVhclIDxx "          
+                + "  LEFT JOIN vehicle_make la ON la.sMakeIDxx = l.sMakeIDxx  "
+                + "  LEFT JOIN vehicle_model lb ON lb.sModelIDx = l.sModelIDx "
+                + "  LEFT JOIN vehicle_type lc ON lc.sTypeIDxx = l.sTypeIDxx  "
+                + "  LEFT JOIN vehicle_color ld ON ld.sColorIDx = l.sColorIDx "                                    
                 /*BRANCH*/                                                                                        
-                + "  LEFT JOIN branch m ON m.sBranchCd = h.sBranchCD "   ;
+                + "  LEFT JOIN branch m ON m.sBranchCd = h.sBranchCD "
+                /*VSI*/
+                + "  LEFT JOIN si_master_source n on n.sSourceNo = a.sTransNox "
+                + "  LEFT JOIN si_master o ON o.sTransNox = n.sTransNox AND o.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)     ;
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -1173,6 +1186,23 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
      * @param fsValue
      * @return True if the record assignment is successful.
      */
+    public JSONObject setPayMode(String fsValue) {
+        return setValue("cPayModex", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPayMode() {
+        return (String) getValue("cPayModex");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
     public JSONObject setCoCltNm(String fsValue) {
         return setValue("sCoCltNmx", fsValue);
     }
@@ -1292,6 +1322,40 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
      * @param fsValue
      * @return True if the record assignment is successful.
      */
+    public JSONObject setVhclFDsc(String fsValue) {
+        return setValue("sVhclFDsc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclFDsc() {
+        return (String) getValue("sVhclFDsc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setColorDsc(String fsValue) {
+        return setValue("sColorDsc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getColorDsc() {
+        return (String) getValue("sColorDsc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
     public JSONObject setBranchNm(String fsValue) {
         return setValue("sBranchNm", fsValue);
     }
@@ -1301,6 +1365,40 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
      */
     public String getBranchNm() {
         return (String) getValue("sBranchNm");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setSITrans(String fsValue) {
+        return setValue("sSITransx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getSITrans() {
+        return (String) getValue("sSITransx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setSINo(String fsValue) {
+        return setValue("sSINoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getSINo() {
+        return (String) getValue("sSINoxxxx");
     }
     
 }

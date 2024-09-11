@@ -35,7 +35,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
     private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
-                             + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
+                             + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sVhclFDsc»sColorDsc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
                              + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex";//» 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -651,7 +651,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         if(getUDRNo() == null || getUDRNo().equals("")){
             lsSQL = "UPDATE customer_inquiry SET" 
                     + " cTranStat = '3'" 
-                    + " dLastUpdt = " + SQLUtil.toSQL(poGRider.getServerDate()) 
+                    + ", dLastUpdt = " + SQLUtil.toSQL(poGRider.getServerDate()) 
                     + " WHERE sTransNox = " + SQLUtil.toSQL(getInqTran());
             if (poGRider.executeQuery(lsSQL, "customer_inquiry", poGRider.getBranchCode(), getTargetBranchCd()) <= 0){
                 loJSON.put("result", "error");
@@ -855,7 +855,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , p.sFrameNox "                                                               
                 + " , p.sEngineNo "                                                               
                 + " , p.sKeyNoxxx "                                                               
-                + " , r.sDescript AS sVhclDesc "                                                  
+                + " , r.sDescript AS sVhclFDsc "
+                + " , TRIM(CONCAT_WS(' ',ra.sMakeDesc, rb.sModelDsc, rc.sTypeDesc, r.sTransMsn, r.nYearModl )) AS sVhclDesc "
+                + " , rd.sColorDsc "
                   /*BRANCH*/                                                                      
                 + " , s.sBranchNm "                                                               
                   /*INSURANCE*/                                                                   
@@ -915,7 +917,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                  /*VEHICLE INFORMATION*/                                                          
                 + " LEFT JOIN vehicle_serial p ON p.sSerialID = a.sSerialID "                     
                 + " LEFT JOIN vehicle_serial_registration q ON q.sSerialID = a.sSerialID "        
-                + " LEFT JOIN vehicle_master r ON r.sVhclIDxx = p.sVhclIDxx "                     
+                + " LEFT JOIN vehicle_master r ON r.sVhclIDxx = p.sVhclIDxx "   
+                + " LEFT JOIN vehicle_make ra ON ra.sMakeIDxx = r.sMakeIDxx  "
+                + " LEFT JOIN vehicle_model rb ON rb.sModelIDx = r.sModelIDx "
+                + " LEFT JOIN vehicle_type rc ON rc.sTypeIDxx = r.sTypeIDxx  "
+                + " LEFT JOIN vehicle_color rd ON rd.sColorIDx = r.sColorIDx "
                  /*BRANCH*/                                                                       
                 + " LEFT JOIN branch s ON s.sBranchCd = a.sBranchCD "                             
                  /*TPL INSURANCE*/                                                                
@@ -931,7 +937,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/                                                             
                 + " LEFT JOIN udr_master za ON za.sSourceNo = a.sTransNox AND za.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
                 + " LEFT JOIN diagnostic_master zb ON zb.sSourceNo = a.sTransNox AND zb.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
-                + " LEFT JOIN si_master_source zc ON zc.sSourceNo = a.sTransNox "
+                + " LEFT JOIN si_master_source zc ON zc.sSourceNo = za.sTransNox "
                 + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sReferNox AND zd.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox "
                 + " LEFT JOIN insurance_policy_proposal zf ON zf.sVSPNoxxx = a.sTransNox AND zf.sInsTypID = 'y' AND zf.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
@@ -2880,6 +2886,40 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getVhclDesc() {
         return (String) getValue("sVhclDesc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setVhclFDsc(String fsValue) {
+        return setValue("sVhclFDsc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclFDsc() {
+        return (String) getValue("sVhclFDsc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setColorDsc(String fsValue) {
+        return setValue("sColorDsc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getColorDsc() {
+        return (String) getValue("sColorDsc");
     }
     
     /**
