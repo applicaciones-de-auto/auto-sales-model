@@ -294,7 +294,7 @@ public class Model_Inquiry_Master implements GEntity {
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -323,7 +323,7 @@ public class Model_Inquiry_Master implements GEntity {
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), getTargetBranchCd()) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -346,6 +346,14 @@ public class Model_Inquiry_Master implements GEntity {
         }
         
         return poJSON;
+    }
+    
+    private String getTargetBranchCd(){
+        if (!poGRider.getBranchCode().equals(getBranchCd())){
+            return getBranchCd();
+        } else {
+            return "";
+        }
     }
     
     public JSONObject lostSale(String fsValue){
@@ -436,11 +444,11 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.dModified "                                                                        
                 + " , b.sCompnyNm AS sClientNm"                                                                        
                 + " , b.cClientTp "                                                                        
-                + " , IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                               
+                + " , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                               
                 + "	IFNULL(CONCAT(d.sAddressx,' ') , ''),  "                                               
                 + "	IFNULL(CONCAT(e.sBrgyName,' '), ''),   "                                               
                 + "	IFNULL(CONCAT(f.sTownName, ', '),''),  "                                               
-                + "	IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  "                                
+                + "	IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx  "                                
                 + " , h.sMobileNo "                                                                        
                 + " , i.sEmailAdd "                                                                        
                 + " , j.sAccountx "                                                                        
@@ -468,7 +476,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + " LEFT JOIN client_master k ON k.sClientID = a.sContctID   "                             
                 + " LEFT JOIN ggc_isysdbf.client_master l ON l.sClientID = a.sEmployID "                   
                 + " LEFT JOIN client_master m ON m.sClientID = a.sAgentIDx    "                            
-                + " LEFT JOIN online_platforms n ON n.sTransNox = a.sSourceCD "                            
+                + " LEFT JOIN online_platforms n ON n.sTransNox = a.sSourceNo "                            
                 + " LEFT JOIN activity_master o ON o.sActvtyID = a.sActvtyID  "                            
                 + " LEFT JOIN branch p ON p.sBranchCd = a.sBranchCd           "                             
                 + " LEFT JOIN vehicle_serial q ON q.sSerialID = a.sSerialID           "    

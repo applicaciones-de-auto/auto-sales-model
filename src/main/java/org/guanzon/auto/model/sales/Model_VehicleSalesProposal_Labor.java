@@ -6,10 +6,13 @@
 package org.guanzon.auto.model.sales;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
+import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
@@ -24,6 +27,8 @@ import org.json.simple.JSONObject;
  */
 public class Model_VehicleSalesProposal_Labor implements GEntity{
     final String XML = "Model_VehicleSalesProposal_Labor.xml";
+    private final String psDefaultDate = "1900-01-01";
+    private String psTargetBranchCd = "";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -54,7 +59,10 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
             poEntity.moveToInsertRow();
 
             MiscUtil.initRowSet(poEntity);
-            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN);
+            poEntity.updateObject("dAddDatex", poGRider.getServerDate());
+            poEntity.updateBigDecimal("nLaborAmt", new BigDecimal("0.00"));  
+            poEntity.updateBigDecimal("nLaborDsc", new BigDecimal("0.00"));  
+            poEntity.updateBigDecimal("nNtLabAmt", new BigDecimal("0.00"));  
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -83,7 +91,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
         return "";
     }
 
-     /**
+    /**
      * Gets the column index number.
      *
      * @param fsValue - column index name
@@ -119,7 +127,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
     public int getEditMode() {
         return pnEditMode;
     }
-
+    
     /**
      * Gets the table name.
      *
@@ -129,7 +137,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
     public String getTable() {
         return "vsp_labor";
     }
-
+    
     /**
      * Gets the value of a column index number.
      *
@@ -221,30 +229,32 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
     @Override
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
-
-        //replace with the primary key column info
-        //setTransactionNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-
+        
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
     }
 
+    @Override
+    public JSONObject openRecord(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     /**
      * Opens a record.
      *
-     * @param fsCondition - filter values
+     * @param fsValue - filter values
+     * @param fsValue2 - filter values
      * @return result as success/failed
      */
-    @Override
-    public JSONObject openRecord(String fsCondition) {
+    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
-        String lsSQL = MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
+        String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, fsCondition);
-
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sLaborCde = " + SQLUtil.toSQL(fsValue2) );
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -280,14 +290,13 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
+            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm";
             if (pnEditMode == EditMode.ADDNEW) {
-                //replace with the primary key column info
-                setTransactionNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-
-                lsSQL = makeSQL();
+                
+                lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -299,17 +308,17 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
                     poJSON.put("message", "No record to save.");
                 }
             } else {
-                Model_VehicleSalesProposal_Master loOldEntity = new Model_VehicleSalesProposal_Master(poGRider);
+                Model_VehicleSalesProposal_Labor loOldEntity = new Model_VehicleSalesProposal_Labor(poGRider);
 
                 //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransactionNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(),this.getLaborCde());
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransactionNo()), "sCompnyNm»sCPerson1»sCPPosit1»sMobileNo»sEMailAdd");
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sLaborCde = " + SQLUtil.toSQL(this.getLaborCde()), lsExclude);
 
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -331,6 +340,33 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
             return poJSON;
         }
 
+        return poJSON;
+    }
+    
+    public void setTargetBranchCd(String fsBranchCd){
+        if (!poGRider.getBranchCode().equals(fsBranchCd)){
+            psTargetBranchCd = fsBranchCd;
+        } else {
+            psTargetBranchCd = "";
+        }
+    }
+    
+    public JSONObject deleteRecord(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = " DELETE FROM "+getTable()+" WHERE "
+                    + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                    + " AND sLaborCde = " + SQLUtil.toSQL(this.getLaborCde());
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record deleted successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
         return poJSON;
     }
     
@@ -380,52 +416,294 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
         return MiscUtil.makeSQL(this, ""); //exclude columns called thru left join
     }
     
+    public String getSQL(){
+        return    " SELECT "                                                                                                           
+                + "   a.sTransNox "                                                                                                    
+                + " , a.nEntryNox "                                                                                                    
+                + " , a.sLaborCde "                                                                                                    
+                + " , a.nLaborAmt "                                                                                                    
+                + " , a.sChrgeTyp "                                                                                                    
+                + " , a.sRemarksx "                                                                                                    
+                + " , a.sLaborDsc "                                                                                                    
+                + " , a.nLaborDsc "                                                                                                    
+                + " , a.nNtLabAmt "                                                                                                   
+                + " , a.cAddtlxxx "                                                                                                    
+                + " , a.dAddDatex "                                                                                                    
+                + " , a.sAddByxxx "                                                                                                    
+                + " , b.sDSNoxxxx "                                                                                                    
+                + " , b.dTransact "                                                                                                    
+                + " , d.sCompnyNm "                                                                                                    
+                + " FROM vsp_labor a "
+                + " LEFT JOIN diagnostic_master b ON  b.sSourceNo = a.sTransNox AND b.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN diagnostic_labor c ON c.sLaborCde = a.sLaborCde AND c.sTransNox = b.sTransNox"                 
+                + " LEFT JOIN GGC_ISysDBF.client_master d ON d.sClientID = a.sAddByxxx " ;
+    }
+    
     /**
-     * Description: Sets the ClientID of this record.
+     * Description: Sets the ID of this record.
      *
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject setTransactionNo(String fsValue) {
+    public JSONObject setTransNo(String fsValue) {
         return setValue("sTransNox", fsValue);
     }
 
     /**
-     * @return The sTransNox of this record.
+     * @return The ID of this record.
      */
-    public String getTransactionNo() {
+    public String getTransNo() {
         return (String) getValue("sTransNox");
     }
     
     /**
-     * Description: Sets the cTranStat of this record.
+     * Description: Sets the Value of this record.
+     *
+     * @param fnValue
+     * @return result as success/failed
+     */
+    public JSONObject setEntryNo(Integer fnValue) {
+        return setValue("nEntryNox", fnValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Integer getEntryNo() {
+        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
      *
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject setTranStatus(String fsValue) {
-        return setValue("cTranStat", fsValue);
+    public JSONObject setLaborCde(String fsValue) {
+        return setValue("sLaborCde", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getLaborCde() {
+        return (String) getValue("sLaborCde");
     }
     
-    public String getSQL(){
-        return " SELECT " +
-                "  IFNULL(a.sTransNox, '') AS sTransNox" + //1
-                " , a.nEntryNox" + //2
-                " , IFNULL(a.sLaborCde, '') AS sLaborCde" + //3
-                " , a.nLaborAmt" + //4
-                " , IFNULL(a.sChrgeTyp, '') AS sChrgeTyp" + //5
-                " , IFNULL(a.sRemarksx, '') AS sRemarksx" + //6
-                " , IFNULL(a.sLaborDsc, '') AS sLaborDsc" + //7
-                " , a.cAddtlxxx" + //8
-                " , a.dAddDatex" + //9
-                " , IFNULL(a.sAddByxxx, '') AS sAddByxxx" + //10
-                " , IFNULL(GROUP_CONCAT( DISTINCT c.sDSNoxxxx), '') AS sDSNoxxxx " + //11
-                " , IFNULL(a.sApproved, '') AS sApproved " + //12
-                " , a.dApproved" + //13
-                " , IFNULL(d.sCompnyNm, '') AS sApprovBy " + //14
-                " FROM "+getTable()+" a "+
-                " LEFT JOIN diagnostic_labor b ON b.sLaborCde = a.sLaborCde " +
-                " LEFT JOIN diagnostic_master c ON c.sTransNox = b.sTransNox and c.sSourceCD = a.sTransNox AND c.cTranStat = '1' "  +
-                " LEFT JOIN GGC_ISysDBF.client_master d ON d.sClientID = a.sApproved " ;
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setLaborAmt(BigDecimal fdbValue) {
+        return setValue("nLaborAmt", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getLaborAmt() {
+        return new BigDecimal(String.valueOf(getValue("nLaborAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setChrgeTyp(String fsValue) {
+        return setValue("sChrgeTyp", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getChrgeTyp() {
+        return (String) getValue("sChrgeTyp");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setRemarks(String fsValue) {
+        return setValue("sRemarksx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getRemarks() {
+        return (String) getValue("sRemarksx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setLaborDsc(String fsValue) {
+        return setValue("sLaborDsc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getLaborDsc() {
+        return (String) getValue("sLaborDsc");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setLaborDscount(BigDecimal fdbValue) {
+        return setValue("nLaborDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getLaborDscount() {
+        return new BigDecimal(String.valueOf(getValue("nLaborDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nLaborDsc")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setNtLabAmt(BigDecimal fdbValue) {
+        return setValue("nNtLabAmt", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getNtLabAmt() {
+        return new BigDecimal(String.valueOf(getValue("nNtLabAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nLaborAmt")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setAddtl(String fsValue) {
+        return setValue("cAddtlxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getAddtl() {
+        return (String) getValue("cAddtlxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setAddDate(Date fdValue) {
+        return setValue("dAddDatex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getAddDate() {
+        Date date = null;
+        if(!getValue("dAddDatex").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dAddDatex").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setAddBy(String fsValue) {
+        return setValue("sAddByxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getAddBy() {
+        return (String) getValue("sAddByxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setDSNo(String fsValue) {
+        return setValue("sDSNoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getDSNo() {
+        return (String) getValue("sDSNoxxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setTransactDte(Date fdValue) {
+        return setValue("dTransact", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getTransactDte() {
+        Date date = null;
+        if(!getValue("dTransact").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dTransact").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setCompnyNm(String fsValue) {
+        return setValue("sCompnyNm", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCompnyNm() {
+        return (String) getValue("sCompnyNm");
     }
 }

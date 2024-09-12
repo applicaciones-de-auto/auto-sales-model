@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
 public class Model_Bank_Application implements GEntity{
     final String XML = "Model_Bank_Application.xml";
     private final String psDefaultDate = "1900-01-01";
-    private String psBranchCd;
+    private String psTargetBranchCd = "";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -276,7 +276,7 @@ public class Model_Bank_Application implements GEntity{
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -303,7 +303,7 @@ public class Model_Bank_Application implements GEntity{
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -327,6 +327,14 @@ public class Model_Bank_Application implements GEntity{
         }
         
         return poJSON;
+    }
+    
+    public void setTargetBranchCd(String fsBranchCd){
+        if (!poGRider.getBranchCode().equals(fsBranchCd)){
+            psTargetBranchCd = fsBranchCd;
+        } else {
+            psTargetBranchCd = "";
+        }
     }
     
     public JSONObject cancelTransaction(){

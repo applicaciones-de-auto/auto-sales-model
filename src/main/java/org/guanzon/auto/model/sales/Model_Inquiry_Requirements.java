@@ -25,7 +25,7 @@ import org.json.simple.JSONObject;
 public class Model_Inquiry_Requirements implements GEntity{
     final String XML = "Model_Inquiry_Requirements.xml";
     private final String psDefaultDate = "1900-01-01";
-    private String psBranchCd;
+    private String psTargetBranchCd;
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -265,13 +265,13 @@ public class Model_Inquiry_Requirements implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sDescript»cPayModex»cCustGrpx»sCompnyNm";
+            String lsExclude = "sDescript»cPayModex»cCustGrpx»sCompnyNm»cRequired";
             
             if (pnEditMode == EditMode.ADDNEW){
                 lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -290,7 +290,7 @@ public class Model_Inquiry_Requirements implements GEntity{
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, " sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sRqrmtCde = " + SQLUtil.toSQL(this.getRqrmtCde()), lsExclude);
                     
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -316,6 +316,14 @@ public class Model_Inquiry_Requirements implements GEntity{
         return poJSON;
     }
     
+    public void setTargetBranchCd(String fsBranchCd){
+        if (!poGRider.getBranchCode().equals(fsBranchCd)){
+            psTargetBranchCd = fsBranchCd;
+        } else {
+            psTargetBranchCd = "";
+        }
+    }
+    
     public JSONObject deleteRecord(){
         poJSON = new JSONObject();
         
@@ -324,7 +332,7 @@ public class Model_Inquiry_Requirements implements GEntity{
                 + " AND nEntryNox = " + SQLUtil.toSQL(this.getEntryNo())
                 + " AND sRqrmtCde = " + SQLUtil.toSQL(this.getRqrmtCde());
         if (!lsSQL.isEmpty()) {
-            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                 poJSON.put("result", "success");
                 poJSON.put("message", "Record deleted successfully.");
             } else {
@@ -373,7 +381,7 @@ public class Model_Inquiry_Requirements implements GEntity{
                 + "    a.sTransNox "                                                    
                 + "  , a.nEntryNox "                                                    
                 + "  , a.sRqrmtCde "                                                    
-                + "  , a.cRequired "                                                    
+//                + "  , a.cRequired "                                                    
                 + "  , a.cSubmittd "                                                    
                 + "  , a.sReceived "                                                    
                 + "  , a.dReceived "                                                    
@@ -381,10 +389,12 @@ public class Model_Inquiry_Requirements implements GEntity{
                 + "  , d.cPayModex "                                                    
                 + "  , d.cCustGrpx "                                                    
                 + "  , e.sCompnyNm "                                                    
+                + "  , f.cRequired "                                                        
                 + " FROM customer_inquiry_requirements a "                              
                 + " LEFT JOIN requirement_source b ON a.sRqrmtCde = b.sRqrmtCde "       
                 + " LEFT JOIN customer_inquiry d ON d.sTransNox = a.sTransNox   "       
-                + " LEFT JOIN GGC_ISysDBF.Client_Master e ON e.sClientID = a.sReceived " ;                          
+                + " LEFT JOIN GGC_ISysDBF.Client_Master e ON e.sClientID = a.sReceived "               
+                + " LEFT JOIN requirement_source_pergroup f ON f.sRqrmtCde = a.sRqrmtCde "  ;                          
     }
     
     /**

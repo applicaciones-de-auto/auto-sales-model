@@ -6,10 +6,13 @@
 package org.guanzon.auto.model.sales;
 
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
+import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
@@ -24,6 +27,9 @@ import org.json.simple.JSONObject;
  */
 public class Model_VehicleSalesProposal_Parts implements GEntity{
     final String XML = "Model_VehicleSalesProposal_Parts.xml";
+    private final String psDefaultDate = "1900-01-01";
+    private String psTargetBranchCd = "";
+    private String psOrigPartDesc = "";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -54,7 +60,13 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
             poEntity.moveToInsertRow();
 
             MiscUtil.initRowSet(poEntity);
-            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN);
+            poEntity.updateObject("dAddDatex", poGRider.getServerDate());
+            poEntity.updateBigDecimal("nUnitPrce", new BigDecimal("0.00"));  
+            poEntity.updateBigDecimal("nSelPrice", new BigDecimal("0.00")); 
+            poEntity.updateBigDecimal("nNtPrtAmt", new BigDecimal("0.00")); 
+            poEntity.updateBigDecimal("nPartsDsc", new BigDecimal("0.00")); 
+            poEntity.updateInt("nQuantity", 0); 
+            poEntity.updateInt("nReleased", 0); 
 
             poEntity.insertRow();
             poEntity.moveToCurrentRow();
@@ -83,7 +95,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
         return "";
     }
 
-     /**
+    /**
      * Gets the column index number.
      *
      * @param fsValue - column index name
@@ -129,7 +141,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
     public String getTable() {
         return "vsp_parts";
     }
-
+    
     /**
      * Gets the value of a column index number.
      *
@@ -222,28 +234,30 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
     public JSONObject newRecord() {
         pnEditMode = EditMode.ADDNEW;
 
-        //replace with the primary key column info
-        setTransactionNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
     }
-
+    
+    @Override
+    public JSONObject openRecord(String string) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     /**
      * Opens a record.
      *
-     * @param fsCondition - filter values
+     * @param fsValue - filter values
+     * @param fsValue2 - filter values
      * @return result as success/failed
      */
-    @Override
-    public JSONObject openRecord(String fsCondition) {
+    public JSONObject openRecord(String fsValue, String fsValue2) {
         poJSON = new JSONObject();
 
-        String lsSQL = MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
+        String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, fsCondition);
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND (a.sStockIDx = " + SQLUtil.toSQL(fsValue2) + " OR REPLACE(a.sDescript,' ', '') = " + SQLUtil.toSQL(fsValue2.replace(" ", ""))+ " )" );
 
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -252,7 +266,13 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                 for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
                     setValue(lnCtr, loRS.getObject(lnCtr));
                 }
-
+                
+                //replace with the primary key column info
+                psOrigPartDesc = this.getStockID();
+                if(psOrigPartDesc.isEmpty()){
+                    psOrigPartDesc = this.getDescript();
+                }
+                
                 pnEditMode = EditMode.UPDATE;
 
                 poJSON.put("result", "success");
@@ -280,14 +300,13 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
+            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm»sBarCodex»sPartDesc";
             if (pnEditMode == EditMode.ADDNEW) {
-                //replace with the primary key column info
-                setTransactionNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
-
-                lsSQL = makeSQL();
+                
+                lsSQL = MiscUtil.makeSQL(this, lsExclude);
 
                 if (!lsSQL.isEmpty()) {
-                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                    if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                         poJSON.put("result", "success");
                         poJSON.put("message", "Record saved successfully.");
                     } else {
@@ -301,15 +320,14 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
             } else {
                 Model_VehicleSalesProposal_Parts loOldEntity = new Model_VehicleSalesProposal_Parts(poGRider);
 
-                //replace with the primary key column info
-                JSONObject loJSON = loOldEntity.openRecord(this.getTransactionNo());
+                JSONObject loJSON = loOldEntity.openRecord(this.getTransNo(),psOrigPartDesc);
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransactionNo()), "sCompnyNm»sCPerson1»sCPPosit1»sMobileNo»sEMailAdd");
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND (sStockIDx = " + SQLUtil.toSQL(psOrigPartDesc) + " OR REPLACE(sDescript,' ', '') = " + SQLUtil.toSQL(psOrigPartDesc.replace(" ", ""))+ " )", lsExclude); //+ " )" (sStockIDx = " + SQLUtil.toSQL(this.getStockID()) + " OR 
 
                     if (!lsSQL.isEmpty()) {
-                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                        if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
                             poJSON.put("result", "success");
                             poJSON.put("message", "Record saved successfully.");
                         } else {
@@ -331,6 +349,34 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
             return poJSON;
         }
 
+        return poJSON;
+    }
+    
+    public void setTargetBranchCd(String fsBranchCd){
+        if (!poGRider.getBranchCode().equals(fsBranchCd)){
+            psTargetBranchCd = fsBranchCd;
+        } else {
+            psTargetBranchCd = "";
+        }
+    }
+    
+    public JSONObject deleteRecord(){
+        poJSON = new JSONObject();
+        
+        String lsSQL = " DELETE FROM "+getTable()+" WHERE "
+                    + " sTransNox = " + SQLUtil.toSQL(this.getTransNo())
+                    + " AND (sStockIDx = " + SQLUtil.toSQL(this.getStockID())
+                    + " OR REPLACE(sDescript,' ', '') = " + SQLUtil.toSQL(this.getDescript().replace(" ", "")) + ") ";
+        if (!lsSQL.isEmpty()) {
+            if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), "") > 0) {
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record deleted successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("continue", true);
+                poJSON.put("message", poGRider.getErrMsg());
+            }
+        }
         return poJSON;
     }
     
@@ -380,62 +426,387 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
         return MiscUtil.makeSQL(this, ""); //exclude columns called thru left join
     }
     
+    public String getSQL(){
+        return    " SELECT "                                                                                                         
+                + "   a.sTransNox "                                                                                                  
+                + " , a.nEntryNox "                                                                                                  
+                + " , a.sStockIDx "                                                                                                  
+                + " , a.nUnitPrce "                                                                                                  
+                + " , a.nSelPrice "                                                                                                  
+                + " , a.nQuantity "                                                                                                  
+                + " , a.nReleased "                                                                                                  
+                + " , a.sChrgeTyp "                                                                                                  
+                + " , a.sDescript "                                                                                                   
+                + " , a.nPartsDsc "                                                                                                    
+                + " , a.nNtPrtAmt "                                                                                               
+                + " , a.sPartStat "                                                                                                  
+                + " , a.dAddDatex "                                                                                                  
+                + " , a.sAddByxxx "                                                                                                   
+                + " , b.sBarCodex "                                                                                                   
+                + " , b.sDescript AS sPartDesc "                                                                                               
+                + " , c.sDSNoxxxx "                                                                                                  
+                + " , c.dTransact "                                                                                                  
+                + " , e.sCompnyNm "                                                                                                   
+                + " FROM vsp_parts a "                                                                                               
+                + " LEFT JOIN inventory b ON b.sStockIDx = a.sStockIDx "                                                             
+                + " LEFT JOIN diagnostic_master c ON c.sSourceNo = a.sTransNox AND c.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
+                + " LEFT JOIN diagnostic_parts d ON d.sTransNox = c.sTransNox AND d.sStockIDx = a.sStockIDx "                                                      
+                + " LEFT JOIN GGC_ISysDBF.client_master e ON e.sClientID = a.sAddByxxx "  ;
+    }
+    
+    
     /**
-     * Description: Sets the ClientID of this record.
+     * Description: Sets the ID of this record.
      *
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject setTransactionNo(String fsValue) {
+    public JSONObject setTransNo(String fsValue) {
         return setValue("sTransNox", fsValue);
     }
 
     /**
-     * @return The sTransNox of this record.
+     * @return The ID of this record.
      */
-    public String getTransactionNo() {
+    public String getTransNo() {
         return (String) getValue("sTransNox");
     }
     
     /**
-     * Description: Sets the cTranStat of this record.
+     * Description: Sets the Value of this record.
+     *
+     * @param fnValue
+     * @return result as success/failed
+     */
+    public JSONObject setEntryNo(Integer fnValue) {
+        return setValue("nEntryNox", fnValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Integer getEntryNo() {
+        return Integer.parseInt(String.valueOf(getValue("nEntryNox")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
      *
      * @param fsValue
      * @return True if the record assignment is successful.
      */
-    public JSONObject setTranStatus(String fsValue) {
-        return setValue("cTranStat", fsValue);
+    public JSONObject setStockID(String fsValue) {
+        return setValue("sStockIDx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getStockID() {
+        return (String) getValue("sStockIDx");
     }
     
-    public String getSQL(){
-        return " SELECT  " +
-                " IFNULL(a.sTransNox, '') AS sTransNox" + //1
-                "  , a.nEntryNox" + //2
-                "  , IFNULL(a.sStockIDx, '') AS sStockIDx" + //3
-                "  , a.nUnitPrce" + //4
-                "  , a.nSelPrice" + //5
-                "  , a.nQuantity" + //6
-                "  , a.nReleased" + //7
-                "  , IFNULL(a.sChrgeTyp, '') AS sChrgeTyp" + //8
-                "  , IFNULL(a.sDescript, '') AS sDescript" + //9 Sales Parts Description
-                "  , IFNULL(a.sPartStat, '') AS sPartStat" + //10
-                "  , IFNULL(GROUP_CONCAT(DISTINCT d.sDSNoxxxx), '') AS sDSNoxxxx" + //11
-                "  , a.dAddDatex" + //12
-                "  , IFNULL(a.sAddByxxx, '') AS sAddByxxx" + //13
-                "  , IFNULL(b.sBarCodex, '') AS sBarCodex" + //14 
-                "  , IFNULL(a.nQuantity * a.nUnitPrce, '') AS sTotlAmtx " + //15
-                "  , SUM(c.nQtyEstmt) AS sQtyEstmt " + //16 
-                "  , IFNULL(b.sDescript, '') AS sPartDesc " + //17 Parts Description
-                " , IFNULL(a.sApproved, '') AS sApproved " + //18
-                " , a.dApproved" + //19
-                " , IFNULL(e.sCompnyNm, '') AS sApprovBy" + //20
-                //  /*dTImeStmp*/
-                " FROM "+getTable()+" a " +
-                " LEFT JOIN inventory b ON b.sStockIDx = a.sStockIDx " +
-                " LEFT JOIN diagnostic_parts c ON c.sStockIDx = a.sStockIDx  " +
-                " LEFT JOIN diagnostic_master d ON d.sTransNox = c.sTransNox AND d.sSourceCD = a.sTransNox AND d.cTranStat = '1' " +
-                " LEFT JOIN GGC_ISysDBF.client_master e ON e.sClientID = a.sApproved " ;
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setUnitPrce(BigDecimal fdbValue) {
+        return setValue("nUnitPrce", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getUnitPrce() {
+        return new BigDecimal(String.valueOf(getValue("nUnitPrce")));
+//        return Double.parseDouble(String.valueOf(getValue("nUnitPrce")));
     }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setSelPrice(BigDecimal fdbValue) {
+        return setValue("nSelPrice", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getSelPrice() {
+        return new BigDecimal(String.valueOf(getValue("nSelPrice")));
+//        return Double.parseDouble(String.valueOf(getValue("nSelPrice")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fnValue
+     * @return result as success/failed
+     */
+    public JSONObject setQuantity(Integer fnValue) {
+        return setValue("nQuantity", fnValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Integer getQuantity() {
+        return Integer.parseInt(String.valueOf(getValue("nQuantity")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fnValue
+     * @return result as success/failed
+     */
+    public JSONObject setReleased(Integer fnValue) {
+        return setValue("nReleased", fnValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Integer getReleased() {
+        return Integer.parseInt(String.valueOf(getValue("nReleased")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setChrgeTyp(String fsValue) {
+        return setValue("sChrgeTyp", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getChrgeTyp() {
+        return (String) getValue("sChrgeTyp");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setDescript(String fsValue) {
+        return setValue("sDescript", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getDescript() {
+        return (String) getValue("sDescript");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setPartsDscount(BigDecimal fdbValue) {
+        return setValue("nPartsDsc", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getPartsDscount() {
+        return new BigDecimal(String.valueOf(getValue("nPartsDsc")));
+//        return Double.parseDouble(String.valueOf(getValue("nPartsDsc")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdbValue
+     * @return result as success/failed
+     */
+    public JSONObject setNtPrtAmt(BigDecimal fdbValue) {
+        return setValue("nNtPrtAmt", fdbValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public BigDecimal getNtPrtAmt() {
+        return new BigDecimal(String.valueOf(getValue("nNtPrtAmt")));
+//        return Double.parseDouble(String.valueOf(getValue("nNtPrtAmt")));
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setPartStat(String fsValue) {
+        return setValue("sPartStat", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPartStat() {
+        return (String) getValue("sPartStat");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setAddtl(String fsValue) {
+        return setValue("cAddtlxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getAddtl() {
+        return (String) getValue("cAddtlxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setAddDate(Date fdValue) {
+        return setValue("dAddDatex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getAddDate() {
+        Date date = null;
+        if(!getValue("dAddDatex").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dAddDatex").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setAddBy(String fsValue) {
+        return setValue("sAddByxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getAddBy() {
+        return (String) getValue("sAddByxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setDSNo(String fsValue) {
+        return setValue("sDSNoxxxx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getDSNo() {
+        return (String) getValue("sDSNoxxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setTransactDte(Date fdValue) {
+        return setValue("dTransact", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getTransactDte() {
+        Date date = null;
+        if(!getValue("dTransact").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dTransact").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setCompnyNm(String fsValue) {
+        return setValue("sCompnyNm", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getCompnyNm() {
+        return (String) getValue("sCompnyNm");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBarCode(String fsValue) {
+        return setValue("sBarCodex", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBarCode() {
+        return (String) getValue("sBarCodex");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setPartDesc(String fsValue) {
+        return setValue("sPartDesc", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getPartDesc() {
+        return (String) getValue("sPartDesc");
+    }
     
 }
