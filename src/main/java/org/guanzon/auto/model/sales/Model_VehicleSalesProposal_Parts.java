@@ -257,8 +257,12 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND (a.sStockIDx = " + SQLUtil.toSQL(fsValue2) + " OR REPLACE(a.sDescript,' ', '') = " + SQLUtil.toSQL(fsValue2.replace(" ", ""))+ " )" );
-
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) 
+                                                + " AND (a.sStockIDx = " + SQLUtil.toSQL(fsValue2) + " OR REPLACE(a.sDescript,' ', '') = " + SQLUtil.toSQL(fsValue2.replace(" ", ""))+ " )" 
+                                                //+ " GROUP BY a.sDescript, a.nEntryNox "
+                                                //+ " ORDER BY a.nEntryNox ASC "
+                                                );
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -443,14 +447,16 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                 + " , a.dAddDatex "                                                                                                  
                 + " , a.sAddByxxx "                                                                                                   
                 + " , b.sBarCodex "                                                                                                   
-                + " , b.sDescript AS sPartDesc "                                                                                               
-                + " , c.sDSNoxxxx "                                                                                                  
-                + " , c.dTransact "                                                                                                  
+                + " , b.sDescript AS sPartDesc "                                                                                        
+                + " , GROUP_CONCAT(c.sDSNoxxxx) AS sDSNoxxxx "                                                                                                    
+                + " , GROUP_CONCAT(c.dTransact) AS dTransact "                                                                                                 
                 + " , e.sCompnyNm "                                                                                                   
                 + " FROM vsp_parts a "                                                                                               
-                + " LEFT JOIN inventory b ON b.sStockIDx = a.sStockIDx "                                                             
-                + " LEFT JOIN diagnostic_master c ON c.sSourceNo = a.sTransNox AND c.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
-                + " LEFT JOIN diagnostic_parts d ON d.sTransNox = c.sTransNox AND d.sStockIDx = a.sStockIDx "                                                      
+                + " LEFT JOIN inventory b ON b.sStockIDx = a.sStockIDx "              
+                + " LEFT JOIN diagnostic_parts d ON d.sStockIDx = a.sStockIDx AND (d.sStockIDx <> NULL OR d.sStockIDx <> '') "
+                + " LEFT JOIN diagnostic_master c ON d.sTransNox = c.sTransNox AND c.sSourceNo = a.sTransNox AND c.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
+//                + " LEFT JOIN diagnostic_master c ON c.sSourceNo = a.sTransNox AND c.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
+//                + " LEFT JOIN diagnostic_parts d ON d.sTransNox = c.sTransNox AND d.sStockIDx = a.sStockIDx "                                                      
                 + " LEFT JOIN GGC_ISysDBF.client_master e ON e.sClientID = a.sAddByxxx "  ;
     }
     

@@ -253,7 +253,11 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND a.sLaborCde = " + SQLUtil.toSQL(fsValue2) );
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) 
+                                                + " AND a.sLaborCde = " + SQLUtil.toSQL(fsValue2) 
+                                                //+ " GROUP BY a.sLaborCde, a.nEntryNox "
+                                                //+ " ORDER BY a.nEntryNox ASC "
+                                                );
         System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -430,12 +434,14 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
                 + " , a.cAddtlxxx "                                                                                                    
                 + " , a.dAddDatex "                                                                                                    
                 + " , a.sAddByxxx "                                                                                                    
-                + " , b.sDSNoxxxx "                                                                                                    
-                + " , b.dTransact "                                                                                                    
+                + " , GROUP_CONCAT(b.sDSNoxxxx) AS sDSNoxxxx "                                                                                                    
+                + " , GROUP_CONCAT(b.dTransact) AS dTransact "                                                                                                    
                 + " , d.sCompnyNm "                                                                                                    
                 + " FROM vsp_labor a "
-                + " LEFT JOIN diagnostic_master b ON  b.sSourceNo = a.sTransNox AND b.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
-                + " LEFT JOIN diagnostic_labor c ON c.sLaborCde = a.sLaborCde AND c.sTransNox = b.sTransNox"                 
+                //+ " LEFT JOIN diagnostic_master b ON  b.sSourceNo = a.sTransNox AND b.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                //+ " LEFT JOIN diagnostic_labor c ON c.sLaborCde = a.sLaborCde AND c.sTransNox = b.sTransNox"         
+                + " LEFT JOIN diagnostic_labor c ON c.sLaborCde = a.sLaborCde "
+                + " LEFT JOIN diagnostic_master b ON b.sSourceNo = a.sTransNox AND c.sTransNox = b.sTransNox AND b.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN GGC_ISysDBF.client_master d ON d.sClientID = a.sAddByxxx " ;
     }
     
