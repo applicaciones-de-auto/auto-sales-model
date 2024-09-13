@@ -597,11 +597,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 if ("success".equals((String) loJSON.get("result"))) {
-                    //set VSP into open when user modify it. TODO
-//                    poJSON = setTranStat(TransactionStatus.STATE_OPEN);
-//                    if ("error".equals((String) poJSON.get("result"))) {
-//                        return poJSON;
-//                    }
+                    //set VSP into open when user modify it. 
+                    if(getTranStat().equals(TransactionStatus.STATE_CLOSED)){
+                        if(loOldEntity.getNetTTotl() != this.getNetTTotl()){
+                            setTranStat(TransactionStatus.STATE_OPEN);
+                        }
+                    }
                     
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
