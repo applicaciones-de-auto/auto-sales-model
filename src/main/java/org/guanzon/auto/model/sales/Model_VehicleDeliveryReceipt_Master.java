@@ -34,7 +34,8 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
     private String psExclude = "sTranStat»sBuyCltNm»cClientTp»sAddressx»sVSPTrans»dVSPDatex»sVSPNOxxx»cIsVhclNw»dDelvryDt»sInqryIDx»sCoCltNmx»"
-                                + "sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sColorDsc»sVhclFDsc»sBranchNm»sBranchCD»cPayModex»sSITransx»sSINoxxxx»sSENamexx";//» 
+                                + "sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sColorDsc»sVhclFDsc»sBranchNm»sBranchCD»cPayModex»sSITransx»sSINoxxxx»sSENamexx»"
+                                + "nUnitPrce»nPromoDsc»nFleetDsc»nSPFltDsc»nBndleDsc»nAddlDscx";//» 
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -525,7 +526,13 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                         + "  , h.sInqryIDx "                                                                               
                         + "  , h.sBranchCD "                                                                               
                         + "  , h.cPayModex "                                            
-                        + " ,  q.sCompnyNm AS sSENamexx "                                                                               
+                        + "  , q.sCompnyNm AS sSENamexx "                                                                           
+                        + "  , h.nUnitPrce "                                                                               
+                        + "  , h.nPromoDsc "                                                                       
+                        + "  , h.nFleetDsc "                                                                       
+                        + "  , h.nSPFltDsc "                                                                       
+                        + "  , h.nBndleDsc "                                                                       
+                        + "  , h.nAddlDscx "      
                         /*CO-CLIENT*/                                                                                     
                         + "  , i.sCompnyNm AS sCoCltNmx "                                                                 
                         /*VEHICLE INFORMATION*/                                                                           
