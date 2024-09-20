@@ -518,9 +518,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
-                                                //+ " GROUP BY a.sTransNox "
+                                                + " GROUP BY a.sTransNox "
                                                 );
-
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -537,6 +537,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 poJSON.put("result", "error");
                 poJSON.put("message", "No record to load.");
             }
+            System.out.println("getJO" + getJONo());
         } catch (SQLException e) {
             poJSON.put("result", "error");
             poJSON.put("message", e.getMessage());
@@ -872,8 +873,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , z.sBankName " 
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/     
                 + " , za.sReferNox AS sUDRNoxxx "
-                + " , CONCAT(zb.sDSNoxxxx) AS sJONoxxxx "
-                + " , CONCAT(zd.sReferNox) AS sSINoxxxx "    
+                + " , GROUP_CONCAT(zb.sDSNoxxxx) AS sJONoxxxx "
+                + " , GROUP_CONCAT(zd.sReferNox) AS sSINoxxxx "    
                 + " , ze.sTransNox AS sGatePsNo "
                 + " , b.dBirthDte " 
                 + " , b.sTaxIDNox " 
