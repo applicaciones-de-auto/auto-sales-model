@@ -27,6 +27,7 @@ import org.json.simple.JSONObject;
  */
 public class Model_VehicleSalesProposal_Parts implements GEntity{
     final String XML = "Model_VehicleSalesProposal_Parts.xml";
+    String psExclude = "sDSNoxxxx»dTransact»sCompnyNm»sBarCodex»sPartDesc";
     private final String psDefaultDate = "1900-01-01";
     private String psTargetBranchCd = "";
     private String psOrigPartDesc = "";
@@ -257,8 +258,12 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
         String lsSQL = getSQL();//MiscUtil.makeSelect(this, ""); //exclude the columns called thru left join
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) + " AND (a.sStockIDx = " + SQLUtil.toSQL(fsValue2) + " OR REPLACE(a.sDescript,' ', '') = " + SQLUtil.toSQL(fsValue2.replace(" ", ""))+ " )" );
-
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue) 
+                                                + " AND (a.sStockIDx = " + SQLUtil.toSQL(fsValue2) + " OR REPLACE(a.sDescript,' ', '') = " + SQLUtil.toSQL(fsValue2.replace(" ", ""))+ " )" 
+                                                //+ " GROUP BY a.sDescript, a.nEntryNox "
+                                                //+ " ORDER BY a.nEntryNox ASC "
+                                                );
+        System.out.println("VSP PARTS : "+lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -300,10 +305,9 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
-            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm»sBarCodex»sPartDesc";
             if (pnEditMode == EditMode.ADDNEW) {
                 
-                lsSQL = MiscUtil.makeSQL(this, lsExclude);
+                lsSQL = MiscUtil.makeSQL(this, psExclude);
 
                 if (!lsSQL.isEmpty()) {
                     if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
@@ -324,7 +328,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND (sStockIDx = " + SQLUtil.toSQL(psOrigPartDesc) + " OR REPLACE(sDescript,' ', '') = " + SQLUtil.toSQL(psOrigPartDesc.replace(" ", ""))+ " )", lsExclude); //+ " )" (sStockIDx = " + SQLUtil.toSQL(this.getStockID()) + " OR 
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND (sStockIDx = " + SQLUtil.toSQL(psOrigPartDesc) + " OR REPLACE(sDescript,' ', '') = " + SQLUtil.toSQL(psOrigPartDesc.replace(" ", ""))+ " )", psExclude); //+ " )" (sStockIDx = " + SQLUtil.toSQL(this.getStockID()) + " OR 
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
@@ -336,6 +340,7 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                         }
                     } else {
                         poJSON.put("result", "success");
+                        poJSON.put("continue", true);
                         poJSON.put("message", "No updates has been made.");
                     }
                 } else {
@@ -423,7 +428,16 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
      * @return SQL Statement
      */
     public String makeSQL() {
-        return MiscUtil.makeSQL(this, ""); //exclude columns called thru left join
+        return MiscUtil.makeSQL(this, psExclude); //exclude columns called thru left join
+    }
+    
+    /**
+     * Gets the SQL Select statement for this entity.
+     *
+     * @return SQL Select Statement
+     */
+    public String makeSelectSQL() {
+        return MiscUtil.makeSelect(this, psExclude);
     }
     
     public String getSQL(){
@@ -443,14 +457,16 @@ public class Model_VehicleSalesProposal_Parts implements GEntity{
                 + " , a.dAddDatex "                                                                                                  
                 + " , a.sAddByxxx "                                                                                                   
                 + " , b.sBarCodex "                                                                                                   
-                + " , b.sDescript AS sPartDesc "                                                                                               
-                + " , c.sDSNoxxxx "                                                                                                  
-                + " , c.dTransact "                                                                                                  
+                + " , b.sDescript AS sPartDesc "                                                                                        
+                + " , GROUP_CONCAT(c.sDSNoxxxx) AS sDSNoxxxx "                                                                                                    
+                + " , GROUP_CONCAT(c.dTransact) AS dTransact "                                                                                                 
                 + " , e.sCompnyNm "                                                                                                   
                 + " FROM vsp_parts a "                                                                                               
-                + " LEFT JOIN inventory b ON b.sStockIDx = a.sStockIDx "                                                             
-                + " LEFT JOIN diagnostic_master c ON c.sSourceNo = a.sTransNox AND c.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
-                + " LEFT JOIN diagnostic_parts d ON d.sTransNox = c.sTransNox AND d.sStockIDx = a.sStockIDx "                                                      
+                + " LEFT JOIN inventory b ON b.sStockIDx = a.sStockIDx "              
+                + " LEFT JOIN diagnostic_parts d ON d.sStockIDx = a.sStockIDx AND (d.sStockIDx <> NULL OR d.sStockIDx <> '') "
+                + " LEFT JOIN diagnostic_master c ON d.sTransNox = c.sTransNox AND c.sSourceNo = a.sTransNox AND c.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
+//                + " LEFT JOIN diagnostic_master c ON c.sSourceNo = a.sTransNox AND c.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
+//                + " LEFT JOIN diagnostic_parts d ON d.sTransNox = c.sTransNox AND d.sStockIDx = a.sStockIDx "                                                      
                 + " LEFT JOIN GGC_ISysDBF.client_master e ON e.sClientID = a.sAddByxxx "  ;
     }
     

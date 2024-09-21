@@ -34,7 +34,8 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
     private final String psDefaultDate = "1900-01-01";
     private String psBranchCd;
     private String psExclude = "sTranStat»sBuyCltNm»cClientTp»sAddressx»sVSPTrans»dVSPDatex»sVSPNOxxx»cIsVhclNw»dDelvryDt»sInqryIDx»sCoCltNmx»"
-                                + "sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sColorDsc»sVhclFDsc»sBranchNm»sBranchCD»cPayModex»sSITransx»sSINoxxxx";//» 
+                                + "sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sColorDsc»sVhclFDsc»sBranchNm»sBranchCD»cPayModex»sSITransx»sSINoxxxx»sSENamexx»"
+                                + "nUnitPrce»nPromoDsc»nFleetDsc»nSPFltDsc»nBndleDsc»nAddlDscx»sTaxIDNox";//» 
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -479,95 +480,106 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
     
     public String getSQL(){
         return    " SELECT "                                                                                       
-                + "    a.sTransNox "                                                                              
-                + "  , a.dTransact "                                                                              
-                + "  , a.cCustType "                                                                              
-                + "  , a.sClientID "                                                                              
-                + "  , a.sSerialID "                                                                              
-                + "  , a.sReferNox "                                                                              
-                + "  , a.sRemarksx "                                                                              
-                + "  , a.nGrossAmt "                                                                              
-                + "  , a.nDiscount "                                                                              
-                + "  , a.nTranTotl "                                                                              
-                + "  , a.sPONoxxxx "                                                                              
-                + "  , a.sSourceCd "                                                                              
-                + "  , a.sSourceNo "                                                                              
-                + "  , a.cPrintedx "                                                                              
-                + "  , a.sPrepared "                                                                              
-                + "  , a.sApproved "                                                                              
-                + "  , a.cCallStat "                                                                              
-                + "  , a.cTranStat "                                                                              
-                + "  , a.sEntryByx "                                                                              
-                + "  , a.dEntryDte "                                                                              
-                + "  , a.sModified "                                                                              
-                + "  , a.dModified "                                                       
-                + "  , CASE "          
-                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "     
-                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVED' "        
-                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "          
-                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                             
-                + " 	ELSE 'ACTIVE'  "                                                          
-                + "    END AS sTranStat "                                                                                
-                /*BUYING COSTUMER*/                                                                               
-                + "  , b.sCompnyNm AS sBuyCltNm "                                                                 
-                + "  , b.cClientTp "                                                                              
-                + "  , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                                
-                + "     IFNULL(CONCAT(d.sAddressx,' ') , ''),                    "                                
-                + "     IFNULL(CONCAT(e.sBrgyName,' '), ''),                     "                                
-                + "     IFNULL(CONCAT(f.sTownName, ', '),''),                    "                                
-                + "     IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx    "                                
-                /*VSP*/                                                                                           
-                + "  , h.sTransNox AS sVSPTrans"                                                                              
-                + "  , DATE(h.dTransact) AS dVSPDatex "                                                                              
-                + "  , h.sVSPNOxxx "                                                                             
-                + "  , h.cIsVhclNw "                                                                             
-                + "  , DATE(h.dDelvryDt) AS dDelvryDt "                                                                              
-                + "  , h.sInqryIDx "                                                                               
-                + "  , h.sBranchCD "                                                                               
-                + "  , h.cPayModex "                                                                              
-                /*CO-CLIENT*/                                                                                     
-                + "  , i.sCompnyNm AS sCoCltNmx "                                                                 
-                /*VEHICLE INFORMATION*/                                                                           
-                + "  , j.sCSNoxxxx "                                                                              
-                + "  , k.sPlateNox "                                                                              
-                + "  , j.sFrameNox "                                                                              
-                + "  , j.sEngineNo "                                                                              
-                + "  , j.sKeyNoxxx "                                                                              
-                + "  , l.sDescript AS sVhclFDsc "   
-                + "  ,  TRIM(CONCAT_WS(' ',la.sMakeDesc, lb.sModelDsc, lc.sTypeDesc, l.sTransMsn, l.nYearModl )) AS sVhclDesc "
-                + "  ,ld.sColorDsc "                                                              
-                /*BRANCH*/                                                                                        
-                + "  , m.sBranchNm    "
-                /*VSI*/
-                + " , o.sTransNox AS sSITransx" 
-                + " , o.sReferNox AS sSINoxxxx "                                                                          
-                + "  FROM udr_master a "                                                                          
-                 /*BUYING CUSTOMER*/                                                                              
-                + "  LEFT JOIN client_master b ON b.sClientID = a.sClientID "                                     
-                + "  LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "                
-                + "  LEFT JOIN addresses d ON d.sAddrssID = c.sAddrssID "                                         
-                + "  LEFT JOIN barangay e ON e.sBrgyIDxx = d.sBrgyIDxx  "                                         
-                + "  LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                                         
-                + "  LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "                                         
-                + "  LEFT JOIN client_mobile ba ON ba.sClientID = b.sClientID AND ba.cPrimaryx = 1 "              
-                + "  LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 "       
-                /*VSP*/                                                                                           
-                + "  LEFT JOIN vsp_master h ON h.sTransNox = a.sSourceNo "                                        
-                /*CO CLIENT*/                                                                                     
-                + "  LEFT JOIN client_master i ON i.sClientID = h.sCoCltIDx "                                     
-                /*VEHICLE INFORMATION*/                                                                           
-                + "  LEFT JOIN vehicle_serial j ON j.sSerialID = a.sSerialID "                                    
-                + "  LEFT JOIN vehicle_serial_registration k ON k.sSerialID = a.sSerialID "                       
-                + "  LEFT JOIN vehicle_master l ON l.sVhclIDxx = j.sVhclIDxx "          
-                + "  LEFT JOIN vehicle_make la ON la.sMakeIDxx = l.sMakeIDxx  "
-                + "  LEFT JOIN vehicle_model lb ON lb.sModelIDx = l.sModelIDx "
-                + "  LEFT JOIN vehicle_type lc ON lc.sTypeIDxx = l.sTypeIDxx  "
-                + "  LEFT JOIN vehicle_color ld ON ld.sColorIDx = l.sColorIDx "                                    
-                /*BRANCH*/                                                                                        
-                + "  LEFT JOIN branch m ON m.sBranchCd = h.sBranchCD "
-                /*VSI*/
-                + "  LEFT JOIN si_master_source n on n.sSourceNo = a.sTransNox "
-                + "  LEFT JOIN si_master o ON o.sTransNox = n.sTransNox AND o.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)     ;
+                        + "    a.sTransNox "                                                                              
+                        + "  , a.dTransact "                                                                              
+                        + "  , a.cCustType "                                                                              
+                        + "  , a.sClientID "                                                                              
+                        + "  , a.sSerialID "                                                                              
+                        + "  , a.sReferNox "                                                                              
+                        + "  , a.sRemarksx "                                                                              
+                        + "  , a.nGrossAmt "                                                                              
+                        + "  , a.nDiscount "                                                                              
+                        + "  , a.nTranTotl "                                                                              
+                        + "  , a.sPONoxxxx "                                                                              
+                        + "  , a.sSourceCd "                                                                              
+                        + "  , a.sSourceNo "                                                                              
+                        + "  , a.cPrintedx "                                                                              
+                        + "  , a.sPrepared "                                                                              
+                        + "  , a.sApproved "                                                                              
+                        + "  , a.cCallStat "                                                                              
+                        + "  , a.cTranStat "                                                                              
+                        + "  , a.sEntryByx "                                                                              
+                        + "  , a.dEntryDte "                                                                              
+                        + "  , a.sModified "                                                                              
+                        + "  , a.dModified "                                                       
+                        + "  , CASE "          
+                        + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "     
+                        + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVED' "        
+                        + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "          
+                        + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                             
+                        + " 	ELSE 'ACTIVE'  "                                                          
+                        + "    END AS sTranStat "                                                                                
+                        /*BUYING COSTUMER*/                                                                               
+                        + "  , b.sCompnyNm AS sBuyCltNm "                                                                 
+                        + "  , b.cClientTp "                                                                        
+                        + "  , b.sTaxIDNox "                                                                            
+                        + "  , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                                
+                        + "     IFNULL(CONCAT(d.sAddressx,' ') , ''),                    "                                
+                        + "     IFNULL(CONCAT(e.sBrgyName,' '), ''),                     "                                
+                        + "     IFNULL(CONCAT(f.sTownName, ', '),''),                    "                                
+                        + "     IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx    "                                
+                        /*VSP*/                                                                                           
+                        + "  , h.sTransNox AS sVSPTrans"                                                                              
+                        + "  , DATE(h.dTransact) AS dVSPDatex "                                                                              
+                        + "  , h.sVSPNOxxx "                                                                             
+                        + "  , h.cIsVhclNw "                                                                             
+                        + "  , DATE(h.dDelvryDt) AS dDelvryDt "                                                                              
+                        + "  , h.sInqryIDx "                                                                               
+                        + "  , h.sBranchCD "                                                                               
+                        + "  , h.cPayModex "                                            
+                        + "  , q.sCompnyNm AS sSENamexx "                                                                           
+                        + "  , h.nUnitPrce "                                                                               
+                        + "  , h.nPromoDsc "                                                                       
+                        + "  , h.nFleetDsc "                                                                       
+                        + "  , h.nSPFltDsc "                                                                       
+                        + "  , h.nBndleDsc "                                                                       
+                        + "  , h.nAddlDscx "      
+                        /*CO-CLIENT*/                                                                                     
+                        + "  , i.sCompnyNm AS sCoCltNmx "                                                                 
+                        /*VEHICLE INFORMATION*/                                                                           
+                        + "  , j.sCSNoxxxx "                                                                              
+                        + "  , k.sPlateNox "                                                                              
+                        + "  , j.sFrameNox "                                                                              
+                        + "  , j.sEngineNo "                                                                              
+                        + "  , j.sKeyNoxxx "                                                                              
+                        + "  , l.sDescript AS sVhclFDsc "   
+                        + "  ,  TRIM(CONCAT_WS(' ',la.sMakeDesc, lb.sModelDsc, lc.sTypeDesc, l.sTransMsn, l.nYearModl )) AS sVhclDesc "
+                        + "  ,ld.sColorDsc "                                                              
+                        /*BRANCH*/                                                                                        
+                        + "  , m.sBranchNm    "
+                        /*VSI*/
+                        + " , o.sTransNox AS sSITransx" 
+                        + " , o.sReferNox AS sSINoxxxx "                                                                          
+                        + "  FROM udr_master a "                                                                          
+                         /*BUYING CUSTOMER*/                                                                              
+                        + "  LEFT JOIN client_master b ON b.sClientID = a.sClientID "                                     
+                        + "  LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "                
+                        + "  LEFT JOIN addresses d ON d.sAddrssID = c.sAddrssID "                                         
+                        + "  LEFT JOIN barangay e ON e.sBrgyIDxx = d.sBrgyIDxx  "                                         
+                        + "  LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                                         
+                        + "  LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "                                         
+                        + "  LEFT JOIN client_mobile ba ON ba.sClientID = b.sClientID AND ba.cPrimaryx = 1 "              
+                        + "  LEFT JOIN client_email_address bb ON bb.sClientID = b.sClientID AND bb.cPrimaryx = 1 "       
+                        /*VSP*/                                                                                           
+                        + "  LEFT JOIN vsp_master h ON h.sTransNox = a.sSourceNo "                                       
+                        /*CO CLIENT*/                                                                                     
+                        + "  LEFT JOIN client_master i ON i.sClientID = h.sCoCltIDx "                                     
+                        /*VEHICLE INFORMATION*/                                                                           
+                        + "  LEFT JOIN vehicle_serial j ON j.sSerialID = a.sSerialID "                                    
+                        + "  LEFT JOIN vehicle_serial_registration k ON k.sSerialID = a.sSerialID "                       
+                        + "  LEFT JOIN vehicle_master l ON l.sVhclIDxx = j.sVhclIDxx "          
+                        + "  LEFT JOIN vehicle_make la ON la.sMakeIDxx = l.sMakeIDxx  "
+                        + "  LEFT JOIN vehicle_model lb ON lb.sModelIDx = l.sModelIDx "
+                        + "  LEFT JOIN vehicle_type lc ON lc.sTypeIDxx = l.sTypeIDxx  "
+                        + "  LEFT JOIN vehicle_color ld ON ld.sColorIDx = l.sColorIDx "                                    
+                        /*BRANCH*/                                                                                        
+                        + "  LEFT JOIN branch m ON m.sBranchCd = h.sBranchCD "
+                        /*VSI*/
+                        + "  LEFT JOIN si_master_source n on n.sReferNox = a.sTransNox "
+                        + "  LEFT JOIN si_master o ON o.sTransNox = n.sTransNox AND o.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED) 
+                        /*INQUIRY*/                
+                        + "  LEFT JOIN customer_inquiry p ON p.sTransNox = h.sInqryIDx "    
+                        + "  LEFT JOIN ggc_isysdbf.client_master q ON q.sClientID = p.sEmployID ";
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -1032,6 +1044,23 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
      * @param fsValue
      * @return True if the record assignment is successful.
      */
+    public JSONObject setTaxIDNo(String fsValue) {
+        return setValue("sTaxIDNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTaxIDNo() {
+        return (String) getValue("sTaxIDNox");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
     public JSONObject setAddress(String fsValue) {
         return setValue("sAddressx", fsValue);
     }
@@ -1212,6 +1241,23 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
      */
     public String getCoCltNm() {
         return (String) getValue("sCoCltNmx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setSEName(String fsValue) {
+        return setValue("sSENamexx", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getSEName() {
+        return (String) getValue("sSENamexx");
     }
     
     /**

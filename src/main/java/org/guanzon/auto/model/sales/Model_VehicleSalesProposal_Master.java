@@ -518,9 +518,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 
         //replace the condition based on the primary key column of the record
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
-                                                //+ " GROUP BY a.sTransNox "
+                                                + " GROUP BY a.sTransNox "
                                                 );
-
+        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -537,6 +537,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 poJSON.put("result", "error");
                 poJSON.put("message", "No record to load.");
             }
+            System.out.println("getJO" + getJONo());
         } catch (SQLException e) {
             poJSON.put("result", "error");
             poJSON.put("message", e.getMessage());
@@ -597,11 +598,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 //replace with the primary key column info
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 if ("success".equals((String) loJSON.get("result"))) {
-                    //set VSP into open when user modify it. TODO
-//                    poJSON = setTranStat(TransactionStatus.STATE_OPEN);
-//                    if ("error".equals((String) poJSON.get("result"))) {
-//                        return poJSON;
-//                    }
+                    //set VSP into open when user modify it. 
+                    if(getTranStat().equals(TransactionStatus.STATE_CLOSED)){
+                        if(loOldEntity.getNetTTotl().compareTo(this.getNetTTotl()) < 0){
+                            setTranStat(TransactionStatus.STATE_OPEN);
+                        }
+                    }
                     
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
@@ -819,9 +821,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.sModified "                                                               
                 + " , a.dModified "                                                        
                 + "  , CASE "          
-                + " 	WHEN a.cTranStat = '2' THEN 'APPROVE' "                     
-                + " 	WHEN a.cTranStat = '3' THEN 'CANCELLED' "                                       
-                + " 	ELSE 'OPEN'  "                                                          
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVE' "                     
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "                  
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "                    
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                                      
+                + " 	ELSE 'ACTIVE'  "                                                          
                 + "    END AS sTranStat "   
                   /*BUYING COSTUMER*/                                                             
                 + " , b.sCompnyNm AS sBuyCltNm"                                                               
@@ -871,8 +875,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , z.sBankName " 
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/     
                 + " , za.sReferNox AS sUDRNoxxx "
-                + " , CONCAT(zb.sDSNoxxxx) AS sJONoxxxx "
-                + " , CONCAT(zd.sReferNox) AS sSINoxxxx "    
+                + " , GROUP_CONCAT( DISTINCT zb.sDSNoxxxx) AS sJONoxxxx "
+                + " , GROUP_CONCAT( DISTINCT zd.sReferNox) AS sSINoxxxx "    
                 + " , ze.sTransNox AS sGatePsNo "
                 + " , b.dBirthDte " 
                 + " , b.sTaxIDNox " 
@@ -937,8 +941,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/                                                             
                 + " LEFT JOIN udr_master za ON za.sSourceNo = a.sTransNox AND za.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
                 + " LEFT JOIN diagnostic_master zb ON zb.sSourceNo = a.sTransNox AND zb.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
-                + " LEFT JOIN si_master_source zc ON zc.sSourceNo = za.sTransNox "
-                + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sReferNox AND zd.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN si_master_source zc ON zc.sReferNox = za.sTransNox  "
+                + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sTransNox AND zd.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox "
                 + " LEFT JOIN insurance_policy_proposal zf ON zf.sVSPNoxxx = a.sTransNox AND zf.sInsTypID = 'y' AND zf.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN insurance_policy_proposal zg ON zg.sVSPNoxxx = a.sTransNox AND zg.sInsTypID = 'c' AND zg.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
