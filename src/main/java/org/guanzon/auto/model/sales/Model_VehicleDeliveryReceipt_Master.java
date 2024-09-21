@@ -35,7 +35,7 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
     private String psBranchCd;
     private String psExclude = "sTranStat»sBuyCltNm»cClientTp»sAddressx»sVSPTrans»dVSPDatex»sVSPNOxxx»cIsVhclNw»dDelvryDt»sInqryIDx»sCoCltNmx»"
                                 + "sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sColorDsc»sVhclFDsc»sBranchNm»sBranchCD»cPayModex»sSITransx»sSINoxxxx»sSENamexx»"
-                                + "nUnitPrce»nPromoDsc»nFleetDsc»nSPFltDsc»nBndleDsc»nAddlDscx";//» 
+                                + "nUnitPrce»nPromoDsc»nFleetDsc»nSPFltDsc»nBndleDsc»nAddlDscx»sTaxIDNox";//» 
     
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -511,7 +511,8 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                         + "    END AS sTranStat "                                                                                
                         /*BUYING COSTUMER*/                                                                               
                         + "  , b.sCompnyNm AS sBuyCltNm "                                                                 
-                        + "  , b.cClientTp "                                                                              
+                        + "  , b.cClientTp "                                                                        
+                        + "  , b.sTaxIDNox "                                                                            
                         + "  , TRIM(IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                                
                         + "     IFNULL(CONCAT(d.sAddressx,' ') , ''),                    "                                
                         + "     IFNULL(CONCAT(e.sBrgyName,' '), ''),                     "                                
@@ -1035,6 +1036,23 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
      */
     public String getClientTp() {
         return (String) getValue("cClientTp");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setTaxIDNo(String fsValue) {
+        return setValue("sTaxIDNox", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getTaxIDNo() {
+        return (String) getValue("sTaxIDNox");
     }
     
     /**

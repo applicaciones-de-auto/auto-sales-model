@@ -600,7 +600,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 if ("success".equals((String) loJSON.get("result"))) {
                     //set VSP into open when user modify it. 
                     if(getTranStat().equals(TransactionStatus.STATE_CLOSED)){
-                        if(loOldEntity.getNetTTotl() != this.getNetTTotl()){
+                        if(loOldEntity.getNetTTotl().compareTo(this.getNetTTotl()) < 0){
                             setTranStat(TransactionStatus.STATE_OPEN);
                         }
                     }
@@ -821,9 +821,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.sModified "                                                               
                 + " , a.dModified "                                                        
                 + "  , CASE "          
-                + " 	WHEN a.cTranStat = '2' THEN 'APPROVE' "                     
-                + " 	WHEN a.cTranStat = '3' THEN 'CANCELLED' "                                       
-                + " 	ELSE 'OPEN'  "                                                          
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVE' "                     
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "                  
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "                    
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                                      
+                + " 	ELSE 'ACTIVE'  "                                                          
                 + "    END AS sTranStat "   
                   /*BUYING COSTUMER*/                                                             
                 + " , b.sCompnyNm AS sBuyCltNm"                                                               
@@ -873,8 +875,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , z.sBankName " 
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/     
                 + " , za.sReferNox AS sUDRNoxxx "
-                + " , GROUP_CONCAT(zb.sDSNoxxxx) AS sJONoxxxx "
-                + " , GROUP_CONCAT(zd.sReferNox) AS sSINoxxxx "    
+                + " , GROUP_CONCAT( DISTINCT zb.sDSNoxxxx) AS sJONoxxxx "
+                + " , GROUP_CONCAT( DISTINCT zd.sReferNox) AS sSINoxxxx "    
                 + " , ze.sTransNox AS sGatePsNo "
                 + " , b.dBirthDte " 
                 + " , b.sTaxIDNox " 
