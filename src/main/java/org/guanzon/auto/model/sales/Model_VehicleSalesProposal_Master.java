@@ -36,7 +36,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     private String psBranchCd;
     private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sVhclFDsc»sColorDsc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
-                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex";//» 
+                             + "»sUDRNoxxx»sUDRDatex»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex";//» 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
@@ -875,6 +875,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , z.sBankName " 
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/     
                 + " , za.sReferNox AS sUDRNoxxx "
+                + " , DATE(za.dTransact) AS sUDRDatex "
                 + " , GROUP_CONCAT( DISTINCT zb.sDSNoxxxx) AS sJONoxxxx "
                 + " , GROUP_CONCAT( DISTINCT zd.sReferNox) AS sSINoxxxx "    
                 + " , ze.sTransNox AS sGatePsNo "
@@ -3077,6 +3078,42 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getUDRNo() {
         return (String) getValue("sUDRNoxxx");
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setUDRDate(Date fdValue) {
+        JSONObject loJSON = new JSONObject();
+//        if (!(fdValue instanceof java.sql.Date) && !(fdValue instanceof Date)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a date object.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+        return setValue("sUDRDatex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getUDRDate() {
+        Date date = null;
+//        if(!getValue("dInqryDte").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dInqryDte").toString());
+//        }
+//        
+        if(getValue("sUDRDatex") == null || getValue("sUDRDatex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("sUDRDatex")), SQLUtil.FORMAT_SHORT_DATE);
+        }
+            
+        return date;
     }
     
     /**
