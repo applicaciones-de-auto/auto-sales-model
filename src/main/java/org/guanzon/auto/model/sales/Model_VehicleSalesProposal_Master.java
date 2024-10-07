@@ -36,7 +36,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     private String psBranchCd;
     private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sVhclFDsc»sColorDsc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
-                             + "»sUDRNoxxx»sUDRDatex»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex";//» 
+                             + "»sUDRNoxxx»sUDRDatex»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex"
+                             + "»cVhclSize»sUnitType»sBodyType";//» 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
@@ -743,7 +744,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return SQL Select Statement
      */
     public String makeSelectSQL() {
-        return MiscUtil.makeSelect(this);
+        return MiscUtil.makeSelect(this,psExclude);
     }
     
     public String getSQL(){
@@ -898,7 +899,10 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , zh.sTransNox AS sBOTTrans " 
                 + " , zh.sReferNox AS sBOTRefrn " 
 //                + " , zh.dTransact AS sBOTDatex " 
-                + " , zh.sInsTypID AS sBOTTypex " 
+                + " , zh.sInsTypID AS sBOTTypex "
+                + "  , r.cVhclSize "
+                + "  , rb.sUnitType "
+                + "  , rb.sBodyType "
                 + " FROM vsp_master a "                                                           
                  /*BUYING CUSTOMER*/                                                              
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
@@ -3410,5 +3414,56 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getBOTType() {
         return (String) getValue("sBOTTypex");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setVhclSize(String fsValue) {
+        return setValue("cVhclSize", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclSize() {
+        return (String) getValue("cVhclSize");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setUnitType(String fsValue) {
+        return setValue("sUnitType", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getUnitType() {
+        return (String) getValue("sUnitType");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBodyType(String fsValue) {
+        return setValue("sBodyType", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBodyType() {
+        return (String) getValue("sBodyType");
     } 
 }
