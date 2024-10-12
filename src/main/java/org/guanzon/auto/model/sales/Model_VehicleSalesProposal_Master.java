@@ -36,7 +36,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     private String psBranchCd;
     private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sVhclFDsc»sColorDsc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
-                             + "»sUDRNoxxx»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex";//» 
+                             + "»sUDRNoxxx»sUDRDatex»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex"
+                             + "»cVhclSize»sUnitType»sBodyType";//» 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
@@ -743,7 +744,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      * @return SQL Select Statement
      */
     public String makeSelectSQL() {
-        return MiscUtil.makeSelect(this);
+        return MiscUtil.makeSelect(this,psExclude);
     }
     
     public String getSQL(){
@@ -875,6 +876,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , z.sBankName " 
                  /*VSP LINKED THRU THE FOLLOWING FORMS*/     
                 + " , za.sReferNox AS sUDRNoxxx "
+                + " , DATE(za.dTransact) AS sUDRDatex "
                 + " , GROUP_CONCAT( DISTINCT zb.sDSNoxxxx) AS sJONoxxxx "
                 + " , GROUP_CONCAT( DISTINCT zd.sReferNox) AS sSINoxxxx "    
                 + " , ze.sTransNox AS sGatePsNo "
@@ -897,7 +899,10 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , zh.sTransNox AS sBOTTrans " 
                 + " , zh.sReferNox AS sBOTRefrn " 
 //                + " , zh.dTransact AS sBOTDatex " 
-                + " , zh.sInsTypID AS sBOTTypex " 
+                + " , zh.sInsTypID AS sBOTTypex "
+                + "  , r.cVhclSize "
+                + "  , rb.sUnitType "
+                + "  , rb.sBodyType "
                 + " FROM vsp_master a "                                                           
                  /*BUYING CUSTOMER*/                                                              
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
@@ -943,7 +948,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN diagnostic_master zb ON zb.sSourceNo = a.sTransNox AND zb.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN si_master_source zc ON zc.sReferNox = za.sTransNox  "
                 + " LEFT JOIN si_master zd ON zd.sTransNox = zc.sTransNox AND zd.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
-                + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceNo = a.sTransNox "
+                + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceCD = a.sTransNox AND ze.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
                 + " LEFT JOIN insurance_policy_proposal zf ON zf.sVSPNoxxx = a.sTransNox AND zf.sInsTypID = 'y' AND zf.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN insurance_policy_proposal zg ON zg.sVSPNoxxx = a.sTransNox AND zg.sInsTypID = 'c' AND zg.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN insurance_policy_proposal zh ON zh.sVSPNoxxx = a.sTransNox AND zh.sInsTypID = 'b' AND zh.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED);
@@ -3082,6 +3087,42 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     /**
      * Description: Sets the Value of this record.
      *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setUDRDate(Date fdValue) {
+        JSONObject loJSON = new JSONObject();
+//        if (!(fdValue instanceof java.sql.Date) && !(fdValue instanceof Date)) {
+//          loJSON.put("result", "error");
+//          loJSON.put("message", "Value must be a date object.");
+//          return loJSON;
+//        } 
+//        loJSON.put("result", "success");
+//        loJSON.put("message", "Value is valid for this field.");
+        return setValue("sUDRDatex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getUDRDate() {
+        Date date = null;
+//        if(!getValue("dInqryDte").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dInqryDte").toString());
+//        }
+//        
+        if(getValue("sUDRDatex") == null || getValue("sUDRDatex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("sUDRDatex")), SQLUtil.FORMAT_SHORT_DATE);
+        }
+            
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
      * @param fsValue
      * @return True if the record assignment is successful.
      */
@@ -3373,5 +3414,56 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public String getBOTType() {
         return (String) getValue("sBOTTypex");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setVhclSize(String fsValue) {
+        return setValue("cVhclSize", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getVhclSize() {
+        return (String) getValue("cVhclSize");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setUnitType(String fsValue) {
+        return setValue("sUnitType", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getUnitType() {
+        return (String) getValue("sUnitType");
+    } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return True if the record assignment is successful.
+     */
+    public JSONObject setBodyType(String fsValue) {
+        return setValue("sBodyType", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getBodyType() {
+        return (String) getValue("sBodyType");
     } 
 }

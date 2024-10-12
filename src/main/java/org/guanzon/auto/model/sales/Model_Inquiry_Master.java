@@ -451,7 +451,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + "	IFNULL(CONCAT(g.sProvName),'') )	, '')) AS sAddressx  "                                
                 + " , h.sMobileNo "                                                                        
                 + " , i.sEmailAdd "                                                                        
-                + " , j.sAccountx "                                                                        
+                + " , IFNULL(GROUP_CONCAT(DISTINCT j.sAccountx),'') AS sAccountx  " 
                 + " , k.sCompnyNm AS sContctNm "                                                           
                 + " , l.sCompnyNm AS sSalesExe "                                                           
                 + " , m.sCompnyNm AS sSalesAgn "                                                           
