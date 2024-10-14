@@ -410,7 +410,7 @@ public class Model_Inquiry_Master implements GEntity {
         }
     }
     
-    private String getSQL(){
+    public String getSQL(){
         return    " SELECT "                                                                               
                 + "   a.sTransNox "                                                                            
                 + " , a.sInqryIDx "                                                                       

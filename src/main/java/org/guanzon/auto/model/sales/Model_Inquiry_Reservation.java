@@ -429,7 +429,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         }
     }
     
-    private String getSQL(){
+    public String getSQL(){
         return    " SELECT "                                                                      
                 + "    a.sTransNox "                                                              
                 + "  , a.dTransact "                                                              
