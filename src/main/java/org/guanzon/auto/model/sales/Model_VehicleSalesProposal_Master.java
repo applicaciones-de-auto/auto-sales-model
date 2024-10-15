@@ -521,7 +521,6 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
                                                 + " GROUP BY a.sTransNox "
                                                 );
-        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -538,7 +537,6 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 poJSON.put("result", "error");
                 poJSON.put("message", "No record to load.");
             }
-            System.out.println("getJO" + getJONo());
         } catch (SQLException e) {
             poJSON.put("result", "error");
             poJSON.put("message", e.getMessage());
