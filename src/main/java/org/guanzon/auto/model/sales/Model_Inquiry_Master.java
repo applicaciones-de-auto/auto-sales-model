@@ -21,6 +21,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -278,7 +279,7 @@ public class Model_Inquiry_Master implements GEntity {
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
             String lsExclude = "sClientNm»cClientTp»sAddressx»sMobileNo»sEmailAdd»sAccountx»sContctNm»sSalesExe»sSalesAgn»sPlatform»sActTitle»sBranchNm»" +
-                               "sFrameNox»sEngineNo»sCSNoxxxx»sPlateNox»sDescript";
+                               "sFrameNox»sEngineNo»sCSNoxxxx»sPlateNox»sDescript»dApprovex»sApprover";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
@@ -462,7 +463,9 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , q.sEngineNo "                                                                                                        
                 + " , q.sCSNoxxxx "                                                                                   
                 + " , r.sPlateNox "                                                                                            
-                + " , s.sDescript "                                                                      
+                + " , s.sDescript "                                                                                             
+                + " , DATE(t.dApproved) AS dApprovex "                                                                           
+                + " , u.sCompnyNm AS sApprover "                                                                    
                 + " FROM customer_inquiry a "                                                              
                 + " LEFT JOIN client_master b ON a.sClientID = b.sClientID   "                             
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "          
@@ -481,7 +484,9 @@ public class Model_Inquiry_Master implements GEntity {
                 + " LEFT JOIN branch p ON p.sBranchCd = a.sBranchCd           "                             
                 + " LEFT JOIN vehicle_serial q ON q.sSerialID = a.sSerialID           "    
                 + " LEFT JOIN vehicle_serial_registration r ON r.sSerialID = a.sSerialID "              
-                + " LEFT JOIN vehicle_master s ON s.sVhclIDxx = q.sVhclIDxx "     ;             
+                + " LEFT JOIN vehicle_master s ON s.sVhclIDxx = q.sVhclIDxx " 
+                + " LEFT JOIN transaction_status_history t ON t.sSourceNo = a.sTransNox AND t.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master u ON u.sClientID = t.sApproved "     ;             
     }
     
     /**
@@ -493,6 +498,7 @@ public class Model_Inquiry_Master implements GEntity {
     public JSONObject setTransNo(String fsValue) {
         return setValue("sTransNox", fsValue);
     }
+    
 
     /**
      * @return The ID of this record.
@@ -1346,5 +1352,43 @@ public class Model_Inquiry_Master implements GEntity {
         return (String) getValue("sDescript");
     }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(!getValue("dApprovex").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dApprovex").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
     
 }

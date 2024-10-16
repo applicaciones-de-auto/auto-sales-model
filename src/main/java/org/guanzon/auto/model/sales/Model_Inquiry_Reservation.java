@@ -21,6 +21,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -308,7 +309,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sCompnyNm»sAddressx»cClientTp»sSINoxxxx»dSIDatexx»nTranAmtx";
+            String lsExclude = "sCompnyNm»sAddressx»cClientTp»sSINoxxxx»dSIDatexx»nTranAmtx»dApprovex»sApprover";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"R"));
@@ -459,7 +460,9 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  "
                 + "  , i.sReferNox  AS sSINoxxxx " 
                 + "  , DATE(i.dTransact) AS dSIDatexx "     
-                + "  , h.nTranAmtx "                    
+                + "  , h.nTranAmtx "                                                                                  
+                + " , DATE(j.dApproved) AS dApprovex "                                                                           
+                + " , k.sCompnyNm AS sApprover "                  
                 + " FROM customer_inquiry_reservation a    "                                      
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 " 
@@ -468,7 +471,9 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                          
                 + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "
                 + " LEFT JOIN si_master_source h ON h.sReferNox = a.sTransNox " 
-                + " LEFT JOIN si_master i ON i.sTransNox = h.sTransNox  "    ;                          
+                + " LEFT JOIN si_master i ON i.sTransNox = h.sTransNox  " 
+                + " LEFT JOIN transaction_status_history j ON j.sSourceNo = a.sTransNox AND j.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master k ON k.sClientID = j.sApproved "    ;                          
     }
     
     /**
@@ -924,6 +929,46 @@ public class Model_Inquiry_Reservation  implements GEntity{
             return new BigDecimal(String.valueOf(getValue("nTranAmtx")));
         }
     }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(!getValue("dApprovex").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dApprovex").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
+    
     
     private static String xsDateShort(Date fdValue) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

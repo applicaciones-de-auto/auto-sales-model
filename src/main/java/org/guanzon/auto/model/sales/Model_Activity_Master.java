@@ -17,6 +17,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -282,7 +283,7 @@ public class Model_Activity_Master implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {
-        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sEventTyp»sActTypDs";
+        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sEventTyp»sActTypDs»dApprovex»sApprover";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -431,13 +432,17 @@ public class Model_Activity_Master implements GEntity {
                 + " , d.sCompnyNm "                                                            
                 + " , e.sBranchNm "                                                              
                 + " , f.sEventTyp "                                                              
-                + " , f.sActTypDs "                                                           
+                + " , f.sActTypDs "                                                                                     
+                + " , DATE(g.dApproved) AS dApprovex "                                                                           
+                + " , h.sCompnyNm AS sApprover "                                                       
                 + " FROM activity_master a "                                                   
                 + " LEFT JOIN GGC_ISysDBF.Department b ON b.sDeptIDxx = a.sDeptIDxx "          
                 + " LEFT JOIN GGC_ISysDBF.Employee_Master001 c ON c.sEmployID = a.sEmployID "  
                 + " LEFT JOIN GGC_ISysDBF.Client_Master d ON d.sClientID = a.sEmployID "       
                 + " LEFT JOIN branch e ON e.sBranchCd = a.sLocation "                           
-                + " LEFT JOIN event_type f ON f.sActTypID = a.sActTypID " ;                     
+                + " LEFT JOIN event_type f ON f.sActTypID = a.sActTypID "
+                + " LEFT JOIN transaction_status_history g ON g.sSourceNo = a.sActvtyID AND g.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master h ON h.sClientID = g.sApproved " ;                     
     }
     
     /**
@@ -965,6 +970,43 @@ public class Model_Activity_Master implements GEntity {
         return (String) getValue("sEventTyp");
     }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(!getValue("dApprovex").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dApprovex").toString());
+        }
+        
+        return date;
+    }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
     
 }

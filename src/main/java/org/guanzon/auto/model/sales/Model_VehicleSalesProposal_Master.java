@@ -37,7 +37,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sVhclFDsc»sColorDsc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
                              + "»sUDRNoxxx»sUDRDatex»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex"
-                             + "»cVhclSize»sUnitType»sBodyType";//» 
+                             + "»cVhclSize»sUnitType»sBodyType»dApprovex»sApprover";//» 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
@@ -900,7 +900,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , zh.sInsTypID AS sBOTTypex "
                 + "  , r.cVhclSize "
                 + "  , rb.sUnitType "
-                + "  , rb.sBodyType "
+                + "  , rb.sBodyType "                                                                                
+                + " , GROUP_CONCAT( DISTINCT DATE(zi.dApproved)) AS dApprovex "                                                                           
+                + " , GROUP_CONCAT( DISTINCT zj.sCompnyNm) AS sApprover "  
                 + " FROM vsp_master a "                                                           
                  /*BUYING CUSTOMER*/                                                              
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
@@ -949,7 +951,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceCD = a.sTransNox AND ze.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
                 + " LEFT JOIN insurance_policy_proposal zf ON zf.sVSPNoxxx = a.sTransNox AND zf.sInsTypID = 'y' AND zf.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN insurance_policy_proposal zg ON zg.sVSPNoxxx = a.sTransNox AND zg.sInsTypID = 'c' AND zg.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
-                + " LEFT JOIN insurance_policy_proposal zh ON zh.sVSPNoxxx = a.sTransNox AND zh.sInsTypID = 'b' AND zh.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED);
+                + " LEFT JOIN insurance_policy_proposal zh ON zh.sVSPNoxxx = a.sTransNox AND zh.sInsTypID = 'b' AND zh.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN transaction_status_history zi ON zi.sSourceNo = a.sTransNox AND zi.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master zj ON zj.sClientID = zi.sApproved " ;
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -3464,4 +3468,44 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     public String getBodyType() {
         return (String) getValue("sBodyType");
     } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(!getValue("dApprovex").toString().isEmpty()){
+            date = CommonUtils.toDate(getValue("dApprovex").toString());
+        }
+        
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
+    
 }
