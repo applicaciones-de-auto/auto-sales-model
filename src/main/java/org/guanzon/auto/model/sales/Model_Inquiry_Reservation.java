@@ -65,7 +65,8 @@ public class Model_Inquiry_Reservation  implements GEntity{
             MiscUtil.initRowSet(poEntity);   
             poEntity.updateObject("dTransact", poGRider.getServerDate());
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateString("cTranStat", RecordStatus.ACTIVE); 
+            poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); 
             poEntity.updateString("cResrvTyp","0");   
             poEntity.updateDouble("nAmountxx", 0.00);  
             poEntity.updateInt("nPrintedx",0);    
@@ -945,10 +946,12 @@ public class Model_Inquiry_Reservation  implements GEntity{
      */
     public Date getApproveDte() {
         Date date = null;
-        if(!getValue("dApprovex").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dApprovex").toString());
+        if(getValue("dApprovex") == null || getValue("dApprovex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApprovex")), SQLUtil.FORMAT_SHORT_DATE);
         }
-        
+            
         return date;
     }
     

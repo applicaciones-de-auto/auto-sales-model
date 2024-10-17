@@ -74,6 +74,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dInqryDte", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
             //RecordStatus.ACTIVE
             poEntity.updateString("cIsVhclNw", "0");  
@@ -3484,10 +3485,12 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
      */
     public Date getApproveDte() {
         Date date = null;
-        if(!getValue("dApprovex").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dApprovex").toString());
+        if(getValue("dApprovex") == null || getValue("dApprovex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApprovex")), SQLUtil.FORMAT_SHORT_DATE);
         }
-        
+            
         return date;
     }
     
