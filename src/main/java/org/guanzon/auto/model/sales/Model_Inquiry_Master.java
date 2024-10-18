@@ -436,7 +436,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.dLastUpdt "                                                                           
                 + " , a.sLockedBy "                                                                        
                 + " , a.dLockedDt "                                                                        
-                + " , a.sApproved "                                                                        
+//                + " , a.sApproved "                                                                        
                 + " , a.sSerialID "                                                                        
                 + " , a.sInqryCde "                                                                        
                 + " , a.cTranStat "                                                                        
@@ -907,22 +907,22 @@ public class Model_Inquiry_Master implements GEntity {
         return date;
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setApproved(String fsValue) {
-        return setValue("sApproved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getApproved() {
-        return (String) getValue("sApproved");
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApproved(String fsValue) {
+//        return setValue("sApproved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getApproved() {
+//        return (String) getValue("sApproved");
+//    }
     
     /**
      * Description: Sets the Value of this record.

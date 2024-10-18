@@ -321,6 +321,13 @@ public class Model_Activity_Master implements GEntity {
                 JSONObject loJSON = loOldEntity.openRecord(this.getActvtyID());
 
                 if ("success".equals((String) loJSON.get("result"))) {
+                    //set Activity into open when user modify it. 
+//                    if(getTranStat().equals(TransactionStatus.STATE_CLOSED)){
+//                        if(loOldEntity.getPropBdgt().compareTo(this.getPropBdgt()) < 0){
+//                            setTranStat(TransactionStatus.STATE_OPEN); //set back to for approval
+//                        }
+//                    }
+                    
                     setModified(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
                     //replace the condition based on the primary key column of the record
@@ -428,8 +435,8 @@ public class Model_Activity_Master implements GEntity {
                 + " , a.cTranStat "                                                            
                 + " , a.sEntryByx "                                                            
                 + " , a.dEntryDte "                                                            
-                + " , a.sApproved "                                                            
-                + " , a.dApproved "                                                            
+//                + " , a.sApproved "                                                            
+//                + " , a.dApproved "                                                            
                 + " , a.sModified "                                                            
                 + " , a.dModified "                                                            
                 + " , b.sDeptName "                                                            
@@ -837,44 +844,44 @@ public class Model_Activity_Master implements GEntity {
         return (Date) getValue("dEntryDte");
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setApproved(String fsValue) {
-        return setValue("sApproved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getApproved() {
-        return (String) getValue("sApproved");
-    }
-    
-    /**
-     * Sets the date and time the record was modified.
-     *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setApprovedDte(Date fdValue) {
-        return setValue("dApproved", fdValue);
-    }
-
-    /**
-     * @return The date and time the record was modified.
-     */
-    public Date getApprovedDte() {
-        Date date = null;
-        if(!getValue("dApproved").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dApproved").toString());
-        }
-        
-        return date;
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApproved(String fsValue) {
+//        return setValue("sApproved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getApproved() {
+//        return (String) getValue("sApproved");
+//    }
+//    
+//    /**
+//     * Sets the date and time the record was modified.
+//     *
+//     * @param fdValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApprovedDte(Date fdValue) {
+//        return setValue("dApproved", fdValue);
+//    }
+//
+//    /**
+//     * @return The date and time the record was modified.
+//     */
+//    public Date getApprovedDte() {
+//        Date date = null;
+//        if(!getValue("dApproved").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dApproved").toString());
+//        }
+//        
+//        return date;
+//    }
     
     /**
      * Description: Sets the Value of this record.

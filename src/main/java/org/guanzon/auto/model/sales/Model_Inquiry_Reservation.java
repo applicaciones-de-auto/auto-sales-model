@@ -64,7 +64,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
 
             MiscUtil.initRowSet(poEntity);   
             poEntity.updateObject("dTransact", poGRider.getServerDate());
-            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); 
             poEntity.updateString("cResrvTyp","0");   
@@ -446,8 +446,8 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  , a.cResrvTyp "                                                             
                 + "  , a.sTransIDx "    //where the reservation has been linked                                                           
                 + "  , a.cTranStat "                                                              
-                + "  , a.sApproved "                                                              
-                + "  , a.dApproved "                                                              
+//                + "  , a.sApproved "                                                              
+//                + "  , a.dApproved "                                                              
                 + "  , a.sEntryByx "                                                              
                 + "  , a.dEntryDte "                                                              
                 + "  , a.sModified "                                                              
@@ -703,44 +703,44 @@ public class Model_Inquiry_Reservation  implements GEntity{
         return (String) getValue("cTranStat");
     }   
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setApproved(String fsValue) {
-        return setValue("sApproved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getApproved() {
-        return (String) getValue("sApproved");
-    }   
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setApprovedDte(Date fdValue) {
-        return setValue("dApproved", fdValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Date getApprovedDte() {
-        Date date = null;
-        if(!getValue("dTransact").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dApproved").toString());
-        }
-        
-        return date;
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApproved(String fsValue) {
+//        return setValue("sApproved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getApproved() {
+//        return (String) getValue("sApproved");
+//    }   
+//    
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fdValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApprovedDte(Date fdValue) {
+//        return setValue("dApproved", fdValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public Date getApprovedDte() {
+//        Date date = null;
+//        if(!getValue("dApproved").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dApproved").toString());
+//        }
+//        
+//        return date;
+//    }
     
     /**
      * Sets the user encoded/updated the record.
