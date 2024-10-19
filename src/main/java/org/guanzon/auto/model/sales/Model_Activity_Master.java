@@ -65,7 +65,7 @@ public class Model_Activity_Master implements GEntity {
             poEntity.updateString("cTranStat", RecordStatus.ACTIVE);
             poEntity.updateObject("dDateFrom", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dDateThru", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateDouble("nPropBdgt", 0.00);
             poEntity.updateDouble("nRcvdBdgt", 0.00);
