@@ -240,7 +240,7 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"VDR"));
         setReferNo(MiscUtil.getNextCode(getTable(), "sReferNox", true, poGRider.getConnection(), poGRider.getBranchCode()));
         setTransactDte(poGRider.getServerDate());
-        
+        setPrinted("0");
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
@@ -494,7 +494,7 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                 + "  , a.sSourceCd "                                                                              
                 + "  , a.sSourceNo "                                                                              
                 + "  , a.cPrintedx "                                                                              
-                + "  , a.sPrepared "                                                                              
+//                + "  , a.sPrepared "                                                                              
 //                        + "  , a.sApproved "                                                                              
                 + "  , a.cCallStat "                                                                              
                 + "  , a.cTranStat "                                                                              
@@ -505,7 +505,7 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                 + "  , CASE "          
                 + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "     
                 + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVED' "        
-                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'FOR APPROVAL' "          
+                + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "          
                 + " 	WHEN a.cTranStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                             
                 + " 	ELSE 'VOID'  "                                                          
                 + "    END AS sTranStat "                                                                                
@@ -858,22 +858,22 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
         return (String) getValue("cPrintedx");
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return True if the record assignment is successful.
-     */
-    public JSONObject setPrepared(String fsValue) {
-        return setValue("sPrepared", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getPrepared() {
-        return (String) getValue("sPrepared");
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return True if the record assignment is successful.
+//     */
+//    public JSONObject setPrepared(String fsValue) {
+//        return setValue("sPrepared", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getPrepared() {
+//        return (String) getValue("sPrepared");
+//    }
     
 //    /**
 //     * Description: Sets the Value of this record.

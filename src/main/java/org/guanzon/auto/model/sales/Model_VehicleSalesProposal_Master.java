@@ -505,7 +505,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"VSP"));
         setVSPNO(MiscUtil.getNextCode(getTable(), "sVSPNOxxx", true, poGRider.getConnection(), poGRider.getBranchCode()));
         setTransactDte(poGRider.getServerDate());
-        
+        setPrinted("0");
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
