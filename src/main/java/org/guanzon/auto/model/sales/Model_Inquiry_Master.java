@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +23,7 @@ import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -68,6 +71,7 @@ public class Model_Inquiry_Master implements GEntity {
             poEntity.updateObject("dTransact", poGRider.getServerDate());    
             poEntity.updateObject("dLastUpdt", poGRider.getServerDate());  
             poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateString("cTranStat", "0"); 
             
             poEntity.updateString("cIsVhclNw", "0");  
@@ -278,7 +282,7 @@ public class Model_Inquiry_Master implements GEntity {
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
             String lsExclude = "sClientNm»cClientTp»sAddressx»sMobileNo»sEmailAdd»sAccountx»sContctNm»sSalesExe»sSalesAgn»sPlatform»sActTitle»sBranchNm»" +
-                               "sFrameNox»sEngineNo»sCSNoxxxx»sPlateNox»sDescript";
+                               "sFrameNox»sEngineNo»sCSNoxxxx»sPlateNox»sDescript»dApprovex»sApprover";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"IQ"));
@@ -410,7 +414,7 @@ public class Model_Inquiry_Master implements GEntity {
         }
     }
     
-    private String getSQL(){
+    public String getSQL(){
         return    " SELECT "                                                                               
                 + "   a.sTransNox "                                                                            
                 + " , a.sInqryIDx "                                                                       
@@ -432,7 +436,7 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , a.dLastUpdt "                                                                           
                 + " , a.sLockedBy "                                                                        
                 + " , a.dLockedDt "                                                                        
-                + " , a.sApproved "                                                                        
+//                + " , a.sApproved "                                                                        
                 + " , a.sSerialID "                                                                        
                 + " , a.sInqryCde "                                                                        
                 + " , a.cTranStat "                                                                        
@@ -462,7 +466,9 @@ public class Model_Inquiry_Master implements GEntity {
                 + " , q.sEngineNo "                                                                                                        
                 + " , q.sCSNoxxxx "                                                                                   
                 + " , r.sPlateNox "                                                                                            
-                + " , s.sDescript "                                                                      
+                + " , s.sDescript "                                                                                             
+                + " , DATE(t.dApproved) AS dApprovex "                                                                           
+                + " , u.sCompnyNm AS sApprover "                                                                    
                 + " FROM customer_inquiry a "                                                              
                 + " LEFT JOIN client_master b ON a.sClientID = b.sClientID   "                             
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 "          
@@ -481,7 +487,30 @@ public class Model_Inquiry_Master implements GEntity {
                 + " LEFT JOIN branch p ON p.sBranchCd = a.sBranchCd           "                             
                 + " LEFT JOIN vehicle_serial q ON q.sSerialID = a.sSerialID           "    
                 + " LEFT JOIN vehicle_serial_registration r ON r.sSerialID = a.sSerialID "              
-                + " LEFT JOIN vehicle_master s ON s.sVhclIDxx = q.sVhclIDxx "     ;             
+                + " LEFT JOIN vehicle_master s ON s.sVhclIDxx = q.sVhclIDxx " 
+                + " LEFT JOIN transaction_status_history t ON t.sSourceNo = a.sTransNox AND t.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master u ON u.sClientID = t.sApproved "     ;             
+    }
+    
+    private static String xsDateShort(Date fdValue) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(fdValue);
+        return date;
+    }
+
+    private static String xsDateShort(String fsValue) throws org.json.simple.parser.ParseException, java.text.ParseException {
+        SimpleDateFormat fromUser = new SimpleDateFormat("MMMM dd, yyyy");
+        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String lsResult = "";
+        lsResult = myFormat.format(fromUser.parse(fsValue));
+        return lsResult;
+    }
+    
+    /*Convert Date to String*/
+    private LocalDate strToDate(String val) {
+        DateTimeFormatter date_formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(val, date_formatter);
+        return localDate;
     }
     
     /**
@@ -493,6 +522,7 @@ public class Model_Inquiry_Master implements GEntity {
     public JSONObject setTransNo(String fsValue) {
         return setValue("sTransNox", fsValue);
     }
+    
 
     /**
      * @return The ID of this record.
@@ -877,22 +907,22 @@ public class Model_Inquiry_Master implements GEntity {
         return date;
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setApproved(String fsValue) {
-        return setValue("sApproved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getApproved() {
-        return (String) getValue("sApproved");
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApproved(String fsValue) {
+//        return setValue("sApproved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getApproved() {
+//        return (String) getValue("sApproved");
+//    }
     
     /**
      * Description: Sets the Value of this record.
@@ -1346,5 +1376,45 @@ public class Model_Inquiry_Master implements GEntity {
         return (String) getValue("sDescript");
     }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(getValue("dApprovex") == null || getValue("dApprovex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApprovex")), SQLUtil.FORMAT_SHORT_DATE);
+        }
+            
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
     
 }

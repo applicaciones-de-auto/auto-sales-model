@@ -9,6 +9,9 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.CommonUtils;
@@ -17,6 +20,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -61,7 +65,8 @@ public class Model_Activity_Master implements GEntity {
             poEntity.updateString("cTranStat", RecordStatus.ACTIVE);
             poEntity.updateObject("dDateFrom", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dDateThru", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateDouble("nPropBdgt", 0.00);
             poEntity.updateDouble("nRcvdBdgt", 0.00);
             poEntity.updateInt("nTrgtClnt", 0);
@@ -282,7 +287,7 @@ public class Model_Activity_Master implements GEntity {
      */
     @Override
     public JSONObject saveRecord() {
-        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sEventTyp»sActTypDs";
+        String lsExclude = "sDeptName»sCompnyNm»sBranchNm»sEventTyp»sActTypDs»dApprovex»sApprover";
         poJSON = new JSONObject();
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
@@ -316,6 +321,13 @@ public class Model_Activity_Master implements GEntity {
                 JSONObject loJSON = loOldEntity.openRecord(this.getActvtyID());
 
                 if ("success".equals((String) loJSON.get("result"))) {
+                    //set Activity into open when user modify it. 
+//                    if(getTranStat().equals(TransactionStatus.STATE_CLOSED)){
+//                        if(loOldEntity.getPropBdgt().compareTo(this.getPropBdgt()) < 0){
+//                            setTranStat(TransactionStatus.STATE_OPEN); //set back to for approval
+//                        }
+//                    }
+                    
                     setModified(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
                     //replace the condition based on the primary key column of the record
@@ -423,21 +435,46 @@ public class Model_Activity_Master implements GEntity {
                 + " , a.cTranStat "                                                            
                 + " , a.sEntryByx "                                                            
                 + " , a.dEntryDte "                                                            
-                + " , a.sApproved "                                                            
-                + " , a.dApproved "                                                            
+//                + " , a.sApproved "                                                            
+//                + " , a.dApproved "                                                            
                 + " , a.sModified "                                                            
                 + " , a.dModified "                                                            
                 + " , b.sDeptName "                                                            
                 + " , d.sCompnyNm "                                                            
                 + " , e.sBranchNm "                                                              
                 + " , f.sEventTyp "                                                              
-                + " , f.sActTypDs "                                                           
+                + " , f.sActTypDs "                                                                                     
+                + " , DATE(g.dApproved) AS dApprovex "                                                                           
+                + " , h.sCompnyNm AS sApprover "                                                       
                 + " FROM activity_master a "                                                   
                 + " LEFT JOIN GGC_ISysDBF.Department b ON b.sDeptIDxx = a.sDeptIDxx "          
                 + " LEFT JOIN GGC_ISysDBF.Employee_Master001 c ON c.sEmployID = a.sEmployID "  
                 + " LEFT JOIN GGC_ISysDBF.Client_Master d ON d.sClientID = a.sEmployID "       
                 + " LEFT JOIN branch e ON e.sBranchCd = a.sLocation "                           
-                + " LEFT JOIN event_type f ON f.sActTypID = a.sActTypID " ;                     
+                + " LEFT JOIN event_type f ON f.sActTypID = a.sActTypID "
+                + " LEFT JOIN transaction_status_history g ON g.sSourceNo = a.sActvtyID AND g.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master h ON h.sClientID = g.sApproved " ;                     
+    }
+    
+    private static String xsDateShort(Date fdValue) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(fdValue);
+        return date;
+    }
+
+    private static String xsDateShort(String fsValue) throws org.json.simple.parser.ParseException, java.text.ParseException {
+        SimpleDateFormat fromUser = new SimpleDateFormat("MMMM dd, yyyy");
+        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String lsResult = "";
+        lsResult = myFormat.format(fromUser.parse(fsValue));
+        return lsResult;
+    }
+    
+    /*Convert Date to String*/
+    private LocalDate strToDate(String val) {
+        DateTimeFormatter date_formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(val, date_formatter);
+        return localDate;
     }
     
     /**
@@ -807,44 +844,44 @@ public class Model_Activity_Master implements GEntity {
         return (Date) getValue("dEntryDte");
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setApproved(String fsValue) {
-        return setValue("sApproved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getApproved() {
-        return (String) getValue("sApproved");
-    }
-    
-    /**
-     * Sets the date and time the record was modified.
-     *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setApprovedDte(Date fdValue) {
-        return setValue("dApproved", fdValue);
-    }
-
-    /**
-     * @return The date and time the record was modified.
-     */
-    public Date getApprovedDte() {
-        Date date = null;
-        if(!getValue("dApproved").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dApproved").toString());
-        }
-        
-        return date;
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApproved(String fsValue) {
+//        return setValue("sApproved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getApproved() {
+//        return (String) getValue("sApproved");
+//    }
+//    
+//    /**
+//     * Sets the date and time the record was modified.
+//     *
+//     * @param fdValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApprovedDte(Date fdValue) {
+//        return setValue("dApproved", fdValue);
+//    }
+//
+//    /**
+//     * @return The date and time the record was modified.
+//     */
+//    public Date getApprovedDte() {
+//        Date date = null;
+//        if(!getValue("dApproved").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dApproved").toString());
+//        }
+//        
+//        return date;
+//    }
     
     /**
      * Description: Sets the Value of this record.
@@ -965,6 +1002,45 @@ public class Model_Activity_Master implements GEntity {
         return (String) getValue("sEventTyp");
     }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(getValue("dApprovex") == null || getValue("dApprovex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApprovex")), SQLUtil.FORMAT_SHORT_DATE);
+        }
+            
+        return date;
+    }
     
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
     
 }

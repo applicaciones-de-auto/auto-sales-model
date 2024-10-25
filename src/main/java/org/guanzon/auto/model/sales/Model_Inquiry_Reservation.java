@@ -21,6 +21,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.constant.RecordStatus;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GEntity;
 import org.json.simple.JSONObject;
 
@@ -63,8 +64,9 @@ public class Model_Inquiry_Reservation  implements GEntity{
 
             MiscUtil.initRowSet(poEntity);   
             poEntity.updateObject("dTransact", poGRider.getServerDate());
-            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateString("cTranStat", RecordStatus.ACTIVE); 
+//            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); 
             poEntity.updateString("cResrvTyp","0");   
             poEntity.updateDouble("nAmountxx", 0.00);  
             poEntity.updateInt("nPrintedx",0);    
@@ -308,7 +310,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sCompnyNm»sAddressx»cClientTp»sSINoxxxx»dSIDatexx»nTranAmtx";
+            String lsExclude = "sCompnyNm»sAddressx»cClientTp»sSINoxxxx»dSIDatexx»nTranAmtx»dApprovex»sApprover";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"R"));
@@ -429,7 +431,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         }
     }
     
-    private String getSQL(){
+    public String getSQL(){
         return    " SELECT "                                                                      
                 + "    a.sTransNox "                                                              
                 + "  , a.dTransact "                                                              
@@ -444,8 +446,8 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  , a.cResrvTyp "                                                             
                 + "  , a.sTransIDx "    //where the reservation has been linked                                                           
                 + "  , a.cTranStat "                                                              
-                + "  , a.sApproved "                                                              
-                + "  , a.dApproved "                                                              
+//                + "  , a.sApproved "                                                              
+//                + "  , a.dApproved "                                                              
                 + "  , a.sEntryByx "                                                              
                 + "  , a.dEntryDte "                                                              
                 + "  , a.sModified "                                                              
@@ -459,7 +461,9 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  "
                 + "  , i.sReferNox  AS sSINoxxxx " 
                 + "  , DATE(i.dTransact) AS dSIDatexx "     
-                + "  , h.nTranAmtx "                    
+                + "  , h.nTranAmtx "                                                                                  
+                + " , DATE(j.dApproved) AS dApprovex "                                                                           
+                + " , k.sCompnyNm AS sApprover "                  
                 + " FROM customer_inquiry_reservation a    "                                      
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
                 + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = 1 " 
@@ -468,7 +472,9 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                          
                 + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "
                 + " LEFT JOIN si_master_source h ON h.sReferNox = a.sTransNox " 
-                + " LEFT JOIN si_master i ON i.sTransNox = h.sTransNox  "    ;                          
+                + " LEFT JOIN si_master i ON i.sTransNox = h.sTransNox  " 
+                + " LEFT JOIN transaction_status_history j ON j.sSourceNo = a.sTransNox AND j.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master k ON k.sClientID = j.sApproved "    ;                          
     }
     
     /**
@@ -697,44 +703,44 @@ public class Model_Inquiry_Reservation  implements GEntity{
         return (String) getValue("cTranStat");
     }   
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return result as success/failed
-     */
-    public JSONObject setApproved(String fsValue) {
-        return setValue("sApproved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getApproved() {
-        return (String) getValue("sApproved");
-    }   
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setApprovedDte(Date fdValue) {
-        return setValue("dApproved", fdValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Date getApprovedDte() {
-        Date date = null;
-        if(!getValue("dTransact").toString().isEmpty()){
-            date = CommonUtils.toDate(getValue("dApproved").toString());
-        }
-        
-        return date;
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApproved(String fsValue) {
+//        return setValue("sApproved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getApproved() {
+//        return (String) getValue("sApproved");
+//    }   
+//    
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fdValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApprovedDte(Date fdValue) {
+//        return setValue("dApproved", fdValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public Date getApprovedDte() {
+//        Date date = null;
+//        if(!getValue("dApproved").toString().isEmpty()){
+//            date = CommonUtils.toDate(getValue("dApproved").toString());
+//        }
+//        
+//        return date;
+//    }
     
     /**
      * Sets the user encoded/updated the record.
@@ -924,6 +930,48 @@ public class Model_Inquiry_Reservation  implements GEntity{
             return new BigDecimal(String.valueOf(getValue("nTranAmtx")));
         }
     }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(getValue("dApprovex") == null || getValue("dApprovex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApprovex")), SQLUtil.FORMAT_SHORT_DATE);
+        }
+            
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
+    
     
     private static String xsDateShort(Date fdValue) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

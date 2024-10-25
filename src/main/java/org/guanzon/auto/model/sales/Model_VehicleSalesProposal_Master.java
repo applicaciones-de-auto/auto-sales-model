@@ -16,6 +16,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sql.rowset.CachedRowSet;
 import org.guanzon.appdriver.base.CommonUtils;
 import org.guanzon.appdriver.base.GRider;
@@ -37,7 +39,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     private String psExclude = "sInquryID»sTranStat»sBuyCltNm»cClientTp»sAddressx»dInqryDte»sInqCltID»sInqCltNm»cInqCltTp»sContctID»sContctNm»sSourceCD»sSourceNo»sPlatform»sAgentIDx»sAgentNmx»sEmployID»sSENamexx"
                              + "»sCoCltNmx»sCSNoxxxx»sPlateNox»sFrameNox»sEngineNo»sKeyNoxxx»sVhclDesc»sVhclFDsc»sColorDsc»sBranchNm»sTPLBrIns»sTPLInsNm»sCOMBrIns»sCOMInsNm»sApplicNo»sBrBankNm»sBankName"
                              + "»sUDRNoxxx»sUDRDatex»sJONoxxxx»sSINoxxxx»sGatePsNo»dBirthDte»sTaxIDNox»cOfficexx»sMobileNo»sEmailAdd»sTPLTrans»sTPLRefrn»sTPLTypex»sCOMTrans»sCOMRefrn»sCOMTypex»sBOTTrans»sBOTRefrn»sBOTTypex"
-                             + "»cVhclSize»sUnitType»sBodyType";//» 
+                             + "»cVhclSize»sUnitType»sBodyType»dApprovex»sApprover";//» 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
     JSONObject poJSON;              //json container
@@ -72,8 +74,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
             poEntity.updateObject("dDcStatDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dLockedDt", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dInqryDte", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+            poEntity.updateObject("dApprovex", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN); //TransactionStatus.STATE_OPEN why is the value of STATE_OPEN is 0 while record status active is 1
             //RecordStatus.ACTIVE
             poEntity.updateString("cIsVhclNw", "0");  
@@ -263,6 +266,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         try {
             poJSON = MiscUtil.validateColumnValue(System.getProperty("sys.default.path.metadata") + XML, MiscUtil.getColumnLabel(poEntity, fnColumn), foValue);
             if ("error".equals((String) poJSON.get("result"))) {
+                if(foValue != null){
+                    System.out.println("ERROR : " + MiscUtil.getColumnLabel(poEntity, fnColumn) + " VALUE : " + foValue + " : " + (String) poJSON.get("message"));
+                }
                 return poJSON;
             }
 
@@ -499,7 +505,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"VSP"));
         setVSPNO(MiscUtil.getNextCode(getTable(), "sVSPNOxxx", true, poGRider.getConnection(), poGRider.getBranchCode()));
         setTransactDte(poGRider.getServerDate());
-        
+        setPrinted("0");
         poJSON = new JSONObject();
         poJSON.put("result", "success");
         return poJSON;
@@ -521,7 +527,6 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue)
                                                 + " GROUP BY a.sTransNox "
                                                 );
-        System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
         try {
@@ -538,7 +543,6 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 poJSON.put("result", "error");
                 poJSON.put("message", "No record to load.");
             }
-            System.out.println("getJO" + getJONo());
         } catch (SQLException e) {
             poJSON.put("result", "error");
             poJSON.put("message", e.getMessage());
@@ -569,7 +573,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 setLockedBy("");
                 setLockedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
                 setCancelldDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
-                setApprovedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
+//                setApprovedDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
                 setDcStatDte(SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE)); //TODO
 //                try {
 //                    poEntity.updateObject("dCancelld", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
@@ -600,11 +604,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 JSONObject loJSON = loOldEntity.openRecord(this.getTransNo());
                 if ("success".equals((String) loJSON.get("result"))) {
                     //set VSP into open when user modify it. 
-                    if(getTranStat().equals(TransactionStatus.STATE_CLOSED)){
-                        if(loOldEntity.getNetTTotl().compareTo(this.getNetTTotl()) < 0){
-                            setTranStat(TransactionStatus.STATE_OPEN);
-                        }
-                    }
+//                    if(getTranStat().equals(TransactionStatus.STATE_CLOSED)){
+//                        if(loOldEntity.getNetTTotl().compareTo(this.getNetTTotl()) < 0){
+//                            setTranStat(TransactionStatus.STATE_OPEN); //set back to for approval
+//                        }
+//                    }
                     
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
@@ -618,6 +622,8 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 //                    }
                     
                     System.out.println("getDelvryDt() : " + getDelvryDt());
+                    System.out.println("getCancelldDte() : " + getCancelldDte());
+                    
                     //replace the condition based on the primary key column of the record
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
 
@@ -811,22 +817,22 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , a.dDcStatDt "                                                               
                 + " , a.cPrintedx "                                                               
                 + " , a.sLockedBy "                                                               
-                + " , a.dLockedDt "                                                               
-                + " , a.cTranStat "                                                               
-                + " , a.sCancelld "                                                               
-                + " , a.dCancelld "                                                               
-                + " , a.sApproved "                                                               
-                + " , a.dApproved "                                                               
+                + " , a.dLockedDt "                                                                
+                + " , a.dCancelld "                                                            
+                + " , a.sCancelld "                                                                
+                + " , a.cTranStat "                                                                
+//                + " , a.sApproved "                                                               
+//                + " , a.dApproved "                                                               
                 + " , a.sEntryByx "                                                               
                 + " , a.dEntryDte "                                                               
                 + " , a.sModified "                                                               
                 + " , a.dModified "                                                        
                 + "  , CASE "          
-                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVE' "                     
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'APPROVED' "                     
                 + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "                  
-                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "                    
+                + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'FOR APPROVAL' "                    
                 + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                                      
-                + " 	ELSE 'ACTIVE'  "                                                          
+                + " 	ELSE 'VOID'  "                                                          
                 + "    END AS sTranStat "   
                   /*BUYING COSTUMER*/                                                             
                 + " , b.sCompnyNm AS sBuyCltNm"                                                               
@@ -902,7 +908,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " , zh.sInsTypID AS sBOTTypex "
                 + "  , r.cVhclSize "
                 + "  , rb.sUnitType "
-                + "  , rb.sBodyType "
+                + "  , rb.sBodyType "                                                                                
+                + " , GROUP_CONCAT( DISTINCT DATE(zi.dApproved)) AS dApprovex "                                                                           
+                + " , GROUP_CONCAT( DISTINCT zj.sCompnyNm) AS sApprover "  
                 + " FROM vsp_master a "                                                           
                  /*BUYING CUSTOMER*/                                                              
                 + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                      
@@ -951,7 +959,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                 + " LEFT JOIN vehicle_gatepass ze ON ze.sSourceCD = a.sTransNox AND ze.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
                 + " LEFT JOIN insurance_policy_proposal zf ON zf.sVSPNoxxx = a.sTransNox AND zf.sInsTypID = 'y' AND zf.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN insurance_policy_proposal zg ON zg.sVSPNoxxx = a.sTransNox AND zg.sInsTypID = 'c' AND zg.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
-                + " LEFT JOIN insurance_policy_proposal zh ON zh.sVSPNoxxx = a.sTransNox AND zh.sInsTypID = 'b' AND zh.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED);
+                + " LEFT JOIN insurance_policy_proposal zh ON zh.sVSPNoxxx = a.sTransNox AND zh.sInsTypID = 'b' AND zh.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN transaction_status_history zi ON zi.sSourceNo = a.sTransNox AND zi.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN ggc_isysdbf.client_master zj ON zj.sClientID = zi.sApproved " ;
     }
     
     private static String xsDateShort(Date fdValue) {
@@ -2345,51 +2355,51 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
         return date;
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return True if the record assignment is successful.
-     */
-    public JSONObject setApproved(String fsValue) {
-        return setValue("sApproved", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getApproved() {
-        return (String) getValue("sApproved");
-    }
-    
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fdValue
-     * @return result as success/failed
-     */
-    public JSONObject setApprovedDte(Date fdValue) {
-        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
-        return setValue("dApproved", timestamp); //dApproved datatype is time stamp so convert it into timestamp
-//        return setValue("dApproved", fdValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public Date getApprovedDte() {
-        Date date = null;
-//        if(!getValue("dApproved").toString().isEmpty()){
-//            date = CommonUtils.toDate(getValue("dApproved").toString());
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return True if the record assignment is successful.
+//     */
+//    public JSONObject setApproved(String fsValue) {
+//        return setValue("sApproved", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getApproved() {
+//        return (String) getValue("sApproved");
+//    }
+//    
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fdValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setApprovedDte(Date fdValue) {
+//        Timestamp timestamp = new Timestamp(((Date) fdValue).getTime());
+//        return setValue("dApproved", timestamp); //dApproved datatype is time stamp so convert it into timestamp
+////        return setValue("dApproved", fdValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public Date getApprovedDte() {
+//        Date date = null;
+////        if(!getValue("dApproved").toString().isEmpty()){
+////            date = CommonUtils.toDate(getValue("dApproved").toString());
+////        }
+//        if(getValue("dApproved") == null || getValue("dApproved").equals("")){
+//            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+//        } else {
+//            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApproved")), SQLUtil.FORMAT_SHORT_DATE);
 //        }
-        if(getValue("dApproved") == null || getValue("dApproved").equals("")){
-            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
-        } else {
-            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApproved")), SQLUtil.FORMAT_SHORT_DATE);
-        }
-            
-        return date;
-    }
+//            
+//        return date;
+//    }
     
     /**
      * Description: Sets the Value of this record.
@@ -3466,4 +3476,46 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
     public String getBodyType() {
         return (String) getValue("sBodyType");
     } 
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fdValue
+     * @return result as success/failed
+     */
+    public JSONObject setApproveDte(Date fdValue) {
+        return setValue("dApprovex", fdValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public Date getApproveDte() {
+        Date date = null;
+        if(getValue("dApprovex") == null || getValue("dApprovex").equals("")){
+            date = SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE);
+        } else {
+            date = SQLUtil.toDate(xsDateShort((Date) getValue("dApprovex")), SQLUtil.FORMAT_SHORT_DATE);
+        }
+            
+        return date;
+    }
+    
+    /**
+     * Description: Sets the Value of this record.
+     *
+     * @param fsValue
+     * @return result as success/failed
+     */
+    public JSONObject setApprover(String fsValue) {
+        return setValue("sApprover", fsValue);
+    }
+
+    /**
+     * @return The Value of this record.
+     */
+    public String getApprover() {
+        return (String) getValue("sApprover");
+    }
+    
 }
