@@ -473,7 +473,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "
                 + " LEFT JOIN si_master_source h ON h.sReferNox = a.sTransNox " 
                 + " LEFT JOIN si_master i ON i.sTransNox = h.sTransNox  " 
-                + " LEFT JOIN transaction_status_history j ON j.sSourceNo = a.sTransNox AND j.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN transaction_status_history j ON j.sSourceNo = a.sTransNox AND j.cRefrStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED) + " AND j.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN ggc_isysdbf.client_master k ON k.sClientID = j.sApproved "    ;                          
     }
     

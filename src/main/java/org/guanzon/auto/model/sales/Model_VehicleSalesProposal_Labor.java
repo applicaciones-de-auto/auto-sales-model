@@ -437,7 +437,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
                 + " , a.sLaborCde "                                                                                                    
                 + " , a.nLaborAmt "                                                                                                    
                 + " , a.sChrgeTyp "                                                                                                    
-                + " , a.sRemarksx "                                                                                                    
+//                + " , a.sRemarksx "         -                                                                                           
                 + " , a.sLaborDsc "                                                                                                    
                 + " , a.nLaborDsc "                                                                                                    
                 + " , a.nNtLabAmt "                                                                                                   
@@ -541,22 +541,22 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
         return (String) getValue("sChrgeTyp");
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return True if the record assignment is successful.
-     */
-    public JSONObject setRemarks(String fsValue) {
-        return setValue("sRemarksx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getRemarks() {
-        return (String) getValue("sRemarksx");
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return True if the record assignment is successful.
+//     */
+//    public JSONObject setRemarks(String fsValue) {
+//        return setValue("sRemarksx", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getRemarks() {
+//        return (String) getValue("sRemarksx");
+//    }
     
     /**
      * Description: Sets the Value of this record.
