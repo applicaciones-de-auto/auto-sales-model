@@ -29,6 +29,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
     final String XML = "Model_VehicleSalesProposal_Labor.xml";
     private final String psDefaultDate = "1900-01-01";
     private String psTargetBranchCd = "";
+    private String psExclude = "sDSNoxxxx»dTransact»sCompnyNm";
 
     GRider poGRider;                //application driver
     CachedRowSet poEntity;          //rowset
@@ -294,10 +295,9 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
 
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE) {
             String lsSQL;
-            String lsExclude = "sDSNoxxxx»dTransact»sCompnyNm";
             if (pnEditMode == EditMode.ADDNEW) {
                 
-                lsSQL = MiscUtil.makeSQL(this, lsExclude);
+                lsSQL = MiscUtil.makeSQL(this, psExclude);
 
                 if (!lsSQL.isEmpty()) {
                     if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
@@ -319,7 +319,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
 
                 if ("success".equals((String) loJSON.get("result"))) {
                     //replace the condition based on the primary key column of the record
-                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sLaborCde = " + SQLUtil.toSQL(this.getLaborCde()), lsExclude);
+                    lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()) + " AND sLaborCde = " + SQLUtil.toSQL(this.getLaborCde()), psExclude);
 
                     if (!lsSQL.isEmpty()) {
                         if (poGRider.executeQuery(lsSQL, getTable(), poGRider.getBranchCode(), psTargetBranchCd) > 0) {
@@ -418,7 +418,16 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
      * @return SQL Statement
      */
     public String makeSQL() {
-        return MiscUtil.makeSQL(this, ""); //exclude columns called thru left join
+        return MiscUtil.makeSQL(this, psExclude); //exclude columns called thru left join
+    }
+    
+    /**
+     * Gets the SQL Select statement for this entity.
+     *
+     * @return SQL Select Statement
+     */
+    public String makeSelectSQL() {
+        return MiscUtil.makeSelect(this, psExclude);
     }
     
     public String getSQL(){
@@ -428,7 +437,7 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
                 + " , a.sLaborCde "                                                                                                    
                 + " , a.nLaborAmt "                                                                                                    
                 + " , a.sChrgeTyp "                                                                                                    
-                + " , a.sRemarksx "                                                                                                    
+//                + " , a.sRemarksx "         -                                                                                           
                 + " , a.sLaborDsc "                                                                                                    
                 + " , a.nLaborDsc "                                                                                                    
                 + " , a.nNtLabAmt "                                                                                                   
@@ -532,22 +541,22 @@ public class Model_VehicleSalesProposal_Labor implements GEntity{
         return (String) getValue("sChrgeTyp");
     }
     
-    /**
-     * Description: Sets the Value of this record.
-     *
-     * @param fsValue
-     * @return True if the record assignment is successful.
-     */
-    public JSONObject setRemarks(String fsValue) {
-        return setValue("sRemarksx", fsValue);
-    }
-
-    /**
-     * @return The Value of this record.
-     */
-    public String getRemarks() {
-        return (String) getValue("sRemarksx");
-    }
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return True if the record assignment is successful.
+//     */
+//    public JSONObject setRemarks(String fsValue) {
+//        return setValue("sRemarksx", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getRemarks() {
+//        return (String) getValue("sRemarksx");
+//    }
     
     /**
      * Description: Sets the Value of this record.

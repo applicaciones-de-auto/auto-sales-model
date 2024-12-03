@@ -575,8 +575,8 @@ public class Model_VehicleDeliveryReceipt_Master implements GEntity {
                 /*BRANCH*/                                                                                        
                 + "  LEFT JOIN branch m ON m.sBranchCd = h.sBranchCD "
                 /*VSI*/
-                + "  LEFT JOIN si_master_source n on n.sReferNox = a.sTransNox "
-                + "  LEFT JOIN si_master o ON o.sTransNox = n.sTransNox AND o.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED) 
+                + "  LEFT JOIN si_master_source n on n.sSourceNo = a.sTransNox "
+                + "  LEFT JOIN si_master o ON o.sTransNox = n.sReferNox AND o.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED) 
                 /*INQUIRY*/                
                 + "  LEFT JOIN customer_inquiry p ON p.sTransNox = h.sInqryIDx "    
                 + "  LEFT JOIN ggc_isysdbf.client_master q ON q.sClientID = p.sEmployID ";

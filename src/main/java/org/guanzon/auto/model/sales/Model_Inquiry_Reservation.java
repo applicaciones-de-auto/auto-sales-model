@@ -240,7 +240,41 @@ public class Model_Inquiry_Reservation  implements GEntity{
         String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
 
         //replace the condition based on the primary key column of the record
-        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue));
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue))
+                                                + " GROUP BY a.sTransNox ";
+        System.out.println(lsSQL);
+        ResultSet loRS = poGRider.executeQuery(lsSQL);
+
+        try {
+            if (loRS.next()) {
+                for (int lnCtr = 1; lnCtr <= loRS.getMetaData().getColumnCount(); lnCtr++) {
+                    setValue(lnCtr, loRS.getObject(lnCtr));
+                }
+
+                pnEditMode = EditMode.UPDATE;
+
+                poJSON.put("result", "success");
+                poJSON.put("message", "Record loaded successfully.");
+            } else {
+                poJSON.put("result", "error");
+                poJSON.put("message", "No record to load.");
+            }
+        } catch (SQLException e) {
+            poJSON.put("result", "error");
+            poJSON.put("message", e.getMessage());
+        }
+
+        return poJSON;
+    }
+    
+    public JSONObject openRecord(String fsValue, String fsSITranNo) {
+        poJSON = new JSONObject();
+
+        String lsSQL = getSQL(); //MiscUtil.makeSelect(this);
+
+        //replace the condition based on the primary key column of the record
+        lsSQL = MiscUtil.addCondition(lsSQL, " a.sTransNox = " + SQLUtil.toSQL(fsValue))
+                                                + " AND i.sTransNox = " + SQLUtil.toSQL(fsSITranNo);
         System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
 
@@ -310,7 +344,7 @@ public class Model_Inquiry_Reservation  implements GEntity{
         
         if (pnEditMode == EditMode.ADDNEW || pnEditMode == EditMode.UPDATE){
             String lsSQL;
-            String lsExclude = "sCompnyNm»sAddressx»cClientTp»sSINoxxxx»dSIDatexx»nTranAmtx»dApprovex»sApprover";
+            String lsExclude = "sCompnyNm»sAddressx»cClientTp»sSITranNo»sSINoxxxx»dSIDatexx»nTranAmtx»dApprovex»sApprover";
             
             if (pnEditMode == EditMode.ADDNEW){
                 setTransNo(MiscUtil.getNextCode(getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"R"));
@@ -459,6 +493,10 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + "  IFNULL(CONCAT(e.sBrgyName,' '), ''),  "                                      
                 + "  IFNULL(CONCAT(f.sTownName, ', '),''), "                                      
                 + "  IFNULL(CONCAT(g.sProvName),'') )	, '') AS sAddressx  "
+//                + "  , GROUP_CONCAT(DISTINCT i.sReferNox)  AS sSINoxxxx " 
+//                + "  , GROUP_CONCAT(DISTINCT DATE(i.dTransact)) AS dSIDatexx "      
+//                + "  , SUM(h.nTranAmtx) "    
+                + "  , i.sTransNox  AS sSITranNo " 
                 + "  , i.sReferNox  AS sSINoxxxx " 
                 + "  , DATE(i.dTransact) AS dSIDatexx "     
                 + "  , h.nTranAmtx "                                                                                  
@@ -471,9 +509,10 @@ public class Model_Inquiry_Reservation  implements GEntity{
                 + " LEFT JOIN barangay e ON e.sBrgyIDxx = d.sBrgyIDxx  "                          
                 + " LEFT JOIN towncity f ON f.sTownIDxx = d.sTownIDxx  "                          
                 + " LEFT JOIN province g ON g.sProvIDxx = f.sProvIDxx  "
-                + " LEFT JOIN si_master_source h ON h.sReferNox = a.sTransNox " 
-                + " LEFT JOIN si_master i ON i.sTransNox = h.sTransNox  " 
-                + " LEFT JOIN transaction_status_history j ON j.sSourceNo = a.sTransNox AND j.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN cashier_receivables hh ON hh.sReferNox = a.sTransNox " 
+                + " LEFT JOIN si_master_source h ON h.sSourceNo = hh.sTransNox " 
+                + " LEFT JOIN si_master i ON i.sTransNox = h.sReferNox AND i.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)  
+                + " LEFT JOIN transaction_status_history j ON j.sSourceNo = a.sTransNox AND j.cRefrStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED) + " AND j.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN ggc_isysdbf.client_master k ON k.sClientID = j.sApproved "    ;                          
     }
     
@@ -867,6 +906,23 @@ public class Model_Inquiry_Reservation  implements GEntity{
      * @param fsValue 
      * @return  True if the record assignment is successful.
      */
+    public JSONObject setSITranNo(String fsValue){
+        return setValue("sSITranNo", fsValue);
+    }
+    
+    /**
+     * @return The user encoded/updated the record 
+     */
+    public String getSITranNo(){
+        return (String) getValue("sSITranNo");
+    }
+    
+    /**
+     * Sets the user encoded/updated the record.
+     * 
+     * @param fsValue 
+     * @return  True if the record assignment is successful.
+     */
     public JSONObject setSINo(String fsValue){
         return setValue("sSINoxxxx", fsValue);
     }
@@ -909,6 +965,23 @@ public class Model_Inquiry_Reservation  implements GEntity{
             
         return date;
     }
+    
+//    /**
+//     * Description: Sets the Value of this record.
+//     *
+//     * @param fsValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setSIDate(String fsValue) {
+//        return setValue("dSIDatexx", fsValue);
+//    }
+//
+//    /**
+//     * @return The Value of this record.
+//     */
+//    public String getSIDate() {
+//        return (String) getValue("dSIDatexx");
+//    }
     
     /**
      * Description: Sets the Value of this record.

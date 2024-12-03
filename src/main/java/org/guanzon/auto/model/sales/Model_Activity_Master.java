@@ -62,7 +62,7 @@ public class Model_Activity_Master implements GEntity {
             poEntity.moveToInsertRow();
 
             MiscUtil.initRowSet(poEntity);
-            poEntity.updateString("cTranStat", RecordStatus.ACTIVE);
+            poEntity.updateString("cTranStat", TransactionStatus.STATE_OPEN ); //RecordStatus.ACTIVE
             poEntity.updateObject("dDateFrom", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
             poEntity.updateObject("dDateThru", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
 //            poEntity.updateObject("dApproved", SQLUtil.toDate(psDefaultDate, SQLUtil.FORMAT_SHORT_DATE));
@@ -452,7 +452,7 @@ public class Model_Activity_Master implements GEntity {
                 + " LEFT JOIN GGC_ISysDBF.Client_Master d ON d.sClientID = a.sEmployID "       
                 + " LEFT JOIN branch e ON e.sBranchCd = a.sLocation "                           
                 + " LEFT JOIN event_type f ON f.sActTypID = a.sActTypID "
-                + " LEFT JOIN transaction_status_history g ON g.sSourceNo = a.sActvtyID AND g.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                + " LEFT JOIN transaction_status_history g ON g.sSourceNo = a.sActvtyID  AND g.cRefrStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED) + " AND g.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                 + " LEFT JOIN ggc_isysdbf.client_master h ON h.sClientID = g.sApproved " ;                     
     }
     
@@ -793,22 +793,22 @@ public class Model_Activity_Master implements GEntity {
         return (String) getValue("cTranStat");
     }
     
-    /**
-     * Sets record as active.
-     *
-     * @param fbValue
-     * @return result as success/failed
-     */
-    public JSONObject setActive(boolean fbValue) {
-        return setValue("cTranStat", fbValue ? "1" : "2");
-    }
-
-    /**
-     * @return If record is active.
-     */
-    public boolean isActive() {
-        return ((String) getValue("cTranStat")).equals("1");
-    }
+//    /**
+//     * Sets record as active.
+//     *
+//     * @param fbValue
+//     * @return result as success/failed
+//     */
+//    public JSONObject setActive(boolean fbValue) {
+//        return setValue("cTranStat", fbValue ? "1" : "2");
+//    }
+//
+//    /**
+//     * @return If record is active.
+//     */
+//    public boolean isActive() {
+//        return ((String) getValue("cTranStat")).equals("1");
+//    }
     
     /**
      * Description: Sets the Value of this record.
