@@ -583,6 +583,9 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 //                    Logger.getLogger(Model_Inquiry_Master.class.getName()).log(Level.SEVERE, null, ex);
 //                }
                 
+                //Exclude date cancelled
+                psExclude = psExclude+"»dCancelld";
+
                 lsSQL = MiscUtil.makeSQL(this, psExclude);
                 
                // lsSQL = "Select * FROM " + getTable() + " a left join (" + makeSQL() + ") b on a.column1 = b.column "
@@ -610,6 +613,7 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
 //                        }
 //                    }
                     
+                    
                     setModifiedBy(poGRider.getUserID());
                     setModifiedDte(poGRider.getServerDate());
                     //Clear Locked by/date
@@ -623,6 +627,11 @@ public class Model_VehicleSalesProposal_Master implements GEntity{
                     
                     System.out.println("getDelvryDt() : " + getDelvryDt());
                     System.out.println("getCancelldDte() : " + getCancelldDte());
+                    
+                    if(!getTranStat().equals(TransactionStatus.STATE_CANCELLED)){
+                        //Exclude date cancelled
+                        psExclude = psExclude+"»dCancelld";
+                    }
                     
                     //replace the condition based on the primary key column of the record
                     lsSQL = MiscUtil.makeSQL(this, loOldEntity, "sTransNox = " + SQLUtil.toSQL(this.getTransNo()), psExclude);
